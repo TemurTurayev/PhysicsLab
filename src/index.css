@@ -1,7 +1,9 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* PhysicsCodeLab Custom Theme */
-@theme {
+:root {
   /* Colors based on project design */
   --color-bg-primary: #0d1117;
   --color-bg-secondary: #161b22;
