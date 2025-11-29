@@ -6,6 +6,7 @@ import MathCanvas from './components/math/MathCanvas';
 import { useAppStore } from './store/useAppStore';
 import { usePython } from './hooks/usePython';
 import mission1_1 from './content/missions/mission1_1';
+import mission5_1_1 from './content/missions/mission5_1_1';
 
 // Lazy load Monaco Editor
 const CodeEditor = lazy(() => import('./components/editor/CodeEditor'));
@@ -25,7 +26,7 @@ function App() {
   const isMathMission = currentMission?.module === 5 || currentMission?.module === 6;
 
   useEffect(() => {
-    setCurrentMission(mission1_1);
+    setCurrentMission(mission5_1_1);
   }, [setCurrentMission]);
 
   const handleRun = async () => {
