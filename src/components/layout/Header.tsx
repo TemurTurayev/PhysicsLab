@@ -1,5 +1,5 @@
 import { useAppStore } from '../../store/useAppStore';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import mission5_1_1 from '../../content/missions/mission5_1_1';
 import mission5_1_2 from '../../content/missions/mission5_1_2';
 import mission5_1_3 from '../../content/missions/mission5_1_3';
@@ -12,6 +12,7 @@ export default function Header() {
   const resetMission = useAppStore((state) => state.resetMission);
 
   const [missionSelectorOpen, setMissionSelectorOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const missions = [mission5_1_1, mission5_1_2, mission5_1_3];
 
@@ -20,6 +21,23 @@ export default function Header() {
     setCurrentMission(mission);
     setMissionSelectorOpen(false);
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setMissionSelectorOpen(false);
+      }
+    };
+
+    if (missionSelectorOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [missionSelectorOpen]);
 
   return (
     <header className="h-16 bg-[var(--color-bg-secondary)] border-b border-gray-700 px-6 flex items-center justify-between">
@@ -37,7 +55,7 @@ export default function Header() {
 
       <div className="flex items-center gap-3">
         {/* Mission Selector */}
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setMissionSelectorOpen(!missionSelectorOpen)}
             className="px-4 py-2 rounded text-sm font-medium bg-gray-700 text-[var(--color-text-primary)] hover:bg-gray-600 transition-colors"
