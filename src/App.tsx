@@ -3,6 +3,7 @@ import Header from './components/layout/Header';
 import OutputConsole from './components/editor/OutputConsole';
 import SimulationCanvas from './components/simulation/SimulationCanvas';
 import MathCanvas from './components/math/MathCanvas';
+import TheoryPanel from './components/theory/TheoryPanel';
 import { useAppStore } from './store/useAppStore';
 import { usePython } from './hooks/usePython';
 import mission1_1 from './content/missions/mission1_1';
@@ -19,6 +20,7 @@ function App() {
   const isRunning = useAppStore((state) => state.isRunning);
   const mathCanvasState = useAppStore((state) => state.mathCanvasState);
   const pythonWorldState = useAppStore((state) => state.pythonWorldState);
+  const theoryPanelOpen = useAppStore((state) => state.theoryPanelOpen);
 
   const { runCode, isLoading, isPyodideReady } = usePython();
 
@@ -43,6 +45,13 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
+        {/* Theory Panel - Collapsible Side Panel */}
+        {theoryPanelOpen && (
+          <div className="w-80 border-r border-gray-700 overflow-y-auto bg-[#161b22] p-6">
+            <TheoryPanel />
+          </div>
+        )}
+
         {/* Visualization - Switch between Physics and Math */}
         <div className="flex-1 border-r border-gray-700">
           {isMathMission || mathCanvasState ? (

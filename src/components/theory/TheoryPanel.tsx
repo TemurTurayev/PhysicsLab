@@ -122,34 +122,7 @@ function HintSection() {
 
 // Helper function to get theory content for a mission
 function getTheoryContent(theoryRefs: string[]): string {
-  // For now, return placeholder content
-  // Later this will fetch from content files
-  return `
-## Основные концепции
-
-Для этой миссии тебе понадобится понимание следующих концепций:
-
-${theoryRefs.map((ref) => `- **${ref}**`).join('\n')}
-
-### Базовые формулы
-
-Позиция объекта в пространстве описывается координатами:
-$$x, y$$
-
-Скорость — это изменение позиции во времени:
-$$v = \\frac{\\Delta x}{\\Delta t}$$
-
-Ускорение — это изменение скорости во времени:
-$$a = \\frac{\\Delta v}{\\Delta t}$$
-
-### Применение в коде
-
-\`\`\`python
-# Обновление позиции
-x = x + v * dt
-
-# Обновление скорости
-v = v + a * dt
-\`\`\`
-`;
+  // Mission theory is now directly passed as markdown strings
+  // Join them with newlines to create the complete markdown content
+  return theoryRefs.join('\n');
 }
