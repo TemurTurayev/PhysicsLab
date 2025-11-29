@@ -6,7 +6,6 @@ import MathCanvas from './components/math/MathCanvas';
 import TheoryPanel from './components/theory/TheoryPanel';
 import { useAppStore } from './store/useAppStore';
 import { usePython } from './hooks/usePython';
-import mission1_1 from './content/missions/mission1_1';
 import mission5_1_1 from './content/missions/mission5_1_1';
 
 // Lazy load Monaco Editor
@@ -19,7 +18,6 @@ function App() {
   const code = useAppStore((state) => state.code);
   const isRunning = useAppStore((state) => state.isRunning);
   const mathCanvasState = useAppStore((state) => state.mathCanvasState);
-  const pythonWorldState = useAppStore((state) => state.pythonWorldState);
   const theoryPanelOpen = useAppStore((state) => state.theoryPanelOpen);
 
   const { runCode, isLoading, isPyodideReady } = usePython();
