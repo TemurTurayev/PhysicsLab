@@ -145,7 +145,7 @@ print(f"f4(0) = {f4(0)}")
   },
 
   metadata: {
-    difficulty: 'easy',
+    difficulty: 'basic',
     estimatedTime: 15,
     prerequisites: ['5-1-1'],
     tags: ['функции', 'линейные функции', 'параметры', 'наклон', 'сдвиг'],

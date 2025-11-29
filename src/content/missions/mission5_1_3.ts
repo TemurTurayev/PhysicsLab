@@ -160,7 +160,7 @@ print(f"f4(0) = {f4(0)} — сдвинутая вершина")
   },
 
   metadata: {
-    difficulty: 'medium',
+    difficulty: 'applied',
     estimatedTime: 20,
     prerequisites: ['5-1-1', '5-1-2'],
     tags: ['функции', 'квадратичные функции', 'парабола', 'степень'],
