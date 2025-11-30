@@ -43,12 +43,12 @@ export default function Header() {
   }, [missionSelectorOpen]);
 
   return (
-    <header className="h-16 bg-[var(--color-bg-secondary)] border-b border-gray-700 px-6 flex items-center justify-between">
+    <header className="h-16 bg-[var(--color-bg-secondary)] border-b border-gray-700 px-6 flex items-center justify-between" role="banner">
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-bold">PhysicsCodeLab</h1>
         {currentMission && (
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--color-text-secondary)]">•</span>
+          <div className="flex items-center gap-2" aria-label="Текущая миссия">
+            <span className="text-[var(--color-text-secondary)]" aria-hidden="true">•</span>
             <span className="text-sm">
               Миссия {currentMission.id}: {currentMission.title}
             </span>
@@ -56,18 +56,25 @@ export default function Header() {
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <nav className="flex items-center gap-3" aria-label="Навигация по миссиям">
         {/* Mission Selector */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setMissionSelectorOpen(!missionSelectorOpen)}
             className="px-4 py-2 rounded text-sm font-medium bg-gray-700 text-[var(--color-text-primary)] hover:bg-gray-600 transition-colors"
+            aria-expanded={missionSelectorOpen}
+            aria-haspopup="true"
+            aria-label="Выбрать миссию"
           >
-            🎯 Миссии
+            <span aria-hidden="true">🎯</span> Миссии
           </button>
 
           {missionSelectorOpen && (
-            <div className="absolute top-full mt-2 right-0 bg-[#161b22] border border-gray-700 rounded shadow-lg min-w-[250px] z-50">
+            <div
+              className="absolute top-full mt-2 right-0 bg-[#161b22] border border-gray-700 rounded shadow-lg min-w-[250px] z-50"
+              role="menu"
+              aria-label="Список миссий"
+            >
               {missions.map((mission) => (
                 <button
                   key={mission.id}
@@ -76,6 +83,8 @@ export default function Header() {
                     w-full text-left px-4 py-3 text-sm hover:bg-gray-700 transition-colors border-b border-gray-800 last:border-b-0
                     ${currentMission?.id === mission.id ? 'bg-gray-700 text-[var(--color-accent-blue)]' : 'text-[var(--color-text-primary)]'}
                   `}
+                  role="menuitem"
+                  aria-current={currentMission?.id === mission.id ? 'true' : 'false'}
                 >
                   <div className="font-medium">Миссия {mission.id}</div>
                   <div className="text-xs text-[var(--color-text-secondary)] mt-1">
@@ -96,10 +105,12 @@ export default function Header() {
               : 'bg-gray-700 text-[var(--color-text-primary)] hover:bg-gray-600'
             }
           `}
+          aria-pressed={theoryPanelOpen}
+          aria-label="Переключить панель теории"
         >
-          📖 Теория
+          <span aria-hidden="true">📖</span> Теория
         </button>
-      </div>
+      </nav>
     </header>
   );
 }

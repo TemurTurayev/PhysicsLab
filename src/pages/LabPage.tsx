@@ -145,21 +145,21 @@ export default function LabPage() {
             </header>
 
             {/* Main Content */}
-            <div className="flex-1 flex">
+            <div className="flex-1 flex flex-col tablet-lg:flex-row">
                 {/* Theory Panel */}
                 {theoryPanelOpen && (
-                    <div className="w-80 border-r border-gray-700 overflow-y-auto bg-[#161b22] p-6">
+                    <div className="w-full tablet-lg:w-80 border-b tablet-lg:border-b-0 tablet-lg:border-r border-gray-700 overflow-y-auto bg-[#161b22] p-4 tablet-lg:p-6 max-h-[300px] tablet-lg:max-h-none">
                         <TheoryPanel />
                     </div>
                 )}
 
                 {/* Visualization */}
-                <div className="flex-1 border-r border-gray-700">
+                <div className="flex-1 border-b tablet-lg:border-b-0 tablet-lg:border-r border-gray-700 min-h-[300px] tablet-lg:min-h-0">
                     {isMathMission || mathCanvasState ? <MathCanvas /> : <SimulationCanvas />}
                 </div>
 
                 {/* Code Area */}
-                <div className="w-1/2 flex flex-col">
+                <div className="w-full tablet-lg:w-1/2 flex flex-col min-h-[400px] tablet-lg:min-h-0">
                     {/* Controls */}
                     <div className="h-14 border-b border-gray-700 px-4 flex items-center gap-3 bg-[#161b22]">
                         <Tooltip content="Запустить код Python и увидеть результат" position="top">

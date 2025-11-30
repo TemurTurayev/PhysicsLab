@@ -14,12 +14,13 @@ interface Achievement {
 }
 
 export default function AchievementsList() {
-    const completedMissions = useProgressStore((state) => state.completedMissions);
+    const progress = useProgressStore((state) => state.progress);
 
     const achievements = useMemo((): Achievement[] => {
-        const totalMissions = Object.keys(completedMissions).length;
-        const totalStars = Object.values(completedMissions).reduce((sum, score) => sum + score, 0);
-        const perfectCount = Object.values(completedMissions).filter(score => score === 3).length;
+        const missions = Object.values(progress.missions);
+        const totalMissions = missions.filter(m => m.completed).length;
+        const totalStars = missions.reduce((sum, m) => sum + m.score, 0);
+        const perfectCount = missions.filter(m => m.score === 3).length;
 
         return [
             {
@@ -72,12 +73,12 @@ export default function AchievementsList() {
                 name: 'Математический гений',
                 description: 'Пройди все миссии по алгебре',
                 icon: '📊',
-                unlocked: ['5.1', '5.2', '5.3', '5.4', '5.5', '5.6'].every(id => id in completedMissions),
-                progress: ['5.1', '5.2', '5.3', '5.4', '5.5', '5.6'].filter(id => id in completedMissions).length,
+                unlocked: ['5-1-1', '5-1-2', '5-1-3', '5-1-4', '5-1-5', '5-1-6'].every(id => progress.missions[id]?.completed),
+                progress: ['5-1-1', '5-1-2', '5-1-3', '5-1-4', '5-1-5', '5-1-6'].filter(id => progress.missions[id]?.completed).length,
                 total: 6,
             },
         ];
-    }, [completedMissions]);
+    }, [progress.missions]);
 
     const unlockedCount = achievements.filter(a => a.unlocked).length;
 

@@ -8,14 +8,15 @@ interface UserStatsProps {
 }
 
 export default function UserStats({ compact = false }: UserStatsProps) {
-    const completedMissions = useProgressStore((state) => state.completedMissions);
+    const progress = useProgressStore((state) => state.progress);
 
     // Calculate statistics
     const stats = useMemo(() => {
-        const totalMissions = Object.keys(completedMissions).length;
-        const totalStars = Object.values(completedMissions).reduce((sum, score) => sum + score, 0);
+        const missions = Object.values(progress.missions);
+        const totalMissions = missions.filter(m => m.completed).length;
+        const totalStars = missions.reduce((sum, m) => sum + m.score, 0);
         const maxStars = totalMissions * 3;
-        const perfectCount = Object.values(completedMissions).filter(score => score === 3).length;
+        const perfectCount = missions.filter(m => m.score === 3).length;
         const averageScore = totalMissions > 0 ? (totalStars / totalMissions).toFixed(1) : '0';
 
         return {
@@ -25,7 +26,7 @@ export default function UserStats({ compact = false }: UserStatsProps) {
             perfectCount,
             averageScore,
         };
-    }, [completedMissions]);
+    }, [progress.missions]);
 
     if (compact) {
         return (

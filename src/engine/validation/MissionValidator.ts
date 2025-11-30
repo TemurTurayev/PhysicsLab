@@ -29,7 +29,7 @@ export class MissionValidator {
     static validateFunctionExpression(
         expected: string,
         actual: string,
-        tolerance: number = 0.001
+        _tolerance: number = 0.001
     ): boolean {
         // Normalize expressions (remove spaces, convert ** to ^, etc.)
         const normalize = (expr: string) =>
@@ -45,9 +45,9 @@ export class MissionValidator {
      * Validate function values
      */
     static validateFunctionValues(
-        functionCode: string,
-        testCases: Array<{ x: number; expectedY: number }>,
-        tolerance: number = 0.01
+        _functionCode: string,
+        _testCases: Array<{ x: number; expectedY: number }>,
+        _tolerance: number = 0.01
     ): { passed: boolean; failedCases: Array<{ x: number; expected: number; got: number }> } {
         const failedCases: Array<{ x: number; expected: number; got: number }> = [];
 
@@ -203,7 +203,7 @@ export class MissionValidator {
                         // Check if console contains expected output
                         if (check.expected_output) {
                             const outputStr = consoleOutput.join('\n');
-                            const hasOutput = check.expected_output.every((expected) =>
+                            const hasOutput = check.expected_output.every((expected: string) =>
                                 outputStr.includes(expected)
                             );
 

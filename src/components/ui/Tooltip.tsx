@@ -19,13 +19,13 @@ export default function Tooltip({
 }: TooltipProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [actualPosition, setActualPosition] = useState(position);
-    const timeoutRef = useRef<number>();
+    const timeoutRef = useRef<number | undefined>(undefined);
     const triggerRef = useRef<HTMLDivElement>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
 
     const showTooltip = () => {
         if (disabled) return;
-        timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = window.setTimeout(() => {
             setIsVisible(true);
             adjustPosition();
         }, delay);
@@ -33,7 +33,7 @@ export default function Tooltip({
 
     const hideTooltip = () => {
         if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
+            window.clearTimeout(timeoutRef.current);
         }
         setIsVisible(false);
     };
@@ -148,7 +148,7 @@ export default function Tooltip({
     useEffect(() => {
         return () => {
             if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
+                window.clearTimeout(timeoutRef.current);
             }
         };
     }, []);

@@ -16,10 +16,10 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
         >
             {/* Top Bar with Theme Toggle and Profile */}
-            <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
-                {/* Compact Stats */}
+            <div className="fixed top-2 tablet:top-4 right-2 tablet:right-4 z-50 flex items-center gap-2 tablet:gap-3">
+                {/* Compact Stats - Hidden on small tablets */}
                 <motion.div
-                    className="px-4 py-2 rounded-lg border backdrop-blur-sm"
+                    className="hidden tablet:block px-3 tablet:px-4 py-2 rounded-lg border backdrop-blur-sm"
                     style={{
                         backgroundColor: 'var(--bg-secondary)',
                         borderColor: 'var(--border-primary)',
@@ -33,7 +33,7 @@ export default function HomePage() {
                 {/* Profile Button */}
                 <motion.button
                     onClick={() => setIsProfileOpen(true)}
-                    className="px-4 py-2 rounded-lg border backdrop-blur-sm"
+                    className="px-3 tablet:px-4 py-2 rounded-lg border backdrop-blur-sm"
                     style={{
                         backgroundColor: 'var(--bg-secondary)',
                         borderColor: 'var(--border-primary)',
@@ -42,7 +42,7 @@ export default function HomePage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                 >
-                    <span className="text-xl">👤</span>
+                    <span className="text-lg tablet:text-xl">👤</span>
                 </motion.button>
 
                 <ThemeToggle />
@@ -60,14 +60,14 @@ export default function HomePage() {
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
                     <div className="inline-block mb-6">
-                        <div className="flex items-center gap-4 text-6xl">
+                        <div className="flex items-center gap-2 tablet:gap-4 text-4xl tablet:text-6xl">
                             <motion.span
                                 animate={{ y: [0, -10, 0] }}
                                 transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
                             >
                                 🚀
                             </motion.span>
-                            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-[#58a6ff] via-[#7ee787] to-[#d2a8ff] bg-clip-text text-transparent">
+                            <h1 className="text-4xl tablet:text-5xl md:text-7xl font-bold bg-gradient-to-r from-[#58a6ff] via-[#7ee787] to-[#d2a8ff] bg-clip-text text-transparent">
                                 PhysicsCodeLab
                             </h1>
                             <motion.span
@@ -80,7 +80,7 @@ export default function HomePage() {
                     </div>
 
                     <motion.p
-                        className="text-xl md:text-2xl text-[#8b949e] max-w-3xl mx-auto mb-8"
+                        className="text-lg tablet:text-xl md:text-2xl text-[#8b949e] max-w-3xl mx-auto mb-8 px-4"
                         {...slideUp}
                         transition={{ duration: 0.6, delay: 0.2 }}
                     >

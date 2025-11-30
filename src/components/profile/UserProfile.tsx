@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { modalPanel, modalPanelTransition, scaleIn } from '../../lib/animations';
+import { modalPanel, modalPanelTransition } from '../../lib/animations';
 import UserStats from './UserStats';
 import AchievementsList from './AchievementsList';
 import ThemeToggle from '../ui/ThemeToggle';
