@@ -1,19 +1,55 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { fadeIn, slideUp, scaleIn, staggerContainer } from '../lib/animations';
 import { Link } from 'react-router-dom';
 import ThemeToggle from '../components/ui/ThemeToggle';
+import UserProfile from '../components/profile/UserProfile';
+import UserStats from '../components/profile/UserStats';
 
 export default function HomePage() {
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+
     return (
         <motion.div
             className="min-h-screen w-full bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117] overflow-auto"
             {...fadeIn}
             transition={{ duration: 0.5 }}
         >
-            {/* Theme Toggle - Fixed position */}
-            <div className="fixed top-4 right-4 z-50">
+            {/* Top Bar with Theme Toggle and Profile */}
+            <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+                {/* Compact Stats */}
+                <motion.div
+                    className="px-4 py-2 rounded-lg border backdrop-blur-sm"
+                    style={{
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderColor: 'var(--border-primary)',
+                    }}
+                    {...scaleIn}
+                    whileHover={{ scale: 1.05 }}
+                >
+                    <UserStats compact />
+                </motion.div>
+
+                {/* Profile Button */}
+                <motion.button
+                    onClick={() => setIsProfileOpen(true)}
+                    className="px-4 py-2 rounded-lg border backdrop-blur-sm"
+                    style={{
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderColor: 'var(--border-primary)',
+                        color: 'var(--text-primary)',
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    <span className="text-xl">👤</span>
+                </motion.button>
+
                 <ThemeToggle />
             </div>
+
+            {/* User Profile Panel */}
+            <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
 
             {/* Hero Section */}
             <div className="container mx-auto px-4 py-16">
