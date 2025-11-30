@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
+import LoadingScreen from './components/common/LoadingScreen';
 import HomePage from './pages/HomePage';
 import MissionsPage from './pages/MissionsPage';
 import LabPage from './pages/LabPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   const setParameters = useAppStore((state) => state.setParameters);
@@ -27,12 +29,14 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/missions" element={<MissionsPage />} />
-        <Route path="/lab" element={<LabPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/missions" element={<MissionsPage />} />
+          <Route path="/lab" element={<LabPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

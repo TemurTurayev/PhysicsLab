@@ -1,14 +1,16 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OutputConsole from '../components/editor/OutputConsole';
 import SimulationCanvas from '../components/simulation/SimulationCanvas';
 import MathCanvas from '../components/math/MathCanvas';
 import TheoryPanel from '../components/theory/TheoryPanel';
 import InteractivePanel from '../components/missions/InteractivePanel';
+import ValidationFeedback from '../components/missions/ValidationFeedback';
 import { useAppStore } from '../store/useAppStore';
 import { usePython } from '../hooks/usePython';
 import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { getInteractiveConfig } from '../config/interactiveConfigs';
+import { MissionValidator, type ValidationResult } from '../engine/validation/MissionValidator';
 
 const CodeEditor = lazy(() => import('../components/editor/CodeEditor'));
 
@@ -22,9 +24,13 @@ export default function LabPage() {
     const mathCanvasState = useAppStore((state) => state.mathCanvasState);
     const theoryPanelOpen = useAppStore((state) => state.theoryPanelOpen);
     const setTheoryPanelOpen = useAppStore((state) => state.setTheoryPanelOpen);
+    const consoleOutput = useAppStore((state) => state.consoleOutput);
     const parameters = useAppStore((state) => state.parameters);
     const setParameter = useAppStore((state) => state.setParameter);
     const setParameters = useAppStore((state) => state.setParameters);
+
+    const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+    const [showValidation, setShowValidation] = useState(false);
 
     const { runCode, isLoading, isPyodideReady } = usePython();
 
@@ -32,6 +38,25 @@ export default function LabPage() {
 
     const handleRun = async () => {
         await runCode(code);
+        // Auto-validate after execution
+        if (currentMission) {
+            setTimeout(() => validateMission(), 500);
+        }
+    };
+
+    const validateMission = async () => {
+        if (!currentMission) return;
+
+        const consoleText = consoleOutput.map(o => o.content);
+        const result = await MissionValidator.validateMission(
+            currentMission,
+            code,
+            consoleText,
+            mathCanvasState
+        );
+
+        setValidationResult(result);
+        setShowValidation(true);
     };
 
     const handleReset = () => {
@@ -108,8 +133,8 @@ export default function LabPage() {
                 <button
                     onClick={() => setTheoryPanelOpen(!theoryPanelOpen)}
                     className={`px-4 py-2 rounded text-sm transition-colors ${theoryPanelOpen
-                            ? 'bg-[#238636] text-white'
-                            : 'bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9]'
+                        ? 'bg-[#238636] text-white'
+                        : 'bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9]'
                         }`}
                 >
                     📚 Теория
@@ -188,6 +213,14 @@ export default function LabPage() {
                     <OutputConsole />
                 </div>
             </div>
+
+            {/* Validation Feedback */}
+            {showValidation && (
+                <ValidationFeedback
+                    result={validationResult}
+                    onClose={() => setShowValidation(false)}
+                />
+            )}
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
+import { useProgressStore } from '../store/useProgressStore';
 import mission1_1 from '../content/missions/mission1_1';
 import mission5_1_1 from '../content/missions/mission5_1_1';
 import mission5_1_2 from '../content/missions/mission5_1_2';
@@ -22,6 +23,8 @@ export default function MissionsPage() {
     const [searchParams] = useSearchParams();
     const selectedModule = searchParams.get('module');
     const setCurrentMission = useAppStore((state) => state.setCurrentMission);
+    const getMissionProgress = useProgressStore((state) => state.getMissionProgress);
+    const getModuleProgress = useProgressStore((state) => state.getModuleProgress);
 
     const [hoveredMission, setHoveredMission] = useState<string | null>(null);
 
@@ -114,7 +117,7 @@ export default function MissionsPage() {
                     >
                         {/* Node circle */}
                         <div
-                            className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl border-4 transition-all ${isHovered
+                            className={`relative w-20 h-20 rounded-full flex items-center justify-center text-2xl border-4 transition-all ${isHovered
                                 ? 'scale-125 shadow-2xl'
                                 : 'scale-100 hover:scale-110'
                                 }`}
@@ -130,6 +133,29 @@ export default function MissionsPage() {
                             {node.mission.id.includes('5-1-4') && '🐍'}
                             {node.mission.id.includes('5-1-5') && '♾️'}
                             {node.mission.id.includes('5-1-6') && '🎨'}
+
+                            {/* Stars indicator */}
+                            {(() => {
+                                const progress = getMissionProgress(node.mission.id);
+                                if (progress && progress.completed) {
+                                    return (
+                                        <div className="absolute -top-1 -right-1 flex gap-0.5">
+                                            {[1, 2, 3].map((star) => (
+                                                <span
+                                                    key={star}
+                                                    className={`text-xs ${star <= progress.score
+                                                            ? 'text-yellow-400'
+                                                            : 'text-gray-700'
+                                                        }`}
+                                                >
+                                                    ⭐
+                                                </span>
+                                            ))}
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
 
                         {/* Label */}
@@ -162,10 +188,25 @@ export default function MissionsPage() {
             {/* Legend */}
             <div className="absolute bottom-4 left-4 bg-[#161b22] border border-[#30363d] rounded-lg p-3">
                 <div className="text-xs text-[#8b949e] mb-2">Skill Tree Progress:</div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#7ee787]"></div>
-                    <span className="text-xs text-[#8b949e]">6 / 6 миссий</span>
-                </div>
+                {(() => {
+                    const moduleProgress = getModuleProgress(moduleNum);
+                    return (
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-[#7ee787]"></div>
+                                <span className="text-xs text-[#8b949e]">
+                                    {moduleProgress.completed} / {moduleProgress.total} миссий
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-yellow-400">⭐</span>
+                                <span className="text-xs text-[#8b949e]">
+                                    {moduleProgress.stars} звёзд
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })()}
             </div>
         </div>
     );
