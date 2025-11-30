@@ -6,6 +6,7 @@ import MathCanvas from '../components/math/MathCanvas';
 import TheoryPanel from '../components/theory/TheoryPanel';
 import InteractivePanel from '../components/missions/InteractivePanel';
 import ValidationFeedback from '../components/missions/ValidationFeedback';
+import Tooltip from '../components/ui/Tooltip';
 import { useAppStore } from '../store/useAppStore';
 import { usePython } from '../hooks/usePython';
 import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
@@ -130,15 +131,17 @@ export default function LabPage() {
                     <span className="text-sm text-[#8b949e]">Модуль {currentMission.module}</span>
                 </div>
 
-                <button
-                    onClick={() => setTheoryPanelOpen(!theoryPanelOpen)}
-                    className={`px-4 py-2 rounded text-sm transition-colors ${theoryPanelOpen
-                        ? 'bg-[#238636] text-white'
-                        : 'bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9]'
-                        }`}
-                >
-                    📚 Теория
-                </button>
+                <Tooltip content="Открыть панель теории с объяснениями и формулами" position="bottom">
+                    <button
+                        onClick={() => setTheoryPanelOpen(!theoryPanelOpen)}
+                        className={`px-4 py-2 rounded text-sm transition-colors ${theoryPanelOpen
+                            ? 'bg-[#238636] text-white'
+                            : 'bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9]'
+                            }`}
+                    >
+                        📚 Теория
+                    </button>
+                </Tooltip>
             </header>
 
             {/* Main Content */}
@@ -159,20 +162,23 @@ export default function LabPage() {
                 <div className="w-1/2 flex flex-col">
                     {/* Controls */}
                     <div className="h-14 border-b border-gray-700 px-4 flex items-center gap-3 bg-[#161b22]">
-                        <button
-                            onClick={handleRun}
-                            disabled={isRunning || isLoading}
-                            className="px-4 py-2 rounded text-sm bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isRunning ? '⏳ Выполняется...' : '▶ Запустить'}
-                        </button>
-                        <button
-                            onClick={handleReset}
-                            disabled={isRunning}
-                            className="px-4 py-2 rounded text-sm bg-gray-700 hover:bg-gray-600 text-white transition-colors disabled:opacity-50"
-                        >
-                            🔄 Сброс
-                        </button>
+                        <Tooltip content="Запустить код Python и увидеть результат" position="top">
+                            <button
+                                onClick={handleRun}
+                                disabled={isRunning || !isPyodideReady}
+                                className="px-6 py-2 bg-[#238636] hover:bg-[#2ea043] text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isRunning ? '⏳ Выполняется...' : '▶ Запустить'}
+                            </button>
+                        </Tooltip>
+                        <Tooltip content="Вернуть исходный код миссии" position="top">
+                            <button
+                                onClick={handleReset}
+                                className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] rounded transition-colors"
+                            >
+                                🔄 Сброс
+                            </button>
+                        </Tooltip>
                         <span className="text-sm text-gray-400 ml-4">
                             {isLoading
                                 ? 'Загрузка Python...'
@@ -215,12 +221,14 @@ export default function LabPage() {
             </div>
 
             {/* Validation Feedback */}
-            {showValidation && (
-                <ValidationFeedback
-                    result={validationResult}
-                    onClose={() => setShowValidation(false)}
-                />
-            )}
-        </div>
+            {
+                showValidation && (
+                    <ValidationFeedback
+                        result={validationResult}
+                        onClose={() => setShowValidation(false)}
+                    />
+                )
+            }
+        </div >
     );
 }
