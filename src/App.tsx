@@ -4,8 +4,11 @@ import OutputConsole from './components/editor/OutputConsole';
 import SimulationCanvas from './components/simulation/SimulationCanvas';
 import MathCanvas from './components/math/MathCanvas';
 import TheoryPanel from './components/theory/TheoryPanel';
+import InteractivePanel from './components/missions/InteractivePanel';
 import { useAppStore } from './store/useAppStore';
 import { usePython } from './hooks/usePython';
+import { useDebouncedEffect } from './hooks/useDebouncedEffect';
+import { getInteractiveConfig } from './config/interactiveConfigs';
 import mission5_1_1 from './content/missions/mission5_1_1';
 
 // Lazy load Monaco Editor
@@ -14,11 +17,15 @@ const CodeEditor = lazy(() => import('./components/editor/CodeEditor'));
 function App() {
   const setCurrentMission = useAppStore((state) => state.setCurrentMission);
   const resetMission = useAppStore((state) => state.resetMission);
+  const setCode = useAppStore((state) => state.setCode);
   const currentMission = useAppStore((state) => state.currentMission);
   const code = useAppStore((state) => state.code);
   const isRunning = useAppStore((state) => state.isRunning);
   const mathCanvasState = useAppStore((state) => state.mathCanvasState);
   const theoryPanelOpen = useAppStore((state) => state.theoryPanelOpen);
+  const parameters = useAppStore((state) => state.parameters);
+  const setParameter = useAppStore((state) => state.setParameter);
+  const setParameters = useAppStore((state) => state.setParameters);
 
   const { runCode, isLoading, isPyodideReady } = usePython();
 
@@ -35,7 +42,56 @@ function App() {
 
   const handleReset = () => {
     resetMission();
+    // Reset parameters to defaults if interactive mission
+    if (currentMission) {
+      const config = getInteractiveConfig(currentMission.id);
+      if (config) {
+        const defaults: Record<string, number> = {};
+        config.parameters.forEach((p) => {
+          defaults[p.name] = p.defaultValue;
+        });
+        setParameters(defaults);
+      }
+    }
   };
+
+  // Initialize parameters when mission changes
+  useEffect(() => {
+    if (currentMission) {
+      const config = getInteractiveConfig(currentMission.id);
+      if (config) {
+        const defaults: Record<string, number> = {};
+        config.parameters.forEach((p) => {
+          defaults[p.name] = p.defaultValue;
+        });
+        setParameters(defaults);
+      }
+    }
+  }, [currentMission, setParameters]);
+
+  // Update code when parameters change (debounced)
+  useDebouncedEffect(
+    () => {
+      if (currentMission) {
+        const config = getInteractiveConfig(currentMission.id);
+        if (config) {
+          const newCode = config.codeTemplate(parameters);
+          setCode(newCode);
+        }
+      }
+    },
+    [parameters, currentMission],
+    150 // 150ms debounce
+  );
+
+  // Get interactive config for current mission
+  const interactiveConfig = currentMission ? getInteractiveConfig(currentMission.id) : null;
+  const interactiveParams = interactiveConfig
+    ? interactiveConfig.parameters.map((p) => ({
+      ...p,
+      value: parameters[p.name] ?? p.defaultValue,
+    }))
+    : [];
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#0d1117]">
@@ -81,10 +137,21 @@ function App() {
               {isLoading
                 ? 'Загрузка Python...'
                 : isPyodideReady
-                ? '✓ Python готов'
-                : 'Готов к запуску'}
+                  ? '✓ Python готов'
+                  : 'Готов к запуску'}
             </span>
           </div>
+
+          {/* Interactive Parameters Panel */}
+          {interactiveParams.length > 0 && (
+            <div className="border-b border-gray-700 p-3 bg-[#0d1117]">
+              <InteractivePanel
+                parameters={interactiveParams}
+                onParameterChange={setParameter}
+                collapsible={true}
+              />
+            </div>
+          )}
 
           {/* Monaco Editor */}
           <div className="flex-1">

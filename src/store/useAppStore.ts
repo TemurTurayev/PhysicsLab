@@ -44,6 +44,12 @@ interface AppState {
   nextHint: () => void;
   resetHints: () => void;
 
+  // Interactive parameters
+  parameters: Record<string, number>;
+  setParameter: (name: string, value: number) => void;
+  setParameters: (params: Record<string, number>) => void;
+  resetParameters: () => void;
+
   // Actions
   resetMission: () => void;
 }
@@ -61,6 +67,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   consoleOutput: [],
   showHints: false,
   currentHintLevel: 0,
+  parameters: {},
 
   // Setters
   setCurrentMission: (mission) => {
@@ -98,6 +105,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   resetHints: () => set({ currentHintLevel: 0, showHints: false }),
 
+  // Parameters
+  setParameter: (name, value) =>
+    set((state) => ({
+      parameters: { ...state.parameters, [name]: value },
+    })),
+
+  setParameters: (params) => set({ parameters: params }),
+
+  resetParameters: () => set({ parameters: {} }),
+
   // Actions
   resetMission: () => {
     const { currentMission } = get();
@@ -111,6 +128,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       consoleOutput: [],
       currentHintLevel: 0,
       showHints: false,
+      parameters: {},
     });
   },
 }));
+

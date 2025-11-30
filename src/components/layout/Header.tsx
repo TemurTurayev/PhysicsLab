@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import mission5_1_1 from '../../content/missions/mission5_1_1';
 import mission5_1_2 from '../../content/missions/mission5_1_2';
 import mission5_1_3 from '../../content/missions/mission5_1_3';
+import mission5_1_4 from '../../content/missions/mission5_1_4';
+import mission5_1_5 from '../../content/missions/mission5_1_5';
+import mission5_1_6 from '../../content/missions/mission5_1_6';
 
 export default function Header() {
   const currentMission = useAppStore((state) => state.currentMission);
@@ -14,7 +17,7 @@ export default function Header() {
   const [missionSelectorOpen, setMissionSelectorOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const missions = [mission5_1_1, mission5_1_2, mission5_1_3];
+  const missions = [mission5_1_1, mission5_1_2, mission5_1_3, mission5_1_4, mission5_1_5, mission5_1_6];
 
   const handleMissionChange = (mission: typeof mission5_1_1) => {
     resetMission();
@@ -88,10 +91,9 @@ export default function Header() {
           onClick={() => setTheoryPanelOpen(!theoryPanelOpen)}
           className={`
             px-4 py-2 rounded text-sm font-medium transition-colors
-            ${
-              theoryPanelOpen
-                ? 'bg-[var(--color-accent-blue)] text-white'
-                : 'bg-gray-700 text-[var(--color-text-primary)] hover:bg-gray-600'
+            ${theoryPanelOpen
+              ? 'bg-[var(--color-accent-blue)] text-white'
+              : 'bg-gray-700 text-[var(--color-text-primary)] hover:bg-gray-600'
             }
           `}
         >
