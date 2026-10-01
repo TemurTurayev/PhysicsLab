@@ -56,10 +56,10 @@ function App() {
       <BrowserRouter>
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
-            <Route path="/" element={<PageTransition><HomePage /></PageTransition>} />
-            <Route path="/missions" element={<PageTransition><MissionsPage /></PageTransition>} />
-            <Route path="/lab" element={<PageTransition><LabPage /></PageTransition>} />
-            <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/missions" element={<MissionsPage />} />
+            <Route path="/lab" element={<LabPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

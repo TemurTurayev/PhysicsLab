@@ -41,6 +41,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
                 animate="enter"
                 exit="exit"
                 className="w-full h-full"
+                style={{ pointerEvents: 'auto' }}
             >
                 {children}
             </motion.div>
