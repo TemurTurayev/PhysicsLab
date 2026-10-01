@@ -5,6 +5,10 @@ import type { EnvironmentId, MissionKind } from '../levels/types'
 import { useLabProgress } from '../state/labProgress'
 import { FAILURES } from '../failures/catalog'
 import './lab.css'
+import './sigma.css'
+import { applyCopy, UNIVERSES } from '../universe'
+import { UniversePicker } from '../universe/UniversePicker'
+import { useUniverse } from '../universe/useUniverse'
 
 const KIND_LABELS: Record<MissionKind, string> = {
   tune: 'Настрой',
@@ -38,11 +42,16 @@ export function WorldMap(): JSX.Element {
   const incidents = useLabProgress((s) => s.incidents)
   const totalFailures = Object.keys(FAILURES).length
 
+  const chosen = useLabProgress((s) => s.universe)
+  const setUniverse = useLabProgress((s) => s.setUniverse)
+  const universe = useUniverse()
+  if (chosen === null) return <UniversePicker />
+
   const allMissions = CHAPTERS.flatMap((c) => c.missions)
   const nextMission = allMissions.find((m) => isUnlocked(m, completed) && (completed[m.id] ?? 0) === 0)
 
   return (
-    <div className="lab-root min-h-screen px-4 py-6 sm:px-8 sm:py-8">
+    <div className="lab-root min-h-screen px-4 py-6 sm:px-8 sm:py-8" data-universe={universe.id}>
       <div className="max-w-6xl mx-auto space-y-10">
         <header className="flex flex-col gap-4 border-b border-[var(--lab-line)] pb-6">
           <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -54,7 +63,7 @@ export function WorldMap(): JSX.Element {
               ← Главная
             </button>
             <div className="lab-mono text-xs px-3 py-1.5 rounded-full border border-[var(--lab-line)] bg-white/5 text-[var(--lab-dim)]">
-              Журнал инцидентов:{' '}
+              {universe.terms.journal}:{' '}
               <span className="text-[var(--lab-accent)] font-semibold">{incidents.length}</span> / {totalFailures}
             </div>
           </div>
@@ -66,23 +75,43 @@ export function WorldMap(): JSX.Element {
               Физика броска: от момента отпуска до параболы и собственного движка на Python.
             </p>
           </div>
+          <div role="radiogroup" aria-label="Вселенная" className="flex gap-2 flex-wrap">
+            {UNIVERSES.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                role="radio"
+                aria-checked={u.id === universe.id}
+                onClick={() => setUniverse(u.id)}
+                className={`lab-btn text-sm ${u.id === universe.id ? 'lab-btn-primary' : ''}`}
+              >
+                {u.name}
+              </button>
+            ))}
+          </div>
         </header>
 
         <main className="space-y-12">
           {CHAPTERS.map((chapter) => {
             const theme = CHAPTER_THEMES[chapter.env] ?? CHAPTER_THEMES.workshop
+            const sectorOpen = universe.envFor(chapter.id) !== null
             return (
               <section key={chapter.id} aria-labelledby={`chapter-${chapter.id}`}>
                 <div
                   className="rounded-xl p-5 sm:p-6 mb-6 border"
-                  style={{ background: theme.gradient, borderColor: theme.border }}
+                  style={{ background: universe.bannerFor?.(chapter.id) ?? theme.gradient, borderColor: theme.border }}
                 >
                   <div className="lab-label">Глава {chapter.id}</div>
                   <h2 id={`chapter-${chapter.id}`} className="text-xl sm:text-2xl font-bold text-[var(--lab-text)] mt-1">
-                    {chapter.title}
+                    {universe.chapterTitles[chapter.id] ?? chapter.title}
                   </h2>
+                  {!sectorOpen && (
+                    <p className="lab-mono text-xs mt-2" style={{ color: 'var(--lab-accent)' }}>
+                      Сектор на реконструкции — эту главу пока можно пройти в «Классике».
+                    </p>
+                  )}
                   <p className="text-sm text-[var(--lab-dim)] mt-1 max-w-2xl leading-relaxed">
-                    {chapter.tagline}
+                    {universe.chapterTaglines[chapter.id] ?? chapter.tagline}
                   </p>
                 </div>
 
@@ -96,8 +125,9 @@ export function WorldMap(): JSX.Element {
                     className="lg:hidden absolute top-8 bottom-8 left-8 w-0.5 bg-[var(--lab-line)] pointer-events-none"
                   />
 
-                  {chapter.missions.map((mission) => {
-                    const unlocked = isUnlocked(mission, completed)
+                  {chapter.missions.map((authored) => {
+                    const mission = applyCopy(authored, universe)
+                    const unlocked = sectorOpen && isUnlocked(mission, completed)
                     const isNext = mission.id === nextMission?.id
                     const stars = completed[mission.id] ?? 0
 

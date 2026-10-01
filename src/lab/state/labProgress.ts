@@ -1,10 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { FailureId } from '../failures/types'
+import type { UniverseId } from '../universe/types'
 
 interface LabProgress {
   completed: Record<string, number> // mission id → best stars (1–3)
   incidents: FailureId[] // discovered failure types, in discovery order
+  universe: UniverseId | null // null until the student has chosen; a setting, so reset() keeps it
+  setUniverse: (id: UniverseId) => void
   complete: (missionId: string, stars: number) => void
   /** Returns true when this failure type is seen for the first time. */
   recordIncident: (id: FailureId) => boolean
@@ -16,6 +19,8 @@ export const useLabProgress = create<LabProgress>()(
     (set, get) => ({
       completed: {},
       incidents: [],
+      universe: null,
+      setUniverse: (universe) => set({ universe }),
       complete: (missionId, stars) =>
         set((s) => ({ completed: { ...s.completed, [missionId]: Math.max(stars, s.completed[missionId] ?? 0) } })),
       recordIncident: (id) => {

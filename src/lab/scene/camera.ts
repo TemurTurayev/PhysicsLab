@@ -41,7 +41,9 @@ function followShot(stone: FlightSample, aspect: number): CameraShot {
 
 function landingShot(x: number, aspect: number): CameraShot {
   const p = pullFor(aspect)
-  return { position: new THREE.Vector3(x - 13 * p, 6 * p, 15 * p), target: new THREE.Vector3(x, 1, 0) }
+  // Look back toward the machine when the stone landed behind it, so the camera stays inside indoor halls.
+  const side = x < 0 ? 10 : -13
+  return { position: new THREE.Vector3(x + side * p, 6 * p, 15 * p), target: new THREE.Vector3(x, 1, 0) }
 }
 
 /**

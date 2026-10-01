@@ -1,5 +1,6 @@
 import { useEffect, useState, type JSX } from 'react'
 import type { FailureEvent } from '../failures/types'
+import { useUniverse } from '../universe/useUniverse'
 import { FAILURES } from '../failures/catalog'
 
 export interface IncidentCardProps {
@@ -9,7 +10,15 @@ export interface IncidentCardProps {
   onClose: () => void
 }
 
+/** Stable, plausible-looking protocol number for this failure, e.g. 0317-Б. */
+function protocolNumber(id: string, t: number): string {
+  const n = [...id].reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) % 9000, 7) + 1000
+  const letters = 'АБВГДЕЖИК'
+  return `${String(n).padStart(4, '0')}-${letters[Math.floor(t * 10) % letters.length]}`
+}
+
 export function IncidentCard({ event, isNew, onReplaySlow, onClose }: IncidentCardProps): JSX.Element {
+  const universe = useUniverse()
   const [mounted, setMounted] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return true
@@ -56,6 +65,11 @@ export function IncidentCard({ event, isNew, onReplaySlow, onClose }: IncidentCa
           <span className="text-2xl shrink-0" aria-hidden="true">
             {entry.icon}
           </span>
+          {universe.id === 'sigma' && (
+            <div className="lab-label" style={{ color: 'var(--lab-bad)' }}>
+              {universe.terms.incident} № {protocolNumber(event.id, event.t)}
+            </div>
+          )}
           <h2 id={titleId} className="text-base font-bold leading-tight" style={{ color: 'var(--lab-text)' }}>
             {entry.title}
           </h2>
@@ -69,7 +83,7 @@ export function IncidentCard({ event, isNew, onReplaySlow, onClose }: IncidentCa
               border: '1px solid rgba(240, 166, 64, 0.35)',
             }}
           >
-            Новая запись в журнале
+            {universe.terms.incidentNew}
           </span>
         )}
       </div>

@@ -17,6 +17,8 @@ export interface ActBarProps {
   onJournal: () => void
   muted: boolean
   onMute: () => void
+  retro: boolean
+  onRetro: () => void
 }
 
 export function ActBar(p: ActBarProps) {
@@ -54,6 +56,15 @@ export function ActBar(p: ActBarProps) {
       </div>
       <button type="button" className="lab-btn !min-h-[36px] !px-3" onClick={p.onJournal} title="Журнал инцидентов">
         📓 <span className="lab-mono">{p.incidents}</span>
+      </button>
+      <button
+        type="button"
+        className={`lab-btn !min-h-[36px] !px-3 lab-mono text-xs ${p.retro ? 'lab-btn-primary' : ''}`}
+        onClick={p.onRetro}
+        aria-pressed={p.retro}
+        title="Ретро-режим: пиксели и строки развёртки"
+      >
+        ЭЛТ
       </button>
       <button type="button" className="lab-btn !min-h-[36px] !px-3" onClick={p.onMute} aria-label={p.muted ? 'Включить звук' : 'Выключить звук'}>
         {p.muted ? '🔇' : '🔊'}

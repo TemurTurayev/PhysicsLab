@@ -1,5 +1,6 @@
 import { useEffect, type JSX } from 'react'
 import type { FailureId } from '../failures/types'
+import { useUniverse } from '../universe/useUniverse'
 import { FAILURES } from '../failures/catalog'
 
 export interface IncidentJournalProps {
@@ -10,6 +11,7 @@ export interface IncidentJournalProps {
 const ALL_FAILURE_IDS = Object.keys(FAILURES) as FailureId[]
 
 export function IncidentJournal({ found, onClose }: IncidentJournalProps): JSX.Element {
+  const universe = useUniverse()
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -42,7 +44,7 @@ export function IncidentJournal({ found, onClose }: IncidentJournalProps): JSX.E
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <h2 id="journal-title" className="text-lg md:text-xl font-bold truncate" style={{ color: 'var(--lab-text)' }}>
-                Журнал инцидентов
+                {universe.terms.journal}
               </h2>
               <p className="text-xs md:text-sm mt-0.5 leading-snug" style={{ color: 'var(--lab-dim)' }}>
                 Найдено{' '}

@@ -8,7 +8,8 @@ import { ForceArrows, ImpactBurst, PathLine, PredictionMarker } from './effects'
 import type { Environment, EnvironmentFactory } from './environments/types'
 import { armAt, flightAt } from './sampling'
 import { skyEnvironment } from './sky'
-import { createTrebuchet, type TrebuchetModel } from './trebuchetModel'
+import { RetroPass } from './retroPass'
+import { createTrebuchet, type MachineSkin, type TrebuchetModel } from './trebuchetModel'
 
 export interface ShotView {
   shot: ShotResult
@@ -52,6 +53,7 @@ export class LabScene {
   private raf = 0
   private onTime: ((t: number, done: boolean) => void) | null = null
   private readonly resizeObserver: ResizeObserver
+  private retro: RetroPass | null = null
 
   private readonly canvas: HTMLCanvasElement
 
@@ -99,12 +101,12 @@ export class LabScene {
     this.render()
   }
 
-  setTrebuchet(p: TrebuchetParams): void {
+  setTrebuchet(p: TrebuchetParams, skin: MachineSkin = 'wood'): void {
     if (this.machine) {
       this.scene.remove(this.machine.group)
       this.machine.dispose()
     }
-    this.machine = createTrebuchet(p)
+    this.machine = createTrebuchet(p, skin)
     this.idle = simulateArm(p, 9.81, { duration: 0 }).arm[0]
     this.pivotY = p.H
     this.scene.add(this.machine.group)
@@ -131,6 +133,20 @@ export class LabScene {
   setPrediction(landingX: number | null, apex: { x: number; y: number } | null): void {
     this.marker.set(landingX, apex)
     this.render()
+  }
+
+  /** Late-90s pixel pass; the canvas keeps its size, only the internal resolution drops. */
+  setRetro(on: boolean): void {
+    if (on === (this.retro !== null)) return
+    this.retro?.dispose()
+    this.retro = on ? new RetroPass() : null
+    this.resize()
+  }
+
+  /** Environments that have warning beacons expose setAlarm on their group. */
+  setAlarm(on: boolean): void {
+    const fn = this.env?.group.userData.setAlarm as ((v: boolean) => void) | undefined
+    fn?.(on)
   }
 
   setXray(on: boolean): void {
@@ -214,7 +230,8 @@ export class LabScene {
     const cam = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX)
     this.camera.position.copy(cam.position)
     this.camera.lookAt(cam.target)
-    this.renderer.render(this.scene, this.camera)
+    if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
+    else this.renderer.render(this.scene, this.camera)
   }
 
   private moveTargets(t: number): void {
@@ -231,6 +248,8 @@ export class LabScene {
     const h = this.canvas.clientHeight
     if (w === 0 || h === 0) return
     this.renderer.setSize(w, h, false)
+    const buffer = this.renderer.getDrawingBufferSize(new THREE.Vector2())
+    this.retro?.setSize(buffer.x, buffer.y)
     this.camera.aspect = w / h
     this.camera.updateProjectionMatrix()
     this.render()
@@ -246,6 +265,7 @@ export class LabScene {
     ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows].forEach((x) => x.dispose())
     this.stone.geometry.dispose()
     ;(this.stone.material as THREE.Material).dispose()
+    this.retro?.dispose()
     this.renderer.dispose()
   }
 }

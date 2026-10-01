@@ -6,9 +6,6 @@ import { findMission, nextMission } from '../levels'
 import type { Mission, SliderValues } from '../levels/types'
 import { isPythonReady, warmUpPython } from '../python/runStudent'
 import { LabScene } from '../scene/LabScene'
-import { createRange } from '../scene/environments/range'
-import { createWorkshop } from '../scene/environments/workshop'
-import { createSiege } from '../scene/environments/siege'
 import { useLabProgress } from '../state/labProgress'
 import { ActBar, type Act } from './ActBar'
 import { CodeDrawer } from './CodeDrawer'
@@ -21,8 +18,11 @@ import { ResultBanner } from './ResultBanner'
 import { TheoryPanel } from './TheoryPanel'
 import { useMissionRun, type ShotRecord } from './useMissionRun'
 import './lab.css'
+import './sigma.css'
+import { playSigma } from '../audio/packs/sigma'
+import { applyCopy, getUniverse, type Universe } from '../universe'
+import { useUniverse } from '../universe/useUniverse'
 
-const ENVIRONMENTS = { workshop: createWorkshop, range: createRange, siege: createSiege }
 type Phase = 'idle' | 'flying' | 'landed'
 
 export function LabPage() {
@@ -32,27 +32,34 @@ export function LabPage() {
   return <MissionView key={mission.id} mission={mission} />
 }
 
-function useLabScene(mission: Mission) {
+function useLabScene(mission: Mission, universe: Universe) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sceneRef = useRef<LabScene | null>(null)
   useEffect(() => {
     if (!canvasRef.current) return
     const scene = new LabScene(canvasRef.current)
     const maxX = Math.max(110, ...mission.targets.map((t) => t.x * 1.5))
-    scene.setEnvironment(ENVIRONMENTS[mission.env], mission.targets, maxX)
-    scene.setTrebuchet(mission.base.trebuchet)
+    // A sector this universe has not built yet falls back to Classic rather than an empty void.
+    const env = universe.envFor(mission.chapter) ?? getUniverse('classic').envFor(mission.chapter)!
+    scene.setEnvironment(env, mission.targets, maxX)
+    scene.setTrebuchet(mission.base.trebuchet, universe.envFor(mission.chapter) ? universe.machine : 'wood')
     sceneRef.current = scene
     return () => {
       scene.dispose()
       sceneRef.current = null
     }
-  }, [mission])
+  }, [mission, universe])
   return { canvasRef, sceneRef }
 }
 
 function MissionView({ mission }: { mission: Mission }) {
   const navigate = useNavigate()
-  const { canvasRef, sceneRef } = useLabScene(mission)
+  const universe = useUniverse()
+  const told = applyCopy(mission, universe)
+  const sigma = universe.id === 'sigma'
+  const { canvasRef, sceneRef } = useLabScene(mission, universe)
+  const [retro, setRetro] = useState(universe.retroByDefault)
+  useEffect(() => sceneRef.current?.setRetro(retro), [retro, sceneRef, universe])
   const run = useMissionRun(mission)
   const progress = useLabProgress()
   const [values, setValues] = useState<SliderValues>(() => Object.fromEntries(mission.sliders.map((s) => [s.key, s.start])))
@@ -89,12 +96,16 @@ function MissionView({ mission }: { mission: Mission }) {
       setPhase('landed')
       if (record.failures.length > 0) {
         setIncidents(record.failures.map((event) => ({ event, isNew: progress.recordIncident(event.id) })))
-        playSfx('fail')
+        if (sigma) {
+          playSigma('alarm')
+          sceneRef.current?.setAlarm(true)
+          setTimeout(() => sceneRef.current?.setAlarm(false), 3500)
+        } else playSfx('fail')
       } else if (record.hits.length > 0 || (record.predictionError !== null && mission.predict && Math.abs(record.predictionError) <= mission.predict.tolerance)) {
         playSfx('success')
       }
     },
-    [progress, mission.predict],
+    [progress, mission.predict, sigma, sceneRef],
   )
 
   const fire = useCallback(async () => {
@@ -108,7 +119,8 @@ function MissionView({ mission }: { mission: Mission }) {
     cues.current = { whoosh: false, thud: false }
     scene.setShot({ shot, ghost: record.ghost, crewScatterAt: selfHit ? selfHit.t : null, hitIndex: record.hits[0] ?? null })
     setPhase('flying')
-    playSfx('creak')
+    if (sigma) playSigma('hydraulic')
+    else playSfx('creak')
     scene.onTimeUpdate((t, done) => {
       if (!cues.current.whoosh && shot.releaseT !== null && t >= shot.releaseT) {
         cues.current.whoosh = true
@@ -116,14 +128,15 @@ function MissionView({ mission }: { mission: Mission }) {
       }
       if (!cues.current.thud && shot.landing && t >= shot.landing.t) {
         cues.current.thud = true
-        playSfx(selfHit ? 'crack' : 'thud')
+        if (sigma && !selfHit) playSigma('impactConcrete')
+        else playSfx(selfHit ? 'crack' : 'thud')
       }
       if (done) {
         scene.onTimeUpdate(null)
         finishShot(record)
       }
     })
-  }, [sceneRef, run, values, code, prediction, finishShot])
+  }, [sceneRef, run, values, code, prediction, finishShot, sigma])
 
   useEffect(() => {
     if (run.won) progress.complete(mission.id, run.stars)
@@ -143,13 +156,15 @@ function MissionView({ mission }: { mission: Mission }) {
   const fireLabel = mission.code ? 'Огонь (с твоим кодом)' : 'Огонь'
 
   return (
-    <div className="lab-root fixed inset-0 overflow-hidden">
+    <div className="lab-root fixed inset-0 overflow-hidden" data-universe={universe.id}>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block touch-none" onPointerDown={placePrediction} />
 
       <div className="absolute top-0 inset-x-0 p-2 md:p-3 flex flex-col items-start gap-2 pointer-events-none [&>*]:pointer-events-auto">
         <div className="w-full">
           <ActBar
-            mission={mission}
+            mission={told}
+            retro={retro}
+            onRetro={() => setRetro(!retro)}
             act={act}
             onAct={setAct}
             incidents={progress.incidents.length}
@@ -162,7 +177,7 @@ function MissionView({ mission }: { mission: Mission }) {
           />
         </div>
         <div className="w-[min(340px,100%)] flex flex-col gap-2 max-h-[38vh] md:max-h-[calc(100vh-260px)] overflow-y-auto">
-          <MissionBrief mission={mission} shots={run.shots} hitSoFar={run.hitSoFar} />
+          <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} />
           {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
         </div>
       </div>

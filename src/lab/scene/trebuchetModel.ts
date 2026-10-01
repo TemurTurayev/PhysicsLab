@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import type { TrebuchetParams } from '../sim/types'
+import { industrialMaterial } from './textures/industrial'
 import { woodMaterial } from './wood'
 
 export interface TrebuchetModel {
@@ -39,17 +40,23 @@ function addBox(
   return addMesh(parent, new THREE.BoxGeometry(w, h, d), mat, geos, mats)
 }
 
-export function createTrebuchet(p: TrebuchetParams): TrebuchetModel {
+export type MachineSkin = 'wood' | 'steel'
+
+export function createTrebuchet(p: TrebuchetParams, skin: MachineSkin = 'wood'): TrebuchetModel {
   const group = new THREE.Group()
   const geos = new Set<THREE.BufferGeometry>()
   const mats = new Set<THREE.Material>()
 
   // Materials
-  const woodMat = woodMaterial('oak')
-  const darkWoodMat = woodMaterial('weathered')
-  const ironBandedWoodMat = woodMaterial('dark')
+  const steel = skin === 'steel'
+  // Same geometry, different build: timber and stone in Classic, steel truss and concrete in the complex.
+  const woodMat: THREE.Material = steel ? industrialMaterial('steelPanel', [1, 4]) : woodMaterial('oak')
+  const darkWoodMat: THREE.Material = steel ? industrialMaterial('rust') : woodMaterial('weathered')
+  const ironBandedWoodMat: THREE.Material = steel ? industrialMaterial('concreteDark') : woodMaterial('dark')
   const ironMat = new THREE.MeshStandardMaterial({ color: 0x3b3b40, roughness: 0.45, metalness: 0.8 })
-  const ropeMat = new THREE.MeshStandardMaterial({ color: 0xc9b38a, roughness: 0.9, metalness: 0.0 })
+  const ropeMat = steel
+    ? new THREE.MeshStandardMaterial({ color: 0x9aa3a8, roughness: 0.4, metalness: 0.9 })
+    : new THREE.MeshStandardMaterial({ color: 0xc9b38a, roughness: 0.9, metalness: 0.0 })
   const stoneMat = new THREE.MeshStandardMaterial({ color: 0x8c8a85, roughness: 0.85, metalness: 0.05, flatShading: true })
 
   // 1. A-Frame side supports at z = +0.75 and z = -0.75
