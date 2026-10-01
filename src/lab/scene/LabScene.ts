@@ -7,6 +7,7 @@ import { createCrew, type Crew } from './crew'
 import { ForceArrows, ImpactBurst, PathLine, PredictionMarker } from './effects'
 import type { Environment, EnvironmentFactory } from './environments/types'
 import { armAt, flightAt } from './sampling'
+import { skyEnvironment } from './sky'
 import { createTrebuchet, type TrebuchetModel } from './trebuchetModel'
 
 export interface ShotView {
@@ -26,8 +27,9 @@ const NO_LANDING_SHOWN = 6 // seconds of a flight that never lands
 export class LabScene {
   private readonly renderer: THREE.WebGLRenderer
   private readonly scene = new THREE.Scene()
-  private readonly camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000)
+  private readonly camera = new THREE.PerspectiveCamera(45, 1, 0.1, 3000)
   private env: Environment | null = null
+  private envMap: THREE.WebGLRenderTarget | null = null
   private machine: TrebuchetModel | null = null
   private idle: ArmSample | null = null
   private crew: Crew
@@ -83,6 +85,15 @@ export class LabScene {
     this.scene.add(this.env.group)
     this.scene.fog = this.env.fog
     this.scene.background = this.env.background
+    this.envMap?.dispose()
+    this.envMap = null
+    this.scene.environment = null
+    const sky = this.env.group.children.find((c) => c.userData.isSky) as THREE.Mesh | undefined
+    if (sky) {
+      this.envMap = skyEnvironment(this.renderer, sky)
+      this.scene.environment = this.envMap.texture
+      this.scene.environmentIntensity = 0.55
+    }
     this.render()
   }
 
@@ -223,6 +234,7 @@ export class LabScene {
     cancelAnimationFrame(this.raf)
     this.resizeObserver.disconnect()
     this.env?.dispose()
+    this.envMap?.dispose()
     this.machine?.dispose()
     this.crew.dispose()
     ;[this.trail, this.ghost, this.burst, this.marker, this.arrows].forEach((x) => x.dispose())

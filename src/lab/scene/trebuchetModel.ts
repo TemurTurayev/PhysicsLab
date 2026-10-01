@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import type { TrebuchetParams } from '../sim/types'
+import { woodMaterial } from './wood'
 
 export interface TrebuchetModel {
   group: THREE.Group
@@ -44,10 +45,10 @@ export function createTrebuchet(p: TrebuchetParams): TrebuchetModel {
   const mats = new Set<THREE.Material>()
 
   // Materials
-  const woodMat = new THREE.MeshStandardMaterial({ color: 0x8a5a35, roughness: 0.75, metalness: 0.05, flatShading: true })
-  const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x6e4428, roughness: 0.8, metalness: 0.05, flatShading: true })
-  const ironBandedWoodMat = new THREE.MeshStandardMaterial({ color: 0x4a2e1a, roughness: 0.85, metalness: 0.05, flatShading: true })
-  const ironMat = new THREE.MeshStandardMaterial({ color: 0x3b3b40, roughness: 0.45, metalness: 0.8, flatShading: true })
+  const woodMat = woodMaterial('oak')
+  const darkWoodMat = woodMaterial('weathered')
+  const ironBandedWoodMat = woodMaterial('dark')
+  const ironMat = new THREE.MeshStandardMaterial({ color: 0x3b3b40, roughness: 0.45, metalness: 0.8 })
   const ropeMat = new THREE.MeshStandardMaterial({ color: 0xc9b38a, roughness: 0.9, metalness: 0.0 })
   const stoneMat = new THREE.MeshStandardMaterial({ color: 0x8c8a85, roughness: 0.85, metalness: 0.05, flatShading: true })
 
@@ -236,7 +237,7 @@ export function createTrebuchet(p: TrebuchetParams): TrebuchetModel {
     },
     dispose(): void {
       for (const geo of geos) geo.dispose()
-      for (const mat of mats) mat.dispose()
+      for (const mat of mats) if (!mat.userData.shared) mat.dispose()
     },
   }
 }

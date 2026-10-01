@@ -1,4 +1,6 @@
 import * as THREE from 'three'
+import { createSky } from '../sky'
+import { woodMaterial } from '../wood'
 import type { Target } from '../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from './types'
 
@@ -66,59 +68,68 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
     return mesh
   }
 
-  // Fog, background, lights
-  const fog = new THREE.Fog('#f2d6a8', 40, opts.maxX + 120)
-  const background = new THREE.Color('#f6dcae')
-  group.add(new THREE.HemisphereLight(0xffeed6, 0x5a6344, 0.75))
+  // One golden-morning atmosphere: the sky's sun, the key light and the shafts share SUN_DIR.
+  const SUN_DIR = new THREE.Vector3(-0.68, 0.44, 0.58).normalize()
+  const fog = new THREE.Fog('#e9cfa2', 55, opts.maxX + 160)
+  const background = new THREE.Color('#e9cfa2')
+  const sky = createSky({
+    zenith: '#6f9fd0',
+    mid: '#b9c7cf',
+    horizon: '#f3cf98',
+    ground: '#e9cfa2',
+    sunDir: SUN_DIR,
+    sunColor: '#ffd59a',
+    halo: 1.1,
+  })
+  track(sky.geometry)
+  track(sky.material as THREE.Material)
+  group.add(sky)
+  group.add(new THREE.HemisphereLight(0xcfe0f0, 0x6b5a40, 0.6))
 
-  const sun = new THREE.DirectionalLight(0xfff0d0, 1.8)
-  sun.position.set(-40, 18, 25); sun.castShadow = true
-  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006
-  sun.shadow.camera.near = 5; sun.shadow.camera.far = 100
-  sun.shadow.camera.left = -30; sun.shadow.camera.right = 30
-  sun.shadow.camera.top = 22; sun.shadow.camera.bottom = -22
-  sun.target.position.set(5, 0, 0)
+  const sun = new THREE.DirectionalLight(0xffd9a6, 3.0)
+  sun.position.copy(SUN_DIR).multiplyScalar(60)
+  sun.castShadow = true
+  sun.shadow.mapSize.set(2048, 2048)
+  sun.shadow.bias = -0.0002
+  sun.shadow.normalBias = 0.03
+  sun.shadow.camera.near = 5; sun.shadow.camera.far = 140
+  sun.shadow.camera.left = -32; sun.shadow.camera.right = 32
+  sun.shadow.camera.top = 24; sun.shadow.camera.bottom = -24
+  sun.target.position.set(0, 0, 0)
   group.add(sun.target); group.add(sun)
 
-  // Sky dome
-  const skyRadius = Math.max(260, opts.maxX + 120)
-  const skyGeo = track(new THREE.SphereGeometry(skyRadius, 24, 16))
-  const skyColors = new Float32Array(skyGeo.attributes.position.count * 3)
-  const cZenith = new THREE.Color(0x7fb2e0); const cHorizon = new THREE.Color('#f6dcae'); const cBelow = new THREE.Color(0x6b7d42)
-  for (let i = 0; i < skyGeo.attributes.position.count; i++) {
-    const ny = skyGeo.attributes.position.getY(i) / skyRadius
-    const col = ny >= 0 ? cHorizon.clone().lerp(cZenith, Math.pow(ny, 0.7)) : cHorizon.clone().lerp(cBelow, Math.min(1, -ny * 2.5))
-    skyColors[i * 3] = col.r; skyColors[i * 3 + 1] = col.g; skyColors[i * 3 + 2] = col.b
-  }
-  skyGeo.setAttribute('color', new THREE.BufferAttribute(skyColors, 3))
-  const skyMesh = new THREE.Mesh(skyGeo, track(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false, fog: false })))
-  skyMesh.position.set(opts.maxX / 2, 0, 0); group.add(skyMesh)
+  // Cool fill from the camera side keeps the shaded flanks of the timber readable without flattening the grain.
+  const fill = new THREE.DirectionalLight(0xaec7df, 0.45)
+  fill.position.set(10, 8, 30)
+  group.add(fill)
 
   // Ground plane
-  const groundGeo = track(new THREE.PlaneGeometry(opts.maxX + 140, 240, 40, 30))
+  const groundGeo = track(new THREE.PlaneGeometry(opts.maxX + 140, 240, 160, 90))
   groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX + 20) / 2, 0, 0)
   const gColors = new Float32Array(groundGeo.attributes.position.count * 3)
-  const cDirt = new THREE.Color(0x75634a); const cGrass = new THREE.Color('#7a8f4e'); const cDry = new THREE.Color(0x8c9456)
+  const cDirt = new THREE.Color(0xa08866); const cGrass = new THREE.Color('#86a052'); const cDry = new THREE.Color(0xa3a35c)
   for (let i = 0; i < groundGeo.attributes.position.count; i++) {
     const x = groundGeo.attributes.position.getX(i); const z = groundGeo.attributes.position.getZ(i)
     const n = Math.sin(x * 0.12) * Math.cos(z * 0.15) * 0.12
-    const yard = Math.max(0, Math.min(1, (Math.hypot(x * 0.7, z + 5) - 8) / 16 + n))
+    const yardDist = Math.hypot((x - 4) * 0.55, z + 3) - 9
+    const lane = x > 0 ? Math.abs(z) - 2.2 - Math.sin(x * 0.08) * 0.6 : 99
+    const yard = Math.max(0, Math.min(1, Math.min(yardDist / 10, lane / 2.5) + n))
     const col = cDirt.clone().lerp(cGrass, yard)
     if (n > 0.04) col.lerp(cDry, n * 2.5)
     gColors[i * 3] = col.r; gColors[i * 3 + 1] = col.g; gColors[i * 3 + 2] = col.b
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3))
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true })))
+  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 })))
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   // Materials
-  const woodMat = track(new THREE.MeshLambertMaterial({ color: 0x684e36, flatShading: true }))
-  const darkWoodMat = track(new THREE.MeshLambertMaterial({ color: 0x483626, flatShading: true }))
+  const woodMat = woodMaterial('weathered')
+  const darkWoodMat = woodMaterial('dark')
   const foliageMat = track(new THREE.MeshLambertMaterial({ color: 0x4c6b2e, flatShading: true }))
 
   // Workshop timber shed (z ≈ -14)
   const shed = new THREE.Group()
-  shed.position.set(-4, 0, -14)
+  shed.position.set(34, 0, -19)
   addMesh(shed, track(new THREE.BoxGeometry(7.5, 3.4, 0.2)), woodMat, [0, 1.7, -2.3])
   addMesh(shed, track(new THREE.BoxGeometry(0.2, 3.4, 4.6)), woodMat, [-3.65, 1.7, 0])
   addMesh(shed, track(new THREE.BoxGeometry(0.2, 3.4, 4.6)), woodMat, [3.65, 1.7, 0])
@@ -130,7 +141,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
 
   // Workbench & Saw-horse
   const bench = new THREE.Group()
-  bench.position.set(3.5, 0, -10.5)
+  bench.position.set(13, 0, -9)
   addMesh(bench, track(new THREE.BoxGeometry(2.4, 0.14, 0.9)), woodMat, [0, 0.85, 0])
   const legGeo = track(new THREE.BoxGeometry(0.1, 0.85, 0.1))
   for (const lx of [-1.05, 1.05]) {
@@ -142,7 +153,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   group.add(bench)
 
   const sawhorse = new THREE.Group()
-  sawhorse.position.set(-1, 0, -10)
+  sawhorse.position.set(9, 0, -8)
   addMesh(sawhorse, track(new THREE.BoxGeometry(1.6, 0.12, 0.12)), woodMat, [0, 0.75, 0])
   const shLegGeo = track(new THREE.BoxGeometry(0.08, 0.8, 0.08))
   for (const sx of [-0.65, 0.65]) {
@@ -167,7 +178,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   fenceMesh.castShadow = true
   const dummy = new THREE.Object3D()
   for (let i = 0; i < postCount; i++) {
-    dummy.position.set(-20 + i * 2.5, 0.65, -17)
+    dummy.position.set(30 + i * 2.5, 0.65, -12.5)
     dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1); dummy.updateMatrix()
     fenceMesh.setMatrixAt(i, dummy.matrix)
   }
@@ -181,7 +192,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   const trunkGeo = track(new THREE.CylinderGeometry(0.25, 0.4, 3.2, 6))
   const coneGeo1 = track(new THREE.ConeGeometry(2.2, 2.6, 7))
   const coneGeo2 = track(new THREE.ConeGeometry(1.6, 2.2, 7))
-  const treeCoords = [[-16, -15], [14, -14], [-38, 24], [30, 18]]
+  const treeCoords = [[-16, -15], [16, -22], [33, -24], [44, -19], [-38, 24], [30, 18]]
   for (const [tx, tz] of treeCoords) {
     const tree = new THREE.Group()
     tree.position.set(tx, 0, tz)
@@ -193,7 +204,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
 
   // Hand cart
   const cart = new THREE.Group()
-  cart.position.set(4, 0, 7.5)
+  cart.position.set(11, 0, 7)
   const wheelGeo = track(new THREE.CylinderGeometry(0.42, 0.42, 0.08, 12))
   wheelGeo.rotateZ(Math.PI / 2)
   for (const wz of [-0.45, 0.45]) addMesh(cart, wheelGeo, darkWoodMat, [0, 0.42, wz])
