@@ -15,14 +15,15 @@ describe('universes', () => {
   })
 
   it('missions without an overlay are told as written', () => {
-    expect(applyCopy(findMission('3-4')!, sigma)).toBe(findMission('3-4'))
+    expect(applyCopy(findMission('3-4')!, getUniverse('classic'))).toBe(findMission('3-4'))
   })
 
   it('Classic opens every chapter; the complex opens only the sectors it has built', () => {
     for (const m of MISSIONS) expect(classic.envFor(m.chapter)).not.toBeNull()
     expect(sigma.envFor(1)).not.toBeNull()
     expect(sigma.envFor(2)).not.toBeNull()
-    expect(sigma.envFor(3)).toBeNull()
+    expect(sigma.envFor(3)).not.toBeNull()
+    expect(sigma.envFor(4)).toBeNull()
   })
 
   it('the complex never borrows names or symbols from Valve games', () => {
