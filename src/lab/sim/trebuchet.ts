@@ -1,4 +1,4 @@
-import type { ArmSample, TrebuchetParams } from './types'
+import type { ArmSample, Breakage, TrebuchetParams } from './types'
 
 /**
  * Fixed-counterweight trebuchet with a sling, two degrees of freedom:
@@ -6,6 +6,8 @@ import type { ArmSample, TrebuchetParams } from './types'
  * Lagrangian derivation and symbols: docs/superpowers/plans/2026-10-01-trebuchet-lab-v1.md
  * The ground under the stone is a stiff penalty spring, so the stone can rest
  * in the trough and lift off naturally when the sling pulls it up.
+ * Structural loads come from the same accelerations: the counterweight presses on
+ * the short arm with mc·(a − g), the sling pulls the stone with mp·(a − g) − N.
  */
 
 const DT = 1 / 2000
@@ -21,13 +23,19 @@ export interface ArmState {
   phi: number
   omega: number // dθ/dt
   psi: number // dφ/dt
+  stoneX: number
   stoneY: number
+  moment: number
+  tension: number
 }
 
 export interface ArmRun {
   arm: ArmSample[]
   states: ArmState[] // sampled like `arm`, for diagnostics and tests
   release: { t: number; x: number; y: number; vx: number; vy: number } | null
+  breakage: Breakage | null
+  peakMoment: number
+  peakTension: number
 }
 
 export interface ArmOptions {
@@ -63,7 +71,7 @@ function stoneVel(p: TrebuchetParams, theta: number, phi: number, omega: number,
 }
 
 /** Total mechanical energy of the loaded machine (no ground spring term). */
-export function armEnergy(p: TrebuchetParams, g: number, s: ArmState): number {
+export function armEnergy(p: TrebuchetParams, g: number, s: Pick<ArmState, 'theta' | 'phi' | 'omega' | 'psi'>): number {
   const { Ia, d } = derived(p)
   const M11 = Ia + p.mc * p.L2 ** 2 + p.mp * p.L1 ** 2
   const M12 = p.mp * p.L1 * p.Ls * Math.cos(s.theta - s.phi)
@@ -77,6 +85,15 @@ export function armEnergy(p: TrebuchetParams, g: number, s: ArmState): number {
 
 type Vec4 = readonly [number, number, number, number] // theta, phi, omega, psi
 
+/** Upward ground reaction on the stone (penalty spring), 0 when it is in the air. */
+function groundForce(p: TrebuchetParams, y: Vec4): number {
+  const [theta, phi, omega, psi] = y
+  const { y: yB } = stonePos(p, theta, phi)
+  if (yB >= p.r) return 0
+  const { vy } = stoneVel(p, theta, phi, omega, psi)
+  return Math.max(0, GROUND_K * (p.r - yB) - GROUND_C * vy)
+}
+
 function loadedDerivative(p: TrebuchetParams, g: number, ground: boolean, y: Vec4): Vec4 {
   const [theta, phi, omega, psi] = y
   const { Ia, d } = derived(p)
@@ -86,17 +103,9 @@ function loadedDerivative(p: TrebuchetParams, g: number, ground: boolean, y: Vec
   const M12 = p.mp * p.L1 * p.Ls * c
   const M22 = p.mp * p.Ls ** 2
 
-  let Qtheta = 0
-  let Qphi = 0
-  if (ground) {
-    const { y: yB } = stonePos(p, theta, phi)
-    if (yB < p.r) {
-      const { vy } = stoneVel(p, theta, phi, omega, psi)
-      const Fy = Math.max(0, GROUND_K * (p.r - yB) - GROUND_C * vy)
-      Qtheta = Fy * p.L1 * Math.cos(theta) // F · ∂B/∂θ, only the y component is non-zero
-      Qphi = Fy * p.Ls * Math.cos(phi)
-    }
-  }
+  const Fy = ground ? groundForce(p, y) : 0
+  const Qtheta = Fy * p.L1 * Math.cos(theta) // F · ∂B/∂θ, only the y component is non-zero
+  const Qphi = Fy * p.Ls * Math.cos(phi)
 
   const rhs1 = -p.mp * p.L1 * p.Ls * s * psi ** 2 - g * Math.cos(theta) * (p.ma * d - p.mc * p.L2 + p.mp * p.L1) + Qtheta
   const rhs2 = p.mp * p.L1 * p.Ls * s * omega ** 2 - g * p.mp * p.Ls * Math.cos(phi) + Qphi
@@ -104,6 +113,28 @@ function loadedDerivative(p: TrebuchetParams, g: number, ground: boolean, y: Vec
   const alpha = (rhs1 * M22 - rhs2 * M12) / det
   const beta = (M11 * rhs2 - M12 * rhs1) / det
   return [omega, psi, alpha, beta]
+}
+
+/** Bending moment at the axle and sling tension for the loaded machine in state y. */
+function loads(p: TrebuchetParams, g: number, ground: boolean, y: Vec4): { moment: number; tension: number } {
+  const [theta, phi, omega, psi] = y
+  const [, , alpha, beta] = loadedDerivative(p, g, ground, y)
+  const ct = Math.cos(theta)
+  const st = Math.sin(theta)
+  const cp = Math.cos(phi)
+  const sp = Math.sin(phi)
+  // counterweight C = P − L2(cos θ, sin θ)
+  const aCx = p.L2 * (ct * omega ** 2 + st * alpha)
+  const aCy = p.L2 * (st * omega ** 2 - ct * alpha)
+  const Fx = p.mc * aCx
+  const Fy = p.mc * (aCy + g)
+  const moment = Math.abs(-p.L2 * ct * Fy + p.L2 * st * Fx)
+  // stone B = A + Ls(cos φ, sin φ)
+  const aBx = p.L1 * (-ct * omega ** 2 - st * alpha) + p.Ls * (-cp * psi ** 2 - sp * beta)
+  const aBy = p.L1 * (-st * omega ** 2 + ct * alpha) + p.Ls * (-sp * psi ** 2 + cp * beta)
+  const N = ground ? groundForce(p, y) : 0
+  const tension = Math.hypot(p.mp * aBx, p.mp * (aBy + g) - N)
+  return { moment, tension }
 }
 
 function freeArmDerivative(p: TrebuchetParams, g: number, y: Vec4): Vec4 {
@@ -130,6 +161,14 @@ function initialPhi(p: TrebuchetParams, theta0: number): number {
   return sinPhi <= -1 ? -Math.PI / 2 : Math.asin(sinPhi)
 }
 
+function checkBreak(p: TrebuchetParams, t: number, l: { moment: number; tension: number }): Breakage | null {
+  const beam = p.beamStrength ?? Infinity
+  const sling = p.slingStrength ?? Infinity
+  if (l.moment > beam) return { kind: 'beam', t, load: l.moment, limit: beam }
+  if (l.tension > sling) return { kind: 'sling', t, load: l.tension, limit: sling }
+  return null
+}
+
 export function simulateArm(p: TrebuchetParams, g: number, opts: ArmOptions = {}): ArmRun {
   const ground = opts.ground ?? true
   const duration = opts.duration ?? 4
@@ -137,14 +176,25 @@ export function simulateArm(p: TrebuchetParams, g: number, opts: ArmOptions = {}
   const releaseAt = p.releaseDeg * DEG
   let y: Vec4 = [theta0, initialPhi(p, theta0), 0, 0]
   let released = false
+  let broken = false
   let release: ArmRun['release'] = null
+  let breakage: Breakage | null = null
+  let peakMoment = 0
+  let peakTension = 0
+  let current = loads(p, g, ground, y)
 
   const arm: ArmSample[] = []
   const states: ArmState[] = []
   const record = (t: number) => {
     const phi = released ? -Math.PI / 2 : y[1]
-    arm.push({ t, theta: y[0], phi, released })
-    states.push({ t, theta: y[0], phi: y[1], omega: y[2], psi: y[3], stoneY: stonePos(p, y[0], y[1]).y })
+    const l = released ? { moment: 0, tension: 0 } : current
+    arm.push({ t, theta: y[0], phi, released, broken, moment: l.moment, tension: l.tension })
+    const stone = stonePos(p, y[0], y[1])
+    states.push({ t, theta: y[0], phi: y[1], omega: y[2], psi: y[3], stoneX: stone.x, stoneY: stone.y, ...l })
+  }
+  const letGo = (t: number) => {
+    release = { t, ...stonePos(p, y[0], y[1]), ...stoneVel(p, y[0], y[1], y[2], y[3]) }
+    released = true
   }
 
   const steps = Math.round(duration / DT)
@@ -153,13 +203,19 @@ export function simulateArm(p: TrebuchetParams, g: number, opts: ArmOptions = {}
   for (let i = 1; i <= steps; i++) {
     const t = i * DT
     y = released ? rk4((v) => freeArmDerivative(p, g, v), y, DT) : rk4((v) => loadedDerivative(p, g, ground, v), y, DT)
-    if (!released && y[0] <= releaseAt) {
-      const pos = stonePos(p, y[0], y[1])
-      const vel = stoneVel(p, y[0], y[1], y[2], y[3])
-      release = { t, ...pos, ...vel }
-      released = true
+    if (!released) {
+      current = loads(p, g, ground, y)
+      peakMoment = Math.max(peakMoment, current.moment)
+      peakTension = Math.max(peakTension, current.tension)
+      breakage = checkBreak(p, t, current)
+      if (breakage) {
+        broken = breakage.kind === 'beam'
+        letGo(t)
+      } else if (y[0] <= releaseAt) {
+        letGo(t)
+      }
     }
     if (i % every === 0) record(t)
   }
-  return { arm, states, release }
+  return { arm, states, release, breakage, peakMoment, peakTension }
 }

@@ -37,3 +37,48 @@ describe('simulateArm', () => {
     for (const s of firstTenth) expect(s.stoneY).toBeGreaterThan(DEFAULT_TREBUCHET.r - 0.02)
   })
 })
+
+describe('structural loads', () => {
+  const free = { ...DEFAULT_TREBUCHET }
+
+  it('sling tension equals m·|a − g| of the stone (checked by finite differences)', () => {
+    const run = simulateArm(free, g)
+    const s = run.states
+    const releaseT = run.release!.t
+    // a sample well after lift-off and before release
+    const i = s.findIndex((x) => x.t > releaseT * 0.8)
+    const h = s[1].t - s[0].t
+    const ax = (s[i + 1].stoneX - 2 * s[i].stoneX + s[i - 1].stoneX) / (h * h)
+    const ay = (s[i + 1].stoneY - 2 * s[i].stoneY + s[i - 1].stoneY) / (h * h)
+    const expected = free.mp * Math.hypot(ax, ay + g)
+    expect(Math.abs(s[i].tension - expected) / expected).toBeLessThan(0.05)
+  })
+
+  it('the beam moment at the axle is at least the counterweight hanging statically', () => {
+    const run = simulateArm(free, g)
+    expect(run.peakMoment).toBeGreaterThan(free.mc * g * free.L2 * 0.5)
+    expect(run.peakMoment).toBeLessThan(free.mc * g * free.L2 * 10)
+  })
+
+  it('a weak beam breaks at its peak load and lets the stone go at that instant', () => {
+    const peak = simulateArm(free, g).peakMoment
+    const run = simulateArm({ ...free, beamStrength: peak * 0.6 }, g)
+    expect(run.breakage?.kind).toBe('beam')
+    expect(run.release!.t).toBe(run.breakage!.t)
+    expect(run.arm.at(-1)!.broken).toBe(true)
+  })
+
+  it('a weak sling snaps before the planned release', () => {
+    const normal = simulateArm(free, g)
+    const run = simulateArm({ ...free, slingStrength: normal.peakTension * 0.6 }, g)
+    expect(run.breakage?.kind).toBe('sling')
+    expect(run.release!.t).toBeLessThan(normal.release!.t)
+  })
+
+  it('strong parts change nothing', () => {
+    const a = simulateArm(free, g)
+    const b = simulateArm({ ...free, beamStrength: a.peakMoment * 2, slingStrength: a.peakTension * 2 }, g)
+    expect(b.breakage).toBeNull()
+    expect(b.release).toEqual(a.release)
+  })
+})

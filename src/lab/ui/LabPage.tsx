@@ -3,11 +3,12 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { isMuted, playSfx, setMuted } from '../audio/sfx'
 import type { FailureEvent } from '../failures/types'
 import { findMission, nextMission } from '../levels'
-import type { Mission } from '../levels/types'
+import type { Mission, SliderValues } from '../levels/types'
 import { isPythonReady, warmUpPython } from '../python/runStudent'
 import { LabScene } from '../scene/LabScene'
 import { createRange } from '../scene/environments/range'
 import { createWorkshop } from '../scene/environments/workshop'
+import { createSiege } from '../scene/environments/siege'
 import { useLabProgress } from '../state/labProgress'
 import { ActBar, type Act } from './ActBar'
 import { CodeDrawer } from './CodeDrawer'
@@ -21,7 +22,7 @@ import { TheoryPanel } from './TheoryPanel'
 import { useMissionRun, type ShotRecord } from './useMissionRun'
 import './lab.css'
 
-const ENVIRONMENTS = { workshop: createWorkshop, range: createRange }
+const ENVIRONMENTS = { workshop: createWorkshop, range: createRange, siege: createSiege }
 type Phase = 'idle' | 'flying' | 'landed'
 
 export function LabPage() {
@@ -54,7 +55,8 @@ function MissionView({ mission }: { mission: Mission }) {
   const { canvasRef, sceneRef } = useLabScene(mission)
   const run = useMissionRun(mission)
   const progress = useLabProgress()
-  const [releaseDeg, setReleaseDeg] = useState(mission.sliders[0]?.start ?? mission.base.trebuchet.releaseDeg)
+  const [values, setValues] = useState<SliderValues>(() => Object.fromEntries(mission.sliders.map((s) => [s.key, s.start])))
+  const releaseDeg = values.releaseDeg ?? mission.base.trebuchet.releaseDeg
   const [prediction, setPrediction] = useState<number | null>(null)
   const [act, setAct] = useState<Act>(mission.code ? 'build' : 'see')
   const [code, setCode] = useState(mission.code?.starter ?? '')
@@ -99,7 +101,7 @@ function MissionView({ mission }: { mission: Mission }) {
     const scene = sceneRef.current
     if (!scene) return
     setIncidents([])
-    const record = await run.fire({ releaseDeg, code, prediction })
+    const record = await run.fire({ values, code, prediction })
     if (!record) return
     const { shot } = record
     const selfHit = record.failures.find((f) => f.id === 'self_hit')
@@ -121,7 +123,7 @@ function MissionView({ mission }: { mission: Mission }) {
         finishShot(record)
       }
     })
-  }, [sceneRef, run, releaseDeg, code, prediction, finishShot])
+  }, [sceneRef, run, values, code, prediction, finishShot])
 
   useEffect(() => {
     if (run.won) progress.complete(mission.id, run.stars)
@@ -183,8 +185,8 @@ function MissionView({ mission }: { mission: Mission }) {
           <div className="w-[min(320px,100%)] md:absolute md:right-3 md:bottom-[96px]">
             <ControlPanel
               mission={mission}
-              releaseDeg={releaseDeg}
-              onReleaseDeg={setReleaseDeg}
+              values={values}
+              onValue={(key, v) => setValues((cur) => ({ ...cur, [key]: v }))}
               prediction={prediction}
               onPrediction={setPrediction}
               canFire={phase !== 'flying' && (!mission.predict || prediction !== null)}
@@ -197,7 +199,8 @@ function MissionView({ mission }: { mission: Mission }) {
         <div className="w-full md:absolute md:bottom-0 md:inset-x-0 md:p-3">
           <Placard
             shot={run.last?.shot ?? null}
-            releaseDeg={mission.sliders.length > 0 ? releaseDeg : mission.base.trebuchet.releaseDeg}
+            releaseDeg={releaseDeg}
+            beamLimit={mission.base.trebuchet.beamStrength}
             phase={phase}
             movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
           />

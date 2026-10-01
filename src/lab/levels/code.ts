@@ -49,3 +49,23 @@ def step(state, dt):
     return {"x": state["x"] + vx * dt, "y": state["y"] + vy * dt, "vx": vx, "vy": vy}
 `,
 }
+
+export const BEAM_MOMENT_CODE: MissionCode = {
+  fn: 'beam_moment',
+  starter: `G = 9.81   # ускорение свободного падения, м/с²
+L2 = 1.2   # короткое плечо: от оси до противовеса, м
+
+def beam_moment(mc):
+    """Момент силы, которым противовес массой mc (кг) давит на балку у оси, Н·м.
+
+    Мастер добавляет противовес, пока этот момент не больше 11 500 Н·м.
+    """
+    return 0  # допиши формулу
+`,
+  reference: `G = 9.81
+L2 = 1.2
+
+def beam_moment(mc):
+    return mc * G * L2
+`,
+}

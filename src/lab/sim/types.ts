@@ -10,6 +10,8 @@ export interface TrebuchetParams {
   r: number // projectile radius (m)
   theta0Deg: number // starting angle of the long arm, measured from +x (220 = cocked back-down)
   releaseDeg: number // the pin opens when the long arm swings down to this angle
+  beamStrength?: number // N·m the beam takes at the axle before it snaps (default: unbreakable)
+  slingStrength?: number // N the sling rope holds before it tears (default: unbreakable)
 }
 
 export interface WorldParams {
@@ -28,6 +30,16 @@ export interface ArmSample {
   theta: number // rad
   phi: number // rad, absolute sling angle (meaningless after release)
   released: boolean
+  broken?: boolean // the beam has snapped
+  moment: number // N·m bending moment at the axle from the counterweight
+  tension: number // N in the sling (0 after release)
+}
+
+export interface Breakage {
+  kind: 'beam' | 'sling'
+  t: number
+  load: number // N·m or N at the moment of failure
+  limit: number
 }
 
 export interface FlightSample {
@@ -46,6 +58,9 @@ export interface ShotResult {
   launch: { speed: number; angleDeg: number } | null
   landing: { x: number; t: number } | null
   apex: { x: number; y: number } | null
+  breakage: Breakage | null
+  peakMoment: number
+  peakTension: number
 }
 
 export const DEFAULT_TREBUCHET: TrebuchetParams = {

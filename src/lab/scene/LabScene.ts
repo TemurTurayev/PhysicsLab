@@ -37,6 +37,8 @@ export class LabScene {
   private readonly trail = new PathLine('#ffe2a8', 0.9, false)
   private readonly ghost = new PathLine('#ffffff', 0.45, true)
   private readonly burst = new ImpactBurst()
+  private readonly splinters = new ImpactBurst(90)
+  private pivotY = 4
   private readonly marker = new PredictionMarker()
   private readonly arrows = new ForceArrows()
   private view: ShotView | null = null
@@ -69,7 +71,7 @@ export class LabScene {
     )
     this.stone.castShadow = true
     this.stone.visible = false
-    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.marker.group, this.arrows.group)
+    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group)
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(canvas)
     this.resize()
@@ -104,6 +106,7 @@ export class LabScene {
     }
     this.machine = createTrebuchet(p)
     this.idle = simulateArm(p, 9.81, { duration: 0 }).arm[0]
+    this.pivotY = p.H
     this.scene.add(this.machine.group)
     const s = this.stone.geometry as THREE.IcosahedronGeometry
     this.stone.scale.setScalar(p.r / s.parameters.radius)
@@ -117,6 +120,8 @@ export class LabScene {
     this.ghost.set(view?.ghost ?? [])
     const landing = view?.shot.landing ?? null
     this.burst.trigger(landing?.x ?? 0, landing ? landing.t : null)
+    const snapped = view?.shot.breakage?.kind === 'beam' ? view.shot.breakage.t : null
+    this.splinters.trigger(0, snapped, this.pivotY)
     this.env?.setHit(null)
     this.t = 0
     this.playing = view !== null
@@ -198,6 +203,7 @@ export class LabScene {
     this.trail.reveal(t)
     this.ghost.reveal(Infinity)
     this.burst.update(t)
+    this.splinters.update(t)
     this.arrows.update(stoneNow && !landed ? stoneNow : null, this.xray)
     this.crew.update(t, this.view?.crewScatterAt ?? null)
     this.moveTargets(t)
@@ -237,7 +243,7 @@ export class LabScene {
     this.envMap?.dispose()
     this.machine?.dispose()
     this.crew.dispose()
-    ;[this.trail, this.ghost, this.burst, this.marker, this.arrows].forEach((x) => x.dispose())
+    ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows].forEach((x) => x.dispose())
     this.stone.geometry.dispose()
     ;(this.stone.material as THREE.Material).dispose()
     this.renderer.dispose()

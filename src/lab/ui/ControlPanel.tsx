@@ -1,9 +1,9 @@
-import type { Mission } from '../levels/types'
+import type { Mission, SliderKey, SliderValues } from '../levels/types'
 
 export interface ControlPanelProps {
   mission: Mission
-  releaseDeg: number
-  onReleaseDeg: (v: number) => void
+  values: SliderValues
+  onValue: (key: SliderKey, v: number) => void
   prediction: number | null
   onPrediction: (v: number) => void
   canFire: boolean
@@ -23,8 +23,8 @@ export function ControlPanel(p: ControlPanelProps) {
           <span className="flex justify-between items-baseline">
             <span className="lab-label">{s.label}</span>
             <span className="lab-mono text-lg" style={{ color: 'var(--lab-accent)' }}>
-              {p.releaseDeg}
-              {s.unit}
+              {(p.values[s.key] ?? s.start).toLocaleString('ru-RU')}
+              {s.unit === '°' ? s.unit : `\u00a0${s.unit}`}
             </span>
           </span>
           <input
@@ -33,13 +33,20 @@ export function ControlPanel(p: ControlPanelProps) {
             min={s.min}
             max={s.max}
             step={s.step}
-            value={p.releaseDeg}
-            onChange={(e) => p.onReleaseDeg(Number(e.target.value))}
+            value={p.values[s.key] ?? s.start}
+            onChange={(e) => p.onValue(s.key, Number(e.target.value))}
           />
-          <span className="flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
-            <span>раньше ← {s.max}{s.unit}</span>
-            <span>{s.min}{s.unit} → позже</span>
-          </span>
+          {s.key === 'releaseDeg' ? (
+            <span className="flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
+              <span>раньше ← {s.max}{s.unit}</span>
+              <span>{s.min}{s.unit} → позже</span>
+            </span>
+          ) : (
+            <span className="flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
+              <span>{s.min.toLocaleString('ru-RU')} {s.unit}</span>
+              <span>{s.max.toLocaleString('ru-RU')} {s.unit}</span>
+            </span>
+          )}
         </label>
       ))}
       {mission.predict && (

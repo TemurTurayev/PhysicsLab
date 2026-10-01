@@ -10,13 +10,16 @@ import {
   shotFromSteps,
   starsFor,
   targetsAt,
-  withRelease,
+  withSliders,
+  pickCounterweight,
+  SAFETY_MASSES,
+  clipAtWalls,
 } from '../levels/evaluate'
-import type { Mission } from '../levels/types'
+import type { Mission, SliderValues } from '../levels/types'
 import { runStudent } from '../python/runStudent'
 import type { StudentError } from '../python/protocol'
 import { simulateShot } from '../sim/shot'
-import type { FlightSample, ShotResult } from '../sim/types'
+import type { FlightSample, ShotResult, SimParams } from '../sim/types'
 
 const STEP_DT = 1 / 240
 const MAX_STEPS = 240 * 40
@@ -38,7 +41,7 @@ export interface MissionRun {
   busy: boolean
   codeError: StudentError | null
   stdout: string
-  fire: (input: { releaseDeg: number; code: string; prediction: number | null }) => Promise<ShotRecord | null>
+  fire: (input: { values: SliderValues; code: string; prediction: number | null }) => Promise<ShotRecord | null>
   reset: () => void
 }
 
@@ -51,10 +54,11 @@ interface Computed {
 
 type Compute = { ok: true; value: Computed; stdout: string } | { ok: false; error: StudentError; stdout: string }
 
-async function computeShot(m: Mission, releaseDeg: number, code: string): Promise<Compute> {
-  const params = withRelease(m.base, m.sliders.length > 0 ? releaseDeg : undefined)
+async function computeShot(m: Mission, values: SliderValues, code: string): Promise<Compute> {
+  const params = withSliders(m, values)
   if (!m.code) return { ok: true, value: { shot: simulateShot(params), studentFlight: false, angleLooksLikeDegrees: false }, stdout: '' }
 
+  if (m.code.fn === 'beam_moment') return momentShot(params, code)
   const reference = simulateShot(params).flight
   const arm = armForCode(params)
   if (m.code.fn === 'launch_velocity') {
@@ -83,6 +87,20 @@ async function computeShot(m: Mission, releaseDeg: number, code: string): Promis
   }
 }
 
+async function momentShot(params: SimParams, code: string): Promise<Compute> {
+  const limit = params.trebuchet.beamStrength ?? Infinity
+  const res = await runStudent(code, { kind: 'moment', masses: SAFETY_MASSES })
+  if (!res.ok) return res
+  if (res.kind !== 'moment') throw new Error('unexpected worker reply')
+  const mc = pickCounterweight(SAFETY_MASSES, res.moments, limit)
+  const truth = SAFETY_MASSES.map((x) => x * params.world.g * params.trebuchet.L2)
+  const safeMc = pickCounterweight(SAFETY_MASSES, truth, limit)
+  const shot = simulateShot({ ...params, trebuchet: { ...params.trebuchet, mc } })
+  const ghost = simulateShot({ ...params, trebuchet: { ...params.trebuchet, mc: safeMc } }).flight
+  const note = `Мастер поставил противовес ${mc} кг: по твоей формуле это ${Math.round(res.moments[SAFETY_MASSES.indexOf(mc)])} Н·м — не больше предела ${limit} Н·м.`
+  return { ok: true, stdout: `${note}\n${res.stdout}`, value: { shot, ghost, studentFlight: false, angleLooksLikeDegrees: false } }
+}
+
 /** Everything that happens when the student pulls the trigger, independent of rendering. */
 export function useMissionRun(m: Mission): MissionRun {
   const [last, setLast] = useState<ShotRecord | null>(null)
@@ -105,17 +123,18 @@ export function useMissionRun(m: Mission): MissionRun {
   }, [])
 
   const fire = useCallback<MissionRun['fire']>(
-    async ({ releaseDeg, code, prediction }) => {
+    async ({ values, code, prediction }) => {
       setBusy(true)
       setCodeError(null)
       try {
-        const computed = await computeShot(m, releaseDeg, code)
+        const computed = await computeShot(m, values, code)
         setStdout(computed.stdout)
         if (!computed.ok) {
           setCodeError(computed.error)
           return null
         }
-        const { shot, ghost, studentFlight, angleLooksLikeDegrees } = computed.value
+        const { ghost, studentFlight, angleLooksLikeDegrees } = computed.value
+        const shot = clipAtWalls(computed.value.shot, m.targets)
         const flightTime = shot.landing ? shot.landing.t - (shot.releaseT ?? 0) : 0
         const failures = detectFailures(shot, {
           g: m.base.world.g,

@@ -73,8 +73,8 @@ export class ImpactBurst {
     this.points.frustumCulled = false
   }
 
-  trigger(x: number, at: number | null): void {
-    this.origin.set(x, 0.1, 0)
+  trigger(x: number, at: number | null, y = 0.1): void {
+    this.origin.set(x, y, 0)
     this.at = at
   }
 
@@ -87,7 +87,7 @@ export class ImpactBurst {
       const vx = this.dirs[i * 3]
       const vy = this.dirs[i * 3 + 1]
       const vz = this.dirs[i * 3 + 2]
-      const y = Math.max(0.05, vy * dt - 4.9 * dt * dt)
+      const y = Math.max(0.05 - this.origin.y, vy * dt - 4.9 * dt * dt)
       pos.setXYZ(i, this.origin.x + vx * dt * 0.8, this.origin.y + y, this.origin.z + vz * dt * 0.8)
     }
     pos.needsUpdate = true

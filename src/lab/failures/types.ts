@@ -9,6 +9,8 @@ export type FailureId =
   | 'gravity_up'
   | 'exploded'
   | 'degrees_radians'
+  | 'beam_break'
+  | 'sling_snap'
 
 export interface FailureEvent {
   id: FailureId

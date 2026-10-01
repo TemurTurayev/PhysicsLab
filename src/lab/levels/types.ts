@@ -1,16 +1,22 @@
 import type { SimParams } from '../sim/types'
 
 export type MissionKind = 'tune' | 'predict' | 'write' | 'fix' | 'challenge'
-export type EnvironmentId = 'workshop' | 'range'
+export type EnvironmentId = 'workshop' | 'range' | 'siege'
 
 export interface Target {
   x: number // distance from the trebuchet pivot at t = 0 (m)
   r: number // hit radius (m)
   moving?: { speed: number } // m/s along +x
+  /** Vertical target (wall, gate, tower) of this height: the stone must strike its face at x below h. */
+  h?: number
+  label?: string
 }
 
+export type SliderKey = 'releaseDeg' | 'mc'
+export type SliderValues = Partial<Record<SliderKey, number>>
+
 export interface SliderSpec {
-  key: 'releaseDeg'
+  key: SliderKey
   label: string
   min: number
   max: number
@@ -20,7 +26,7 @@ export interface SliderSpec {
 }
 
 export interface MissionCode {
-  fn: 'step' | 'launch_velocity'
+  fn: 'step' | 'launch_velocity' | 'beam_moment'
   starter: string
   reference: string
 }
@@ -35,7 +41,7 @@ export interface Prediction {
 
 export interface Mission {
   id: string
-  chapter: 1 | 2
+  chapter: 1 | 2 | 3
   order: number
   kind: MissionKind
   env: EnvironmentId
@@ -53,7 +59,7 @@ export interface Mission {
 }
 
 export interface Chapter {
-  id: 1 | 2
+  id: 1 | 2 | 3
   title: string
   env: EnvironmentId
   tagline: string

@@ -12,7 +12,7 @@ function fakeFlight(ay: number, n = 40): ShotResult {
     const t = i / 60
     return { t, x: 20 * t, y: 5 + 10 * t + 0.5 * ay * t * t, vx: 20, vy: 10 + ay * t }
   })
-  return { arm: [], flight, released: true, releaseT: 0, launch: { speed: 22, angleDeg: 26 }, landing: null, apex: null }
+  return { arm: [], flight, released: true, releaseT: 0, launch: { speed: 22, angleDeg: 26 }, landing: null, apex: null, breakage: null, peakMoment: 0, peakTension: 0 }
 }
 
 describe('detectFailures', () => {
@@ -46,5 +46,22 @@ describe('detectFailures', () => {
   })
   it('passes through the degrees/radians verdict of the mission', () => {
     expect(ids(shot(110), [], { angleLooksLikeDegrees: true })).toContain('degrees_radians')
+  })
+})
+
+describe('structural failures', () => {
+  const base = { ...DEFAULT_TREBUCHET, releaseDeg: 110 }
+  const peak = simulateShot({ trebuchet: base, world: EARTH })
+
+  it('a snapped beam is the only story, with load against limit', () => {
+    const r = simulateShot({ trebuchet: { ...base, beamStrength: peak.peakMoment * 0.7 }, world: EARTH })
+    const events = detectFailures(r, { g: 9.81, targets: [{ x: 73, r: 3 }] })
+    expect(events.map((e) => e.id)).toEqual(['beam_break'])
+    expect(events[0].numbers.ratio).toBeGreaterThan(1)
+  })
+
+  it('a torn sling is reported instead of a release-angle mistake', () => {
+    const r = simulateShot({ trebuchet: { ...base, slingStrength: peak.peakTension * 0.7 }, world: EARTH })
+    expect(detectFailures(r, { g: 9.81, targets: [] }).map((e) => e.id)).toEqual(['sling_snap'])
   })
 })

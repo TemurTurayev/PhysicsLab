@@ -8,13 +8,33 @@ export interface FailureEntry {
   why: string
   realLife: string
   /** Which control or code line to highlight. */
-  culprit: 'releaseDeg' | 'code' | 'target'
+  culprit: 'releaseDeg' | 'mc' | 'code' | 'target'
 }
 
-const f1 = (v: number | undefined) => (v === undefined ? '?' : v.toFixed(1))
-const abs1 = (v: number | undefined) => (v === undefined ? '?' : Math.abs(v).toFixed(1))
+const f1 = (v: number | undefined) => (v === undefined ? '?' : v.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 }))
+const kN = (v: number | undefined) => (v === undefined ? '?' : (v / 1000).toLocaleString('ru-RU', { maximumFractionDigits: 1 }))
+const abs1 = (v: number | undefined) => (v === undefined ? '?' : f1(Math.abs(v)))
 
 export const FAILURES: Record<FailureId, FailureEntry> = {
+  beam_break: {
+    title: 'Балка сломалась',
+    icon: '🪓',
+    what: (n) =>
+      `Через ${f1(n.t)} с после спуска момент у оси дошёл до предела балки — ${kN(n.limit)} кН·м — и дерево треснуло. Камень ушёл куда попало.`,
+    why: 'Противовес давит на короткое плечо с силой m·(a − g), а момент — это сила на плечо. Тяжелее противовес — больше момент. Дерево выдерживает не бесконечно.',
+    realLife:
+      'Инженеры и сегодня считают именно это: максимальный момент в балке. Поэтому у оси, где он наибольший, балку делают толще всего.',
+    culprit: 'mc',
+  },
+  sling_snap: {
+    title: 'Праща порвалась',
+    icon: '🧵',
+    what: (n) =>
+      `Через ${f1(n.t)} с после спуска натяжение верёвки дошло до ${kN(n.limit)} кН — её предела. Камень улетел с той скоростью, что была в момент обрыва.`,
+    why: 'Чтобы вести камень по кругу, верёвка тянет его к центру с силой m·v²/R плюс вес. Растёт скорость — растёт натяжение, и быстрее всего квадратично.',
+    realLife: 'Любой трос рассчитывают с запасом прочности: рабочая нагрузка должна быть в несколько раз меньше разрывной. Иначе обрыв случится на пике разгона.',
+    culprit: 'mc',
+  },
   no_release: {
     title: 'Праща не раскрылась',
     icon: '🪢',

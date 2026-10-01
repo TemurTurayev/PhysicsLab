@@ -28,6 +28,17 @@ def _run_step(init, dt, max_steps):
             break
     return json.dumps(out)
 
+def _run_moment(masses):
+    if "beam_moment" not in globals():
+        raise NameError("не найдена функция beam_moment(mc)")
+    out = []
+    for m in masses:
+        v = beam_moment(m)
+        if not isinstance(v, (int, float)):
+            raise TypeError(f"beam_moment() должна вернуть число, а вернула {type(v).__name__}")
+        out.append(float(v))
+    return json.dumps(out)
+
 def _run_launch(speed, angle_deg):
     if "launch_velocity" not in globals():
         raise NameError("не найдена функция launch_velocity(speed, angle_deg)")

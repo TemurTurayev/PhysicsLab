@@ -31,6 +31,10 @@ async function handle(req: WorkerRequest): Promise<WorkerResponse> {
       const samples = JSON.parse(py.runPython(call, { globals }) as string)
       return { id: req.id, ok: true, kind: 'step', samples, stdout }
     }
+    if (job.kind === 'moment') {
+      const moments = JSON.parse(py.runPython(`_run_moment(${JSON.stringify(job.masses)})`, { globals }) as string)
+      return { id: req.id, ok: true, kind: 'moment', moments, stdout }
+    }
     const velocity = JSON.parse(py.runPython(`_run_launch(${job.speed}, ${job.angleDeg})`, { globals }) as string)
     return { id: req.id, ok: true, kind: 'launch', velocity, stdout }
   } catch (e) {

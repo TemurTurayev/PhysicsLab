@@ -46,6 +46,11 @@ function landingFailures(r: ShotResult, ctx: DetectContext): FailureEvent[] {
 /** Every way this shot went wrong, in the order the viewer sees them happen. */
 export function detectFailures(r: ShotResult, ctx: DetectContext): FailureEvent[] {
   if (!r.released) return [{ id: 'no_release', t: r.arm.at(-1)?.t ?? 0, numbers: {} }]
+  if (r.breakage) {
+    const id = r.breakage.kind === 'beam' ? 'beam_break' : 'sling_snap'
+    const { t, load, limit } = r.breakage
+    return [{ id, t, numbers: { load, limit, ratio: load / limit, t } }]
+  }
   const exploded = isExploded(r)
   if (exploded) return [exploded]
   const events = [
