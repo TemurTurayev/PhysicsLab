@@ -97,7 +97,8 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
       const d = gz - 6; y = d > 8 ? Math.pow((d - 8) / 10, 1.8) * 7.5 + Math.cos(gx * 0.06 + gz * 0.05) * 2.5 : (d / 8) * 0.4
     }
     if (absZ <= 6) y = 0
-    groundGeo.attributes.position.setY(i, Math.max(0, y))
+    // Cap the slopes: unbounded they reach hundreds of metres at the mesh edge and show a cut-off cliff in the sky.
+    groundGeo.attributes.position.setY(i, Math.min(40, Math.max(0, y)))
 
     const n = Math.sin(gx * 0.12) * Math.cos(gz * 0.15) * 0.1
     const col = cGrass.clone()
@@ -119,8 +120,9 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const peakMat = track(new THREE.MeshLambertMaterial({ color: 0x5a6066, flatShading: true }))
   const snowMat = track(new THREE.MeshLambertMaterial({ color: 0xe8eff4, flatShading: true }))
   const peaks: Array<[number, number, number, number]> = [
-    [-30, 8, -75, 1.2], [25, 10, -85, 1.4], [opts.maxX * 0.6, 9, -80, 1.3],
-    [-20, 8, 80, 1.1], [35, 11, 85, 1.5], [opts.maxX * 0.7, 10, 80, 1.3], [opts.maxX + 40, 12, -20, 1.6],
+    // Bases sit well below y = 0 so no peak ever floats where the ground mesh ends.
+    [-30, -12, -75, 1.6], [25, -12, -85, 1.8], [opts.maxX * 0.6, -12, -80, 1.7],
+    [-20, -12, 80, 1.5], [35, -12, 85, 1.9], [opts.maxX * 0.7, -12, 80, 1.7], [opts.maxX + 40, -12, -20, 2.0],
   ]
   for (const [px, py, pz, s] of peaks) {
     const pGroup = new THREE.Group(); pGroup.position.set(px, py, pz); pGroup.scale.set(s, s, s)

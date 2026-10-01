@@ -23,6 +23,10 @@ const pullFor = (aspect: number) => (aspect < 1 ? 1.9 : aspect < 1.4 ? 1.25 : 1)
 export function establishingShot(focusX: number, aspect: number): CameraShot {
   const p = pullFor(aspect)
   const reach = Math.min(focusX, 80)
+  if (aspect < 1) {
+    // Portrait phones: a narrow horizontal view, so stand back (inside indoor halls, z < 30) and aim near the machine.
+    return { position: new THREE.Vector3(-22, 12, 27), target: new THREE.Vector3(Math.min(reach, 40) * 0.08, 4, 0) }
+  }
   return {
     position: new THREE.Vector3(-16 * p, 7.5 * p, 15 * p),
     target: new THREE.Vector3(reach * 0.32, 3.2, -1),

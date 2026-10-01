@@ -235,8 +235,8 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const sMat = track(new THREE.MeshLambertMaterial({ map: track(createSignTexture('МОРЕ СПОКОЙСТВИЯ')), side: THREE.DoubleSide }))
   addMesh(signpost, track(new THREE.PlaneGeometry(1.56, 0.38)), sMat, [0, 1.2, 0.025], undefined, false, false); group.add(signpost)
 
-  // Bullet-shaped brass capsule at (30, 0, -24)
-  const capsule = new THREE.Group(); capsule.position.set(30, 1.2, -24); capsule.rotation.set(-0.35, 0.25, -0.42)
+  // Bullet-shaped brass capsule, well clear of the machine's silhouette from the main camera
+  const capsule = new THREE.Group(); capsule.position.set(58, 1.2, -46); capsule.rotation.set(-0.35, 0.25, -0.42)
   addMesh(capsule, track(new THREE.CylinderGeometry(1.6, 1.6, 4.2, 14)), brassMat, [0, 2.1, 0]); addMesh(capsule, track(new THREE.ConeGeometry(1.6, 2.4, 14)), brassMat, [0, 5.4, 0])
   const flangeGeo = track(new THREE.TorusGeometry(1.65, 0.08, 6, 16)); flangeGeo.rotateX(Math.PI / 2); addMesh(capsule, flangeGeo, darkBrassMat, [0, 0.1, 0])
   const portMat = track(new THREE.MeshLambertMaterial({ color: 0x1f2937 }))

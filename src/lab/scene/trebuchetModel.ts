@@ -52,7 +52,7 @@ export function createTrebuchet(p: TrebuchetParams, skin: MachineSkin = 'wood'):
   // Same geometry, different build: timber and stone in Classic, steel truss and concrete in the complex.
   const woodMat: THREE.Material = steel ? industrialMaterial('steelPanel', [1, 4]) : woodMaterial('oak')
   const darkWoodMat: THREE.Material = steel ? industrialMaterial('rust') : woodMaterial('weathered')
-  const ironBandedWoodMat: THREE.Material = steel ? industrialMaterial('concreteDark') : woodMaterial('dark')
+  const ironBandedWoodMat: THREE.Material = steel ? industrialMaterial('concrete') : woodMaterial('dark')
   const ironMat = new THREE.MeshStandardMaterial({ color: 0x3b3b40, roughness: 0.45, metalness: 0.8 })
   const ropeMat = steel
     ? new THREE.MeshStandardMaterial({ color: 0x9aa3a8, roughness: 0.4, metalness: 0.9 })

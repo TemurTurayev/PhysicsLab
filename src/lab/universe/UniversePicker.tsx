@@ -2,17 +2,15 @@ import { useLabProgress } from '../state/labProgress'
 import { UNIVERSES } from './index'
 import type { UniverseId } from './types'
 
-const PREVIEW: Record<UniverseId, { background: string; badge: string; lines: string[] }> = {
+const PREVIEW: Record<UniverseId, { background: string; badge: string }> = {
   classic: {
-    background: 'linear-gradient(160deg, #6f9fd0 0%, #f3cf98 48%, #86a052 49%, #5d6b38 100%)',
+    background: "url('/previews/classic.jpg') center 60% / cover no-repeat, linear-gradient(160deg, #6f9fd0 0%, #f3cf98 48%, #86a052 49%, #5d6b38 100%)",
     badge: 'Дерево · камень · закат',
-    lines: ['Мастерская плотника', 'Полигон в поле', 'Осада замка'],
   },
   sigma: {
     background:
-      'repeating-linear-gradient(-45deg, rgba(242,196,0,0.9) 0 12px, rgba(27,27,27,0.9) 12px 24px) bottom / 100% 14px no-repeat, linear-gradient(180deg, #1a1e20 0%, #3a3d3c 55%, #8a877c 100%)',
+      "repeating-linear-gradient(-45deg, rgba(242,196,0,0.9) 0 12px, rgba(27,27,27,0.9) 12px 24px) bottom / 100% 14px no-repeat, url('/previews/sigma.jpg') center 60% / cover no-repeat, linear-gradient(180deg, #1a1e20 0%, #3a3d3c 55%, #8a877c 100%)",
     badge: 'Бетон · сталь · протоколы',
-    lines: ['Испытательная камера 3', 'Наземный полигон', 'Испытание на разрушение'],
   },
 }
 
@@ -59,7 +57,7 @@ export function UniversePicker({ onChosen }: { onChosen?: (id: UniverseId) => vo
                     {u.tagline}
                   </p>
                   <ol className="text-sm space-y-1 mb-5 lab-mono" style={{ color: 'var(--lab-text)' }}>
-                    {p.lines.map((l, i) => (
+                    {Object.values(u.chapterTitles).map((l, i) => (
                       <li key={l}>
                         {i + 1}. {l}
                       </li>

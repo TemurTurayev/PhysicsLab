@@ -1,5 +1,6 @@
 import { useEffect, type JSX } from 'react'
 import type { FailureId } from '../failures/types'
+import { tellFailure } from '../universe/failureCopy'
 import { useUniverse } from '../universe/useUniverse'
 import { FAILURES } from '../failures/catalog'
 
@@ -81,7 +82,7 @@ export function IncidentJournal({ found, onClose }: IncidentJournalProps): JSX.E
         <div className="p-4 md:p-5 overflow-y-auto flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {ALL_FAILURE_IDS.map((id) => {
-              const entry = FAILURES[id]
+              const entry = tellFailure(id, universe)
               const isFound = foundSet.has(id)
 
               if (isFound) {

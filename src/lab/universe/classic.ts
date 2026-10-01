@@ -11,7 +11,7 @@ const ENVS: Record<number, EnvironmentFactory> = { 1: createWorkshop, 2: createR
 export const CLASSIC: Universe = {
   id: 'classic',
   name: 'Классика',
-  tagline: 'Двор плотника, открытое поле и замок на закате. Дерево, верёвка и камень.',
+  tagline: 'Двор плотника, поле, замок на закате, горный перевал и Луна. Дерево, верёвка и камень.',
   envFor: (chapter) => ENVS[chapter] ?? null,
   copy: {},
   chapterTitles: { 1: 'Мастерская', 2: 'Полигон', 3: 'Осада', 4: 'Перевал', 5: 'Луна' },

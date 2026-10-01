@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import type { FailureEvent } from '../failures/types'
+import { tellFailure } from '../universe/failureCopy'
 import { useUniverse } from '../universe/useUniverse'
-import { FAILURES } from '../failures/catalog'
 
 export interface IncidentCardProps {
   event: FailureEvent
@@ -43,7 +43,7 @@ export function IncidentCard({ event, isNew, onReplaySlow, onClose }: IncidentCa
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
-  const entry = FAILURES[event.id]
+  const entry = tellFailure(event.id, universe)
   if (!entry) {
     return <></>
   }

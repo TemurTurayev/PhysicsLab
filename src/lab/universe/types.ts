@@ -1,3 +1,4 @@
+import type { FailureId } from '../failures/types'
 import type { EnvironmentFactory } from '../scene/environments/types'
 
 export type UniverseId = 'classic' | 'sigma'
@@ -24,4 +25,6 @@ export interface Universe {
   machine: 'wood' | 'steel'
   terms: { journal: string; incident: string; incidentNew: string; movingTarget: string }
   retroByDefault: boolean
+  /** Universe-specific lines for post-mortems; anything left out is the shared text. */
+  failureCopy?: Partial<Record<FailureId, { title?: string; why?: string; realLife?: string }>>
 }

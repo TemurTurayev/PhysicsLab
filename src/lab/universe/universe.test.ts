@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { findMission, MISSIONS } from '../levels'
+import { FAILURES } from '../failures/catalog'
 import { applyCopy } from './copy'
+import { tellFailure } from './failureCopy'
 import { getUniverse } from './index'
 
 const sigma = getUniverse('sigma')
@@ -30,5 +32,19 @@ describe('universes', () => {
     const forbidden = /half[- ]?life|black\s*mesa|aperture|\bhev\b|combine|freeman|valve|λ|лямбд|хэв|блэк\s*меса/i
     const strings = JSON.stringify({ ...sigma, envFor: undefined })
     expect(strings).not.toMatch(forbidden)
+  })
+})
+
+describe('post-mortems per universe', () => {
+  it('the complex tells about its projectile and its own machine, with the same numbers', () => {
+    const told = tellFailure('early_release', sigma)
+    const n = { angleDeg: 114.6, speed: 19.6 }
+    expect(told.what(n)).toMatch(/Снаряд/)
+    expect(told.what(n)).not.toMatch(/[Кк]ам(ень|ня|нем|ню)/)
+    expect(told.realLife).not.toMatch(/требушет/i)
+    expect(told.what(n)).toMatch(/114,6/)
+  })
+  it('Classic keeps the original post-mortem', () => {
+    expect(tellFailure('early_release', classic)).toBe(FAILURES.early_release)
   })
 })

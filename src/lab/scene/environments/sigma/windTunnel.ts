@@ -194,6 +194,10 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
   const fanSteel = industrialMaterial('steelPanel')
 
   const rotors: THREE.Group[] = []
+  const fanRingGeo = track(new THREE.TorusGeometry(6.1, 0.18, 6, 32))
+  const fanRingMat = track(new THREE.MeshBasicMaterial({ color: 0xff6a13, toneMapped: false }))
+  const fanLampGeo = track(new THREE.BoxGeometry(1.4, 0.9, 0.9))
+  const fanLampMat = track(new THREE.MeshBasicMaterial({ color: 0xe8f3ef, toneMapped: false }))
   for (const [fy, fz] of [[7, -6], [7, 6], [19, -6], [19, 6]] as const) {
     addMesh(group, shroudGeo, fanSteel, [fanX, fy, fz]); addMesh(group, hubGeo, fanSteel, [fanX, fy, fz])
     const rotor = new THREE.Group(); rotor.position.set(fanX, fy, fz)
@@ -202,6 +206,22 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
       blade.rotation.x = b * (Math.PI / 3); blade.castShadow = true; rotor.add(blade)
     }
     group.add(rotor); rotors.push(rotor)
+    // Orange warning ring on each shroud so the fan wall reads from the far end of the hall.
+    const ring = new THREE.Mesh(fanRingGeo, fanRingMat)
+    ring.position.set(fanX + (fansAtNear ? 0.6 : -0.6), fy, fz)
+    ring.rotation.y = Math.PI / 2
+    group.add(ring)
+  }
+  // Two floodlights on the side walls, aimed at the fan wall (visible lamp housings).
+  for (const side of [-14, 28]) {
+    const lampPos = new THREE.Vector3(fanX + (fansAtNear ? 22 : -22), 22, side)
+    const lamp = new THREE.Mesh(fanLampGeo, fanLampMat)
+    lamp.position.copy(lampPos)
+    group.add(lamp)
+    const flood = new THREE.SpotLight(0xdff3ee, 1400, 80, 0.55, 0.5, 1.4)
+    flood.position.copy(lampPos)
+    flood.target.position.set(fanX, 13, 0)
+    group.add(flood, flood.target)
   }
 
   // Honeycomb flow-straightener grid (thin slats) in front of the fans
