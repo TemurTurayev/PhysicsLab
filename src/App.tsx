@@ -1,4 +1,4 @@
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -8,6 +8,9 @@ import HomePage from './pages/HomePage';
 import MissionsPage from './pages/MissionsPage';
 import LabPage from './pages/LabPage';
 import NotFoundPage from './pages/NotFoundPage';
+
+const WorldMap = lazy(() => import('./lab/ui/WorldMap').then((m) => ({ default: m.WorldMap })));
+const TrebuchetLab = lazy(() => import('./lab/ui/LabPage').then((m) => ({ default: m.LabPage })));
 
 function App() {
   const setParameters = useAppStore((state) => state.setParameters);
@@ -59,6 +62,8 @@ function App() {
             <Route path="/" element={<PageTransition><HomePage /></PageTransition>} />
             <Route path="/missions" element={<PageTransition><MissionsPage /></PageTransition>} />
             <Route path="/lab" element={<PageTransition><LabPage /></PageTransition>} />
+            <Route path="/trebuchet" element={<WorldMap />} />
+            <Route path="/trebuchet/:missionId" element={<TrebuchetLab />} />
             <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
           </Routes>
         </Suspense>

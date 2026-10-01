@@ -19,7 +19,8 @@ describe('missions', () => {
     ['1-1', [104]],
     ['1-4', [96, 102, 107]],
     ['2-1', [111]],
-    ['2-4', [100]],
+    ['2-4', [96]],
+    ['2-4', [120]],
   ])('mission %s is solvable with the slider', (id, angles) => {
     const hit = new Set<number>()
     for (const deg of angles) {

@@ -126,6 +126,27 @@ export default function HomePage() {
                     </motion.div>
                 </motion.header>
 
+                {/* World 1: interactive trebuchet lab */}
+                <Link
+                    to="/trebuchet"
+                    className="group block max-w-5xl mx-auto mb-10 rounded-2xl overflow-hidden border-2 border-[#f0a640]/40 hover:border-[#f0a640] transition-colors"
+                    style={{ background: 'linear-gradient(120deg, #2a1d0c 0%, #5a3a14 45%, #c98a3d 100%)' }}
+                >
+                    <div className="p-8 md:p-10 flex flex-col md:flex-row md:items-center gap-6">
+                        <div className="flex-1">
+                            <div className="text-xs tracking-[0.2em] uppercase text-[#f6dcae]/80 mb-2">Новое · Мир 1</div>
+                            <h3 className="text-3xl md:text-4xl font-bold text-[#fff4e0] mb-3">Требушет</h3>
+                            <p className="text-[#f6dcae]/90 max-w-xl">
+                                Настоящая физика броска в 3D. Ломай, промахивайся, пиши свой движок на Python —
+                                и смотри, что случится. Ошибки здесь безопасны и попадают в журнал.
+                            </p>
+                        </div>
+                        <span className="self-start md:self-center px-6 py-3 rounded-xl bg-[#f0a640] text-[#1a1206] font-semibold group-hover:bg-[#ffb85a] transition-colors">
+                            Войти в мастерскую →
+                        </span>
+                    </div>
+                </Link>
+
                 {/* Modules Grid */}
                 <motion.div
                     className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto"

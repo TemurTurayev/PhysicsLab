@@ -4,7 +4,7 @@ import { simulateArm } from '../sim/trebuchet'
 import type { FlightSample, ShotResult, SimParams } from '../sim/types'
 import type { Mission, Target } from './types'
 
-/** Where every target stands at time t (moving carts start when the trigger is pulled). */
+/** Where every target stands t seconds after the stone leaves the sling (carts start at release). */
 export function targetsAt(targets: Target[], t: number): Array<{ x: number; r: number }> {
   return targets.map((tg) => ({ x: tg.x + (tg.moving?.speed ?? 0) * t, r: tg.r }))
 }
@@ -61,7 +61,7 @@ export function evaluateShot(m: Mission, shot: ShotResult, prediction: number | 
   const hits =
     landing === null
       ? []
-      : targetsAt(m.targets, landing.t).flatMap((tg, i) => (Math.abs(landing.x - tg.x) <= tg.r ? [i] : []))
+      : targetsAt(m.targets, landing.t - (shot.releaseT ?? 0)).flatMap((tg, i) => (Math.abs(landing.x - tg.x) <= tg.r ? [i] : []))
   let predictionError: number | null = null
   if (m.predict && prediction !== null) {
     const actual = m.predict.quantity === 'landingX' ? landing?.x : shot.apex?.y
