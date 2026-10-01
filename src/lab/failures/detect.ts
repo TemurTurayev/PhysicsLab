@@ -37,6 +37,7 @@ function studentPhysics(r: ShotResult, ctx: DetectContext): FailureEvent[] {
   const ay = (last.vy - first.vy) / (last.t - first.t)
   if (ay > 0.5 * g) return [{ id: 'gravity_up', t: first.t, numbers: { ay } }]
   if (Math.abs(ay) < 0.1 * g) return [{ id: 'no_gravity', t: first.t, numbers: { ay } }]
+  if (!ctx.expectDrag && Math.abs(ay + g) > 0.25 * g) return [{ id: 'wrong_g', t: first.t, numbers: { ay, g } }]
   if (ctx.expectDrag) {
     const { k, wind } = ctx.expectDrag
     // Judge the drag right after release: over a long window a light ball has already stopped decelerating.

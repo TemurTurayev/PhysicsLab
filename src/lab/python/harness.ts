@@ -14,13 +14,13 @@ def _check_state(s, i):
             raise KeyError(f"в словаре, который вернула step(), нет ключа '{k}' (шаг {i})")
     return {k: float(s[k]) for k in ("x", "y", "vx", "vy")}
 
-def _run_step(init, dt, max_steps):
+def _run_step(init, dt, max_steps, g=9.81):
     if "step" not in globals():
         raise NameError("не найдена функция step(state, dt)")
     s = dict(init)
     out = [dict(s)]
     for i in range(1, max_steps + 1):
-        s = _check_state(step(dict(s), dt), i)
+        s = _check_state(step(dict(s, g=g), dt), i)
         out.append(s)
         if s["y"] <= 0 and s["vy"] < 0:
             break

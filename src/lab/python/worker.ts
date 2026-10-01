@@ -27,7 +27,7 @@ async function handle(req: WorkerRequest): Promise<WorkerResponse> {
     py.runPython(req.code, { globals, filename: '<exec>' })
     const { job } = req
     if (job.kind === 'step') {
-      const call = `_run_step(${JSON.stringify(job.init)}, ${job.dt}, ${job.maxSteps})`
+      const call = `_run_step(${JSON.stringify(job.init)}, ${job.dt}, ${job.maxSteps}, ${job.g ?? 9.81})`
       const samples = JSON.parse(py.runPython(call, { globals }) as string)
       return { id: req.id, ok: true, kind: 'step', samples, stdout }
     }

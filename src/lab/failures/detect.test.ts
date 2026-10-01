@@ -107,3 +107,12 @@ describe('air and numerics in student code', () => {
     expect(ids(shaky, [], { g: 9.81, targets: [], studentFlight: true })).toContain('unstable')
   })
 })
+
+describe('gravity of the right world', () => {
+  it('flags a student flight that falls with Earth gravity on the Moon', () => {
+    expect(ids(fakeFlight(-9.81), [], { studentFlight: true, g: 1.62 })).toContain('wrong_g')
+  })
+  it('accepts the gravity of the world it runs in', () => {
+    expect(ids(fakeFlight(-1.62), [], { studentFlight: true, g: 1.62 })).not.toContain('wrong_g')
+  })
+})

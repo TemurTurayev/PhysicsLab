@@ -193,3 +193,45 @@ describe('chapter 4 is solvable', () => {
     expect(detectFailures(good.shot, { g: 9.81, targets: good.m.targets, studentFlight: true, stepDt: 0.5, expectDrag: { k, wind: 0 } })).toEqual([])
   })
 })
+
+describe('chapter 5 is solvable', () => {
+  const eulerFlight = (id: string, g: number) => {
+    const m = findMission(id)!
+    const { run } = armForCode(m.base)
+    const dt = 1 / 240
+    let s = { x: run.release!.x, y: run.release!.y, vx: run.release!.vx, vy: run.release!.vy }
+    const samples = [s]
+    while (samples.length < 40 / dt) {
+      const vy = s.vy - g * dt
+      s = { x: s.x + s.vx * dt, y: s.y + vy * dt, vx: s.vx, vy }
+      samples.push(s)
+      if (s.y <= 0 && s.vy < 0) break
+    }
+    return { m, shot: shotFromSteps(m.base, samples, dt) }
+  }
+
+  it('5-1 and 5-2: answers are inside the prediction ranges', () => {
+    const shot = simulateShot(findMission('5-1')!.base)
+    expect(shot.landing!.x).toBeGreaterThan(70)
+    expect(shot.landing!.x).toBeLessThan(76)
+    const t = shot.landing!.t - shot.releaseT!
+    expect(t).toBeGreaterThan(8)
+    expect(t).toBeLessThan(findMission('5-2')!.predict!.max)
+    expect(evaluateShot(findMission('5-2')!, shot, t + 0.5).predictionError).toBeCloseTo(0.5, 6)
+  })
+
+  it('5-3: Earth gravity in Moon code misses and is named; the world g hits', () => {
+    const bad = eulerFlight('5-3', 9.81)
+    expect(evaluateShot(bad.m, bad.shot, null).hits).toEqual([])
+    expect(detectFailures(bad.shot, { g: 1.62, targets: bad.m.targets, studentFlight: true }).map((e) => e.id)).toContain('wrong_g')
+    const good = eulerFlight('5-3', 1.62)
+    expect(evaluateShot(good.m, good.shot, null).hits).toEqual([0])
+  })
+
+  it('5-4: the slow lunar flight lets the rover be caught at two angles', () => {
+    for (const deg of [100, 114]) {
+      const m = findMission('5-4')!
+      expect(evaluateShot(m, simulateShot(withSliders(m, { releaseDeg: deg })), null).hits).toEqual([0])
+    }
+  })
+})

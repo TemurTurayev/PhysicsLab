@@ -1,7 +1,7 @@
 import type { FlightSample } from '../sim/types'
 
 export type StudentJob =
-  | { kind: 'step'; init: Omit<FlightSample, 't'>; dt: number; maxSteps: number }
+  | { kind: 'step'; init: Omit<FlightSample, 't'>; dt: number; maxSteps: number; g?: number }
   | { kind: 'launch'; speed: number; angleDeg: number }
   | { kind: 'moment'; masses: number[] }
 

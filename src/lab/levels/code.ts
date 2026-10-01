@@ -150,3 +150,25 @@ def step(state, dt):
     return {"x": x, "y": y, "vx": vx, "vy": vy}
 `,
 }
+
+export const MAGIC_G_CODE: MissionCode = {
+  fn: 'step',
+  starter: `def step(state, dt):
+    """Один шаг полёта. В state есть x, y, vx, vy и g — ускорение
+    свободного падения там, где идёт испытание, м/с²."""
+    x, y = state["x"], state["y"]
+    vx, vy = state["vx"], state["vy"]
+
+    vy = vy - 9.81 * dt   # «проверено на Земле»
+
+    x = x + vx * dt
+    y = y + vy * dt
+    return {"x": x, "y": y, "vx": vx, "vy": vy}
+`,
+  reference: `def step(state, dt):
+    g = state["g"]
+    vy = state["vy"] - g * dt
+    vx = state["vx"]
+    return {"x": state["x"] + vx * dt, "y": state["y"] + vy * dt, "vx": vx, "vy": vy}
+`,
+}

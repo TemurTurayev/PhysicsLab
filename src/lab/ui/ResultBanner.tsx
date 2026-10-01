@@ -15,7 +15,7 @@ function verdict(m: Mission, r: ShotRecord): { text: string; good: boolean } {
   if (m.predict && r.predictionError !== null) {
     const ok = Math.abs(r.predictionError) <= m.predict.tolerance
     const dir = r.predictionError > 0 ? 'больше' : 'меньше'
-    return { good: ok, text: `${ok ? 'Прогноз сбылся' : 'Прогноз мимо'}: твой ответ на ${fmt(r.predictionError)} м ${dir} настоящего.` }
+    return { good: ok, text: `${ok ? 'Прогноз сбылся' : 'Прогноз мимо'}: твой ответ на ${fmt(r.predictionError)} ${m.predict.unit ?? 'м'} ${dir} настоящего.` }
   }
   if (r.hits.length > 0) return { good: true, text: 'Попадание!' }
   return { good: false, text: 'Мимо. Поправь и стреляй ещё.' }

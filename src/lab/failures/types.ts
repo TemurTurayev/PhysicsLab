@@ -13,6 +13,7 @@ export type FailureId =
   | 'sling_snap'
   | 'no_drag'
   | 'unstable'
+  | 'wrong_g'
 
 export interface FailureEvent {
   id: FailureId

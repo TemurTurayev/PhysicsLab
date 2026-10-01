@@ -118,7 +118,14 @@ export function evaluateShot(m: Mission, shot: ShotResult, prediction: number | 
       : targetsAt(m.targets, landing.t - (shot.releaseT ?? 0)).flatMap((tg, i) => (Math.abs(landing.x - tg.x) <= tg.r ? [i] : []))
   let predictionError: number | null = null
   if (m.predict && prediction !== null) {
-    const actual = m.predict.quantity === 'landingX' ? landing?.x : shot.apex?.y
+    const actual =
+      m.predict.quantity === 'landingX'
+        ? landing?.x
+        : m.predict.quantity === 'apexY'
+          ? shot.apex?.y
+          : landing && shot.releaseT !== null
+            ? landing.t - shot.releaseT
+            : undefined
     predictionError = actual === undefined ? null : prediction - actual
   }
   return { hits, predictionError }

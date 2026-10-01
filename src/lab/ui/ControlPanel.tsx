@@ -54,7 +54,7 @@ export function ControlPanel(p: ControlPanelProps) {
           <span className="flex justify-between items-baseline">
             <span className="lab-label">{mission.predict.label}</span>
             <span className="lab-mono text-lg" style={{ color: 'var(--lab-accent)' }}>
-              {p.prediction === null ? '—' : `${fmt(p.prediction)} м`}
+              {p.prediction === null ? '—' : `${fmt(p.prediction)} ${mission.predict.unit ?? 'м'}`}
             </span>
           </span>
           <input
@@ -62,7 +62,7 @@ export function ControlPanel(p: ControlPanelProps) {
             type="range"
             min={mission.predict.min}
             max={mission.predict.max}
-            step={0.5}
+            step={mission.predict.quantity === 'flightTime' ? 0.1 : 0.5}
             value={p.prediction ?? (mission.predict.min + mission.predict.max) / 2}
             onChange={(e) => p.onPrediction(Number(e.target.value))}
           />

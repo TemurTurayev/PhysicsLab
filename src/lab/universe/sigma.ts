@@ -1,5 +1,6 @@
 import { createDemolitionHall } from '../scene/environments/sigma/demolitionHall'
 import { createDesertRange } from '../scene/environments/sigma/desertRange'
+import { createLunarStation } from '../scene/environments/sigma/lunarStation'
 import { createWindTunnel } from '../scene/environments/sigma/windTunnel'
 import { createTestChamber } from '../scene/environments/sigma/testChamber'
 import type { EnvironmentFactory } from '../scene/environments/types'
@@ -10,19 +11,20 @@ import type { Universe } from './types'
  * Genre homage to late-90s science-facility games; every name and line here is our own
  * (universe.test.ts guards against borrowed trademarks).
  */
-const ENVS: Record<number, EnvironmentFactory> = { 1: createTestChamber, 2: createDesertRange, 3: createDemolitionHall, 4: createWindTunnel }
+const ENVS: Record<number, EnvironmentFactory> = { 1: createTestChamber, 2: createDesertRange, 3: createDemolitionHall, 4: createWindTunnel, 5: createLunarStation }
 
 export const SIGMA: Universe = {
   id: 'sigma',
   name: 'Комплекс',
   tagline: 'НИИ «Сигма-7», 1998 год. Бетон, гул ламп, протоколы испытаний. Ты — новый стажёр отдела прикладной механики.',
   envFor: (chapter) => ENVS[chapter] ?? null,
-  chapterTitles: { 1: 'Испытательная камера 3', 2: 'Наземный полигон', 3: 'Испытание на разрушение', 4: 'Аэродинамический зал' },
+  chapterTitles: { 1: 'Испытательная камера 3', 2: 'Наземный полигон', 3: 'Испытание на разрушение', 4: 'Аэродинамический зал', 5: 'Станция «Сигма-Л»' },
   chapterTaglines: {
     1: 'Бетонный бокс под землёй, гул ламп и смотровое окно. Здесь стажёр получает допуск к установке ЭМУ-3.',
     2: 'Наземный полигон в пустыне: плато, вышка наблюдения и разметка до горизонта.',
     3: 'Ангар разрушающих испытаний: бетонные стены-мишени и предел прочности конструкции.',
     4: 'Сектор В: четыре гигантских вентилятора гонят поток навстречу снаряду. Воздух больше не пустота.',
+    5: 'Экспериментальный лунный полигон. g = 1,62 м/с², вакуум и Земля над горизонтом. Тот же расчёт — другой мир.',
   },
   bannerFor: () =>
     'linear-gradient(90deg, rgba(10,14,12,0.88) 0%, rgba(10,14,12,0.55) 70%, rgba(10,14,12,0.35) 100%), repeating-linear-gradient(-45deg, #3a3d3c 0 18px, #333634 18px 36px)',
@@ -181,6 +183,28 @@ export const SIGMA: Universe = {
       brief:
         'Лёгкая сфера (0,6 кг) и резервный полевой вычислитель: он вызывает step() всего дважды в секунду. Формулы верные, но в расчёте сфера вдруг разворачивается и летит назад быстрее, чем летела вперёд. Сделайте расчёт устойчивым, не трогая физику.',
       goal: 'Сделайте расчёт устойчивым — сфера должна лечь на отметку 13 м.',
+    },
+    '5-1': {
+      title: 'ЭМУ-3 на Луне',
+      brief:
+        'Добро пожаловать на станцию «Сигма-Л». На Земле при угле схода 110° установка клала снаряд на 73 м. Здесь g = 1,62 м/с² — в шесть раз меньше. Снаряд легче, но и противовес тянет слабее. Отметьте точку падения до пуска.',
+    },
+    '5-2': {
+      title: 'Медленный полёт',
+      brief:
+        'Снаряд лёг туда же, где и на Земле. Но телеметрия зафиксировала другое время полёта. На Земле — 3,7 с. Сколько здесь? Запишите прогноз в журнал.',
+    },
+    '5-3': {
+      title: 'Магическое число',
+      brief:
+        'Баллистический модуль доставили с Земли последним рейсом. В долине он работал безупречно, а здесь кладёт снаряд не туда. В state приходит g этого мира — но модуль его не читает. Найдите «магическое число».',
+      goal: 'Исправьте step(), чтобы снаряд лёг на мишень на отметке 73 м.',
+    },
+    '5-4': {
+      title: 'Лунный тир',
+      brief:
+        'Луноход с мишенью стартует с отметки 40 м и идёт со скоростью 3 м/с, трогаясь в момент схода снаряда. На Земле он успел бы немного. Здесь снаряд летит в два с половиной раза дольше.',
+      goal: 'Поразите мишень на луноходе.',
     },
   },
 }

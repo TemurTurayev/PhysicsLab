@@ -79,7 +79,7 @@ async function computeShot(m: Mission, values: SliderValues, code: string): Prom
   }
   const r = arm.run.release!
   const dt = m.code.dt ?? STEP_DT
-  const res = await runStudent(code, { kind: 'step', init: { x: r.x, y: r.y, vx: r.vx, vy: r.vy }, dt, maxSteps: Math.ceil(MAX_FLIGHT_S / dt) })
+  const res = await runStudent(code, { kind: 'step', init: { x: r.x, y: r.y, vx: r.vx, vy: r.vy }, dt, maxSteps: Math.ceil(MAX_FLIGHT_S / dt), g: params.world.g })
   if (!res.ok) return res
   if (res.kind !== 'step') throw new Error('unexpected worker reply')
   return {

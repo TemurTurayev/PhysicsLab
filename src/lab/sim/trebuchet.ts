@@ -171,7 +171,8 @@ function checkBreak(p: TrebuchetParams, t: number, l: { moment: number; tension:
 
 export function simulateArm(p: TrebuchetParams, g: number, opts: ArmOptions = {}): ArmRun {
   const ground = opts.ground ?? true
-  const duration = opts.duration ?? 4
+  // Every motion of the machine slows by √(g_earth/g): on the Moon the swing takes ~2.5× longer.
+  const duration = opts.duration ?? 4 * Math.sqrt(9.81 / g)
   const theta0 = p.theta0Deg * DEG
   const releaseAt = p.releaseDeg * DEG
   let y: Vec4 = [theta0, initialPhi(p, theta0), 0, 0]
