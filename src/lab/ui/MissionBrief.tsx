@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Mission } from '../levels/types'
 
 export function MissionBrief({ mission, shots, hitSoFar }: { mission: Mission; shots: number; hitSoFar: ReadonlySet<number> }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 768)
   const [hints, setHints] = useState(0)
   return (
     <div className="lab-panel p-3 flex flex-col gap-2">

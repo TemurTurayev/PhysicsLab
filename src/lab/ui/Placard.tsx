@@ -77,7 +77,7 @@ export function Placard({ shot, releaseDeg, phase, movingTargetSpeed }: PlacardP
           {story}
         </p>
       </div>
-      <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-x-4 gap-y-2 shrink-0 w-full md:w-auto">
+      <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-x-3 gap-y-2 shrink-0 w-full md:w-auto">
         {readouts.map((r) => (
           <div key={r.label} className="flex flex-col min-w-0">
             <span className="lab-label truncate">{r.label}</span>

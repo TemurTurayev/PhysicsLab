@@ -16,27 +16,32 @@ function mix(a: CameraShot, b: CameraShot, f: number): CameraShot {
   return { position: a.position.clone().lerp(b.position, k), target: a.target.clone().lerp(b.target, k) }
 }
 
-/** Wide establishing view: the machine in the foreground, the lane and targets beyond. */
+/** Narrow screens need the camera further back to keep the same subject in frame. */
+const pullFor = (aspect: number) => (aspect < 1 ? 1.9 : aspect < 1.4 ? 1.25 : 1)
+
+/** Three-quarter view from behind the machine: the trebuchet in the foreground, the lane and targets beyond. */
 export function establishingShot(focusX: number, aspect: number): CameraShot {
-  const pull = aspect < 1 ? 1.7 : 1
+  const p = pullFor(aspect)
+  const reach = Math.min(focusX, 80)
   return {
-    position: new THREE.Vector3(-11 * pull, 6.5 * pull, 17 * pull),
-    target: new THREE.Vector3(Math.min(focusX, 40) * 0.35, 4, 0),
+    position: new THREE.Vector3(-16 * p, 7.5 * p, 15 * p),
+    target: new THREE.Vector3(reach * 0.32, 3.2, -1),
   }
 }
 
+/** Side-on tracking shot: works for stones flying forward and backward alike. */
 function followShot(stone: FlightSample, aspect: number): CameraShot {
-  const pull = aspect < 1 ? 1.6 : 1
-  const height = Math.max(5, stone.y * 0.55 + 4)
+  const p = pullFor(aspect)
+  const y = Math.max(stone.y, 0)
   return {
-    position: new THREE.Vector3(stone.x - 9 * pull, height * pull, (20 + stone.y * 0.4) * pull),
-    target: new THREE.Vector3(stone.x + 4, stone.y * 0.75 + 1, 0),
+    position: new THREE.Vector3(stone.x - 5, (4 + y * 0.6) * p, (24 + y * 0.5) * p),
+    target: new THREE.Vector3(stone.x + Math.sign(stone.vx || 1) * 3, y * 0.75 + 1, 0),
   }
 }
 
 function landingShot(x: number, aspect: number): CameraShot {
-  const pull = aspect < 1 ? 1.6 : 1
-  return { position: new THREE.Vector3(x - 14 * pull, 7 * pull, 16 * pull), target: new THREE.Vector3(x, 1, 0) }
+  const p = pullFor(aspect)
+  return { position: new THREE.Vector3(x - 13 * p, 6 * p, 15 * p), target: new THREE.Vector3(x, 1, 0) }
 }
 
 /**

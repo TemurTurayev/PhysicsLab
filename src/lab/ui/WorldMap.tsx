@@ -17,12 +17,12 @@ const KIND_LABELS: Record<MissionKind, string> = {
 const CHAPTER_THEMES: Record<EnvironmentId, { gradient: string; border: string }> = {
   workshop: {
     gradient:
-      'linear-gradient(rgba(14, 17, 23, 0.84), rgba(14, 17, 23, 0.92)), linear-gradient(135deg, #f6dcae 0%, #c98a3d 100%)',
+      'linear-gradient(90deg, rgba(14, 17, 23, 0.82) 0%, rgba(14, 17, 23, 0.35) 70%, rgba(14, 17, 23, 0.1) 100%), linear-gradient(135deg, #f6dcae 0%, #c98a3d 100%)',
     border: 'rgba(201, 138, 61, 0.35)',
   },
   range: {
     gradient:
-      'linear-gradient(rgba(14, 17, 23, 0.84), rgba(14, 17, 23, 0.92)), linear-gradient(135deg, #5fa8e6 0%, #6f9a45 100%)',
+      'linear-gradient(90deg, rgba(14, 17, 23, 0.82) 0%, rgba(14, 17, 23, 0.35) 70%, rgba(14, 17, 23, 0.1) 100%), linear-gradient(135deg, #5fa8e6 0%, #6f9a45 100%)',
     border: 'rgba(95, 168, 230, 0.35)',
   },
 }

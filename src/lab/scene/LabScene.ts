@@ -17,6 +17,7 @@ export interface ShotView {
 }
 
 const TAIL_AFTER_LANDING = 3 // seconds the scene keeps running after impact
+const NO_LANDING_SHOWN = 6 // seconds of a flight that never lands
 
 /**
  * Owns the renderer and everything in the 3D world. React talks to it through
@@ -58,6 +59,7 @@ export class LabScene {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
+    this.renderer.toneMappingExposure = 1.2
     this.crew = createCrew()
     this.stone = new THREE.Mesh(
       new THREE.IcosahedronGeometry(0.15, 1),
@@ -150,8 +152,10 @@ export class LabScene {
     const shot = this.view?.shot
     if (!shot) return 0
     const armEnd = shot.arm.at(-1)?.t ?? 0
-    const flightEnd = shot.landing ? shot.landing.t + TAIL_AFTER_LANDING : shot.flight.at(-1)?.t ?? 0
-    return shot.released ? Math.max(Math.min(flightEnd, 40), (shot.releaseT ?? 0) + 1.5) : armEnd
+    if (!shot.released) return armEnd
+    const releaseT = shot.releaseT ?? 0
+    // A stone that never comes down (no gravity in student code) gets a few seconds of fame, not forty.
+    return shot.landing ? Math.max(shot.landing.t + TAIL_AFTER_LANDING, releaseT + 1.5) : releaseT + NO_LANDING_SHOWN
   }
 
   private readonly loop = (now: number) => {

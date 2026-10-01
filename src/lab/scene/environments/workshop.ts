@@ -84,14 +84,14 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   const skyRadius = Math.max(260, opts.maxX + 120)
   const skyGeo = track(new THREE.SphereGeometry(skyRadius, 24, 16))
   const skyColors = new Float32Array(skyGeo.attributes.position.count * 3)
-  const cZenith = new THREE.Color(0x9bc2e0); const cHorizon = new THREE.Color('#f6dcae'); const cBelow = new THREE.Color(0x6b7d42)
+  const cZenith = new THREE.Color(0x7fb2e0); const cHorizon = new THREE.Color('#f6dcae'); const cBelow = new THREE.Color(0x6b7d42)
   for (let i = 0; i < skyGeo.attributes.position.count; i++) {
     const ny = skyGeo.attributes.position.getY(i) / skyRadius
     const col = ny >= 0 ? cHorizon.clone().lerp(cZenith, Math.pow(ny, 0.7)) : cHorizon.clone().lerp(cBelow, Math.min(1, -ny * 2.5))
     skyColors[i * 3] = col.r; skyColors[i * 3 + 1] = col.g; skyColors[i * 3 + 2] = col.b
   }
   skyGeo.setAttribute('color', new THREE.BufferAttribute(skyColors, 3))
-  const skyMesh = new THREE.Mesh(skyGeo, track(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false })))
+  const skyMesh = new THREE.Mesh(skyGeo, track(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false, fog: false })))
   skyMesh.position.set(opts.maxX / 2, 0, 0); group.add(skyMesh)
 
   // Ground plane
@@ -181,7 +181,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   const trunkGeo = track(new THREE.CylinderGeometry(0.25, 0.4, 3.2, 6))
   const coneGeo1 = track(new THREE.ConeGeometry(2.2, 2.6, 7))
   const coneGeo2 = track(new THREE.ConeGeometry(1.6, 2.2, 7))
-  const treeCoords = [[-16, -15], [14, -14], [-15, 14], [20, 13]]
+  const treeCoords = [[-16, -15], [14, -14], [-38, 24], [30, 18]]
   for (const [tx, tz] of treeCoords) {
     const tree = new THREE.Group()
     tree.position.set(tx, 0, tz)
@@ -249,7 +249,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   }
 
   // Dust motes in sunlight
-  const dustCount = 140
+  const dustCount = 40
   const dustGeo = track(new THREE.BufferGeometry())
   const dustPositions = new Float32Array(dustCount * 3)
   const dustBase = new Float32Array(dustCount * 3)
@@ -261,7 +261,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   }
   dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3))
   const dustMat = track(new THREE.PointsMaterial({
-    color: 0xffe3a0, size: 0.12, transparent: true, opacity: 0.65,
+    color: 0xffe3a0, size: 0.07, transparent: true, opacity: 0.4,
     blending: THREE.AdditiveBlending, depthWrite: false,
   }))
   group.add(new THREE.Points(dustGeo, dustMat))
@@ -278,20 +278,28 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
     const tPivot = new THREE.Group()
     tGroup.add(tPivot)
 
-    // Bale cylinder lying on its side
-    const baleGeo = track(new THREE.CylinderGeometry(t.r, t.r, 1.7 * t.r, 16))
-    baleGeo.rotateX(Math.PI / 2)
-    addMesh(tPivot, baleGeo, hayMat, [0, t.r, 0])
+    // Bale lying with its round face toward the machine; the hit zone is a ring on the ground
+    const baleR = 0.8
+    const baleLen = 1.3
+    const baleGeo = track(new THREE.CylinderGeometry(baleR, baleR, baleLen, 16))
+    baleGeo.rotateZ(Math.PI / 2)
+    addMesh(tPivot, baleGeo, hayMat, [0, baleR, 0])
 
-    const ropeGeo = track(new THREE.CylinderGeometry(t.r * 1.01, t.r * 1.01, 0.04, 16))
-    ropeGeo.rotateX(Math.PI / 2)
-    for (const rz of [-0.45 * t.r, 0.45 * t.r]) addMesh(tPivot, ropeGeo, ropeMat, [0, t.r, rz], undefined, false)
+    const ropeGeo = track(new THREE.CylinderGeometry(baleR * 1.02, baleR * 1.02, 0.05, 16))
+    ropeGeo.rotateZ(Math.PI / 2)
+    for (const rx of [-0.3 * baleLen, 0.3 * baleLen]) addMesh(tPivot, ropeGeo, ropeMat, [rx, baleR, 0], undefined, false)
 
-    // Target disc facing -x
-    const discGeo = track(new THREE.CircleGeometry(0.8 * t.r, 20))
+    const discGeo = track(new THREE.CircleGeometry(0.72 * baleR, 24))
     discGeo.rotateY(-Math.PI / 2)
     const discMat = track(new THREE.MeshLambertMaterial({ map: targetTex }))
-    addMesh(tPivot, discGeo, discMat, [-t.r - 0.02, t.r, 0], undefined, false)
+    addMesh(tPivot, discGeo, discMat, [-baleLen / 2 - 0.01, baleR, 0], undefined, false)
+
+    const zoneGeo = track(new THREE.RingGeometry(Math.max(0.1, t.r - 0.18), t.r, 64))
+    zoneGeo.rotateX(-Math.PI / 2)
+    const zoneMat = track(new THREE.MeshBasicMaterial({ color: 0xf0a640, transparent: true, opacity: 0.55, depthWrite: false }))
+    const zone = new THREE.Mesh(zoneGeo, zoneMat)
+    zone.position.y = 0.04
+    tGroup.add(zone)
 
     group.add(tGroup)
     targetItems.push({ spec: t, group: tGroup, pivot: tPivot, discMat })

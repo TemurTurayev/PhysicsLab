@@ -59,7 +59,8 @@ function MissionView({ mission }: { mission: Mission }) {
   const [act, setAct] = useState<Act>(mission.code ? 'build' : 'see')
   const [code, setCode] = useState(mission.code?.starter ?? '')
   const [phase, setPhase] = useState<Phase>('idle')
-  const [incident, setIncident] = useState<{ event: FailureEvent; isNew: boolean } | null>(null)
+  const [incidents, setIncidents] = useState<Array<{ event: FailureEvent; isNew: boolean }>>([])
+  const incident = incidents[0] ?? null
   const [journalOpen, setJournalOpen] = useState(false)
   const [muted, setMutedState] = useState(isMuted())
   const [pythonReady, setPythonReady] = useState(isPythonReady())
@@ -84,10 +85,8 @@ function MissionView({ mission }: { mission: Mission }) {
   const finishShot = useCallback(
     (record: ShotRecord) => {
       setPhase('landed')
-      const first = record.failures[0]
-      if (first) {
-        const isNew = progress.recordIncident(first.id)
-        setIncident({ event: first, isNew })
+      if (record.failures.length > 0) {
+        setIncidents(record.failures.map((event) => ({ event, isNew: progress.recordIncident(event.id) })))
         playSfx('fail')
       } else if (record.hits.length > 0 || (record.predictionError !== null && mission.predict && Math.abs(record.predictionError) <= mission.predict.tolerance)) {
         playSfx('success')
@@ -99,7 +98,7 @@ function MissionView({ mission }: { mission: Mission }) {
   const fire = useCallback(async () => {
     const scene = sceneRef.current
     if (!scene) return
-    setIncident(null)
+    setIncidents([])
     const record = await run.fire({ releaseDeg, code, prediction })
     if (!record) return
     const { shot } = record
@@ -145,66 +144,64 @@ function MissionView({ mission }: { mission: Mission }) {
     <div className="lab-root fixed inset-0 overflow-hidden">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block touch-none" onPointerDown={placePrediction} />
 
-      <div className="absolute top-0 inset-x-0 p-2 md:p-3">
-        <ActBar
-          mission={mission}
-          act={act}
-          onAct={setAct}
-          incidents={progress.incidents.length}
-          onJournal={() => setJournalOpen(true)}
-          muted={muted}
-          onMute={() => {
-            setMuted(!muted)
-            setMutedState(!muted)
-          }}
-        />
-      </div>
-
-      <div className="absolute left-2 md:left-3 top-[64px] w-[min(340px,calc(100%-16px))] flex flex-col gap-2 max-h-[calc(100%-200px)] overflow-y-auto">
-        <MissionBrief mission={mission} shots={run.shots} hitSoFar={run.hitSoFar} />
-        {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
-      </div>
-
-      <div
-        className={
-          showCode
-            ? 'absolute right-0 md:right-3 bottom-[120px] md:bottom-[96px] top-[40%] md:top-[64px] w-full md:w-[460px] px-2 md:px-0'
-            : 'absolute right-2 md:right-3 bottom-[132px] md:bottom-[96px] w-[min(320px,calc(100%-16px))]'
-        }
-      >
-        {showCode ? (
-          <CodeDrawer
-            code={code}
-            onChange={setCode}
-            onRun={fire}
-            onReset={() => setCode(mission.code!.starter)}
-            busy={run.busy || phase === 'flying'}
-            error={run.codeError}
-            stdout={run.stdout}
-            pythonReady={pythonReady}
-          />
-        ) : (
-          <ControlPanel
+      <div className="absolute top-0 inset-x-0 p-2 md:p-3 flex flex-col items-start gap-2 pointer-events-none [&>*]:pointer-events-auto">
+        <div className="w-full">
+          <ActBar
             mission={mission}
-            releaseDeg={releaseDeg}
-            onReleaseDeg={setReleaseDeg}
-            prediction={prediction}
-            onPrediction={setPrediction}
-            canFire={phase !== 'flying' && (!mission.predict || prediction !== null)}
-            busy={run.busy}
-            onFire={fire}
-            fireLabel={fireLabel}
+            act={act}
+            onAct={setAct}
+            incidents={progress.incidents.length}
+            onJournal={() => setJournalOpen(true)}
+            muted={muted}
+            onMute={() => {
+              setMuted(!muted)
+              setMutedState(!muted)
+            }}
           />
-        )}
+        </div>
+        <div className="w-[min(340px,100%)] flex flex-col gap-2 max-h-[38vh] md:max-h-[calc(100vh-260px)] overflow-y-auto">
+          <MissionBrief mission={mission} shots={run.shots} hitSoFar={run.hitSoFar} />
+          {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
+        </div>
       </div>
 
-      <div className="absolute bottom-0 inset-x-0 p-2 md:p-3">
-        <Placard
-          shot={run.last?.shot ?? null}
-          releaseDeg={mission.sliders.length > 0 ? releaseDeg : mission.base.trebuchet.releaseDeg}
-          phase={phase}
-          movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
-        />
+      <div className="absolute bottom-0 inset-x-0 p-2 flex flex-col items-end gap-2 pointer-events-none [&>*]:pointer-events-auto md:static md:p-0">
+        {showCode ? (
+          <div className="w-full h-[50vh] md:absolute md:right-3 md:top-[64px] md:bottom-[96px] md:w-[460px] md:h-auto">
+            <CodeDrawer
+              code={code}
+              onChange={setCode}
+              onRun={fire}
+              onReset={() => setCode(mission.code!.starter)}
+              busy={run.busy || phase === 'flying'}
+              error={run.codeError}
+              stdout={run.stdout}
+              pythonReady={pythonReady}
+            />
+          </div>
+        ) : (
+          <div className="w-[min(320px,100%)] md:absolute md:right-3 md:bottom-[96px]">
+            <ControlPanel
+              mission={mission}
+              releaseDeg={releaseDeg}
+              onReleaseDeg={setReleaseDeg}
+              prediction={prediction}
+              onPrediction={setPrediction}
+              canFire={phase !== 'flying' && (!mission.predict || prediction !== null)}
+              busy={run.busy}
+              onFire={fire}
+              fireLabel={fireLabel}
+            />
+          </div>
+        )}
+        <div className="w-full md:absolute md:bottom-0 md:inset-x-0 md:p-3">
+          <Placard
+            shot={run.last?.shot ?? null}
+            releaseDeg={mission.sliders.length > 0 ? releaseDeg : mission.base.trebuchet.releaseDeg}
+            phase={phase}
+            movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
+          />
+        </div>
       </div>
 
       {incident && phase === 'landed' && (
@@ -212,7 +209,7 @@ function MissionView({ mission }: { mission: Mission }) {
           <IncidentCard
             event={incident.event}
             isNew={incident.isNew}
-            onClose={() => setIncident(null)}
+            onClose={() => setIncidents((q) => q.slice(1))}
             onReplaySlow={() => {
               setPhase('flying')
               sceneRef.current?.replay(0.25)

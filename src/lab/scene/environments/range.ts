@@ -97,7 +97,7 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     skyColors.set([col.r, col.g, col.b], i * 3)
   }
   skyGeo.setAttribute('color', new THREE.BufferAttribute(skyColors, 3))
-  const skyMesh = new THREE.Mesh(skyGeo, track(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false })))
+  const skyMesh = new THREE.Mesh(skyGeo, track(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false, fog: false })))
   skyMesh.position.set(opts.maxX / 2, 0, 0)
   group.add(skyMesh)
 
