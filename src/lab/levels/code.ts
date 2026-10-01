@@ -69,3 +69,84 @@ def beam_moment(mc):
     return mc * G * L2
 `,
 }
+
+const AIR_CONSTANTS = (m: number, r: number, wind: number) => `import math
+
+G = 9.81
+M = ${m}       # масса снаряда, кг
+R = ${r}      # радиус снаряда, м
+RHO = 1.225   # плотность воздуха, кг/м³
+CD = 0.47     # коэффициент сопротивления шара
+WIND = ${wind}  # ветер вдоль x, м/с (минус — встречный)
+K = RHO * CD * math.pi * R**2 / (2 * M)   # «сила» торможения, 1/м
+`
+
+export const DRAG_CODE: MissionCode = {
+  fn: 'step',
+  starter: `${AIR_CONSTANTS(12.0, 0.15, -12.0)}
+def step(state, dt):
+    """Один шаг полёта длиной dt секунд (dt = 1/240 с)."""
+    x, y = state["x"], state["y"]
+    vx, vy = state["vx"], state["vy"]
+
+    # Скорость камня ОТНОСИТЕЛЬНО ВОЗДУХА
+    ux, uy = vx - WIND, vy
+    u = math.hypot(ux, uy)
+
+    # Ускорение. Сейчас здесь только сила тяжести.
+    # Допиши сопротивление воздуха: a = -K * u * (ux, uy)
+    ax = 0.0
+    ay = -G
+
+    vx = vx + ax * dt
+    vy = vy + ay * dt
+    x = x + vx * dt
+    y = y + vy * dt
+    return {"x": x, "y": y, "vx": vx, "vy": vy}
+`,
+  reference: `${AIR_CONSTANTS(12.0, 0.15, -12.0)}
+def step(state, dt):
+    vx, vy = state["vx"], state["vy"]
+    ux, uy = vx - WIND, vy
+    u = math.hypot(ux, uy)
+    vx += -K * u * ux * dt
+    vy += (-G - K * u * uy) * dt
+    return {"x": state["x"] + vx * dt, "y": state["y"] + vy * dt, "vx": vx, "vy": vy}
+`,
+}
+
+export const SUBSTEP_CODE: MissionCode = {
+  fn: 'step',
+  dt: 0.5,
+  starter: `${AIR_CONSTANTS(0.6, 0.3, 0.0)}
+N = 1  # сколько маленьких шагов делать внутри одного большого
+
+def step(state, dt):
+    """Старый вычислитель вызывает step() всего 2 раза в секунду: dt = 0.5 с."""
+    x, y = state["x"], state["y"]
+    vx, vy = state["vx"], state["vy"]
+    h = dt / N
+    for _ in range(N):
+        u = math.hypot(vx, vy)
+        ax = -K * u * vx
+        ay = -G - K * u * vy
+        vx = vx + ax * h
+        vy = vy + ay * h
+        x = x + vx * h
+        y = y + vy * h
+    return {"x": x, "y": y, "vx": vx, "vy": vy}
+`,
+  reference: `${AIR_CONSTANTS(0.6, 0.3, 0.0)}
+N = 50
+def step(state, dt):
+    x, y, vx, vy = state["x"], state["y"], state["vx"], state["vy"]
+    h = dt / N
+    for _ in range(N):
+        u = math.hypot(vx, vy)
+        vx += -K * u * vx * h
+        vy += (-G - K * u * vy) * h
+        x += vx * h
+        y += vy * h
+    return {"x": x, "y": y, "vx": vx, "vy": vy}
+`,
+}

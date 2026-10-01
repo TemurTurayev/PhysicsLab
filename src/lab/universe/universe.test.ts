@@ -22,8 +22,8 @@ describe('universes', () => {
     for (const m of MISSIONS) expect(classic.envFor(m.chapter)).not.toBeNull()
     expect(sigma.envFor(1)).not.toBeNull()
     expect(sigma.envFor(2)).not.toBeNull()
-    expect(sigma.envFor(3)).not.toBeNull()
-    expect(sigma.envFor(4)).toBeNull()
+    expect(sigma.envFor(4)).not.toBeNull()
+    expect(sigma.envFor(5)).toBeNull()
   })
 
   it('the complex never borrows names or symbols from Valve games', () => {

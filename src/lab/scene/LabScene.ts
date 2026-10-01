@@ -80,12 +80,12 @@ export class LabScene {
     this.raf = requestAnimationFrame(this.loop)
   }
 
-  setEnvironment(factory: EnvironmentFactory, targets: Target[], maxX: number): void {
+  setEnvironment(factory: EnvironmentFactory, targets: Target[], maxX: number, wind = 0): void {
     this.env?.dispose()
     if (this.env) this.scene.remove(this.env.group)
     this.targets = targets
     this.focusX = targets[0]?.x ?? maxX * 0.6
-    this.env = factory({ targets, maxX })
+    this.env = factory({ targets, maxX, wind })
     this.scene.add(this.env.group)
     this.scene.fog = this.env.fog
     this.scene.background = this.env.background

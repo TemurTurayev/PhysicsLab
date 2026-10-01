@@ -11,6 +11,8 @@ export type FailureId =
   | 'degrees_radians'
   | 'beam_break'
   | 'sling_snap'
+  | 'no_drag'
+  | 'unstable'
 
 export interface FailureEvent {
   id: FailureId
@@ -25,4 +27,8 @@ export interface DetectContext {
   studentFlight?: boolean
   /** Set by the radians mission when the student's angle equals sin/cos of degrees. */
   angleLooksLikeDegrees?: boolean
+  /** Set when the air is on: the student's flight must slow down like a ball with this drag factor k (1/m). */
+  expectDrag?: { k: number; wind: number }
+  /** The time step the student's step() was called with (s). */
+  stepDt?: number
 }

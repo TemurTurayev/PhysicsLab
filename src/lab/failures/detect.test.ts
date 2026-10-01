@@ -76,3 +76,34 @@ describe('a hit is never a failure', () => {
     expect(detectFailures(r, { g: 9.81, targets: [{ x: 70, r: 2 }] }).map((e) => e.id)).toEqual(['short'])
   })
 })
+
+describe('air and numerics in student code', () => {
+  const k = 0.0017
+  const wind = -12
+  const dragCtx = { g: 9.81, targets: [], studentFlight: true, expectDrag: { k, wind } }
+  const flightWith = (ax: (vx: number, vy: number) => number, n = 40): ShotResult => {
+    let s = { t: 0, x: 0, y: 10, vx: 25, vy: 10 }
+    const flight: FlightSample[] = [s]
+    for (let i = 1; i < n; i++) {
+      const dt = 1 / 60
+      const vx = s.vx + ax(s.vx, s.vy) * dt
+      const vy = s.vy - 9.81 * dt
+      s = { t: i * dt, x: s.x + vx * dt, y: s.y + vy * dt, vx, vy }
+      flight.push(s)
+    }
+    return { arm: [], flight, released: true, releaseT: 0, launch: { speed: 27, angleDeg: 22 }, landing: null, apex: null, breakage: null, peakMoment: 0, peakTension: 0 }
+  }
+  const realDrag = (vx: number, vy: number) => -k * Math.hypot(vx - wind, vy) * (vx - wind)
+
+  it('flags a flight that ignores the air when the air is on', () => {
+    expect(ids(flightWith(() => 0), [], dragCtx)).toContain('no_drag')
+  })
+  it('accepts a flight that feels the air', () => {
+    expect(ids(flightWith(realDrag), [], dragCtx)).not.toContain('no_drag')
+  })
+  it('flags a numerical method that makes the stone swing back and forth', () => {
+    const r = flightWith(() => 0)
+    const shaky = { ...r, flight: r.flight.map((s, i) => ({ ...s, vx: i % 2 === 0 ? 20 + i : -20 - i })) }
+    expect(ids(shaky, [], { g: 9.81, targets: [], studentFlight: true })).toContain('unstable')
+  })
+})

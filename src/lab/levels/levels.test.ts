@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { simulateShot } from '../sim/shot'
 import { armForCode, clipAtWalls, evaluateShot, pickCounterweight, SAFETY_MASSES, looksLikeDegrees, shotFromLaunch, shotFromSteps, withRelease, withSliders } from './evaluate'
+import { detectFailures } from '../failures/detect'
 import { findMission, MISSIONS } from './index'
 
 const shotAt = (id: string, deg?: number) => {
@@ -128,5 +129,67 @@ describe('chapter 3 is solvable', () => {
   it('3-4: both the gate and the tower can be hit', () => {
     expect(play('3-4', { mc: 800, releaseDeg: 104 }).hits).toEqual([0])
     expect(play('3-4', { mc: 1000, releaseDeg: 108 }).hits).toEqual([1])
+  })
+})
+
+describe('chapter 4 is solvable', () => {
+  /** TS twin of the students' Python: explicit Euler with N sub-steps per call of step(dt). */
+  const studentFlight = (id: string, opts: { drag: boolean; dt: number; N: number }) => {
+    const m = findMission(id)!
+    const { mp, r } = m.base.trebuchet
+    const K = (1.225 * 0.47 * Math.PI * r * r) / (2 * mp)
+    const W = m.base.world.wind
+    const { run } = armForCode(m.base)
+    let s = { x: run.release!.x, y: run.release!.y, vx: run.release!.vx, vy: run.release!.vy }
+    const samples = [s]
+    for (let i = 0; i < Math.ceil(40 / opts.dt); i++) {
+      let { x, y, vx, vy } = s
+      const h = opts.dt / opts.N
+      for (let j = 0; j < opts.N; j++) {
+        const ux = vx - W
+        const u = Math.hypot(ux, vy)
+        const ax = opts.drag ? -K * u * ux : 0
+        const ay = -9.81 - (opts.drag ? K * u * vy : 0)
+        vx += ax * h
+        vy += ay * h
+        x += vx * h
+        y += vy * h
+      }
+      s = { x, y, vx, vy }
+      samples.push(s)
+      if ((y <= 0 && vy < 0) || ![x, y, vx, vy].every((v) => Number.isFinite(v) && Math.abs(v) < 1e6)) break
+    }
+    return { m, shot: shotFromSteps(m.base, samples, opts.dt) }
+  }
+
+  it('4-1: about 110° beats the headwind', () => {
+    const m = findMission('4-1')!
+    expect(evaluateShot(m, simulateShot(withSliders(m, { releaseDeg: 110 })), null).hits).toEqual([0])
+  })
+
+  it('4-2: the straw ball lands roughly halfway, inside the prediction range', () => {
+    const m = findMission('4-2')!
+    const x = simulateShot(m.base).landing!.x
+    expect(x).toBeGreaterThan(25)
+    expect(x).toBeLessThan(40)
+  })
+
+  it('4-3: step() with drag hits; without drag it overshoots and is called out', () => {
+    const good = studentFlight('4-3', { drag: true, dt: 1 / 240, N: 1 })
+    expect(evaluateShot(good.m, good.shot, null).hits).toEqual([0])
+    const bad = studentFlight('4-3', { drag: false, dt: 1 / 240, N: 1 })
+    expect(bad.shot.landing!.x).toBeGreaterThan(65)
+    const k = (1.225 * 0.47 * Math.PI * 0.15 ** 2) / 24
+    const ids = detectFailures(bad.shot, { g: 9.81, targets: bad.m.targets, studentFlight: true, expectDrag: { k, wind: -12 } }).map((e) => e.id)
+    expect(ids).toContain('no_drag')
+  })
+
+  it('4-4: one Euler step per 0.5 s swings out of control; 50 sub-steps land on the target', () => {
+    const bad = studentFlight('4-4', { drag: true, dt: 0.5, N: 1 })
+    expect(detectFailures(bad.shot, { g: 9.81, targets: bad.m.targets, studentFlight: true }).map((e) => e.id)).toEqual(['unstable'])
+    const good = studentFlight('4-4', { drag: true, dt: 0.5, N: 50 })
+    expect(evaluateShot(good.m, good.shot, null).hits).toEqual([0])
+    const k = (1.225 * 0.47 * Math.PI * 0.3 ** 2) / 1.2
+    expect(detectFailures(good.shot, { g: 9.81, targets: good.m.targets, studentFlight: true, stepDt: 0.5, expectDrag: { k, wind: 0 } })).toEqual([])
   })
 })

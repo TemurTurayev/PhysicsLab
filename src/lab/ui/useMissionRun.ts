@@ -18,11 +18,12 @@ import {
 import type { Mission, SliderValues } from '../levels/types'
 import { runStudent } from '../python/runStudent'
 import type { StudentError } from '../python/protocol'
+import { dragFactor } from '../sim/flight'
 import { simulateShot } from '../sim/shot'
 import type { FlightSample, ShotResult, SimParams } from '../sim/types'
 
 const STEP_DT = 1 / 240
-const MAX_STEPS = 240 * 40
+const MAX_FLIGHT_S = 40
 
 export interface ShotRecord {
   shot: ShotResult
@@ -77,13 +78,14 @@ async function computeShot(m: Mission, values: SliderValues, code: string): Prom
     }
   }
   const r = arm.run.release!
-  const res = await runStudent(code, { kind: 'step', init: { x: r.x, y: r.y, vx: r.vx, vy: r.vy }, dt: STEP_DT, maxSteps: MAX_STEPS })
+  const dt = m.code.dt ?? STEP_DT
+  const res = await runStudent(code, { kind: 'step', init: { x: r.x, y: r.y, vx: r.vx, vy: r.vy }, dt, maxSteps: Math.ceil(MAX_FLIGHT_S / dt) })
   if (!res.ok) return res
   if (res.kind !== 'step') throw new Error('unexpected worker reply')
   return {
     ok: true,
     stdout: res.stdout,
-    value: { shot: shotFromSteps(params, res.samples, STEP_DT), ghost: reference, studentFlight: true, angleLooksLikeDegrees: false },
+    value: { shot: shotFromSteps(params, res.samples, dt), ghost: reference, studentFlight: true, angleLooksLikeDegrees: false },
   }
 }
 
@@ -141,6 +143,8 @@ export function useMissionRun(m: Mission): MissionRun {
           targets: targetsAt(m.targets, flightTime),
           studentFlight,
           angleLooksLikeDegrees,
+          stepDt: m.code?.fn === 'step' ? (m.code.dt ?? STEP_DT) : undefined,
+          expectDrag: m.base.world.drag ? { k: dragFactor(m.base.trebuchet.mp, m.base.trebuchet.r), wind: m.base.world.wind } : undefined,
         })
         const { hits, predictionError } = evaluateShot(m, shot, prediction)
         const record: ShotRecord = { shot, ghost, failures, hits, predictionError }

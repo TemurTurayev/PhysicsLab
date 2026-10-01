@@ -11,14 +11,40 @@ function isExploded(r: ShotResult): FailureEvent | null {
   return bad ? { id: 'exploded', t: bad.t, numbers: { t: bad.t } } : null
 }
 
-function studentPhysics(r: ShotResult, g: number): FailureEvent[] {
+/**
+ * A step too large for the method: the horizontal velocity flips sign again and again,
+ * or flips in one step while keeping most of its speed. Real drag only fades it through zero.
+ */
+function isOscillating(r: ShotResult): boolean {
+  let flips = 0
+  for (let i = 1; i < r.flight.length; i++) {
+    const a = r.flight[i - 1].vx
+    const b = r.flight[i].vx
+    if (Math.sign(a) === Math.sign(b) || a === 0) continue
+    flips++
+    if (Math.abs(b) >= 0.3 * Math.abs(a)) return true
+  }
+  return flips >= 3
+}
+
+function studentPhysics(r: ShotResult, ctx: DetectContext): FailureEvent[] {
+  const { g } = ctx
   const window = r.flight.slice(0, 20)
   if (window.length < 3) return []
   const first = window[0]
   const last = window[window.length - 1]
+  if (isOscillating(r)) return [{ id: 'unstable', t: first.t, numbers: { dt: ctx.stepDt ?? window[1].t - first.t } }]
   const ay = (last.vy - first.vy) / (last.t - first.t)
   if (ay > 0.5 * g) return [{ id: 'gravity_up', t: first.t, numbers: { ay } }]
   if (Math.abs(ay) < 0.1 * g) return [{ id: 'no_gravity', t: first.t, numbers: { ay } }]
+  if (ctx.expectDrag) {
+    const { k, wind } = ctx.expectDrag
+    // Judge the drag right after release: over a long window a light ball has already stopped decelerating.
+    const early = r.flight.find((s) => s.t - first.t >= 0.2) ?? r.flight[1]
+    const ax = (early.vx - first.vx) / (early.t - first.t)
+    const expected = -k * Math.hypot(first.vx - wind, first.vy) * (first.vx - wind)
+    if (Math.abs(ax) < 0.25 * Math.abs(expected)) return [{ id: 'no_drag', t: first.t, numbers: { ax, expected } }]
+  }
   return []
 }
 
@@ -56,12 +82,14 @@ export function detectFailures(r: ShotResult, ctx: DetectContext): FailureEvent[
     const { t, load, limit } = r.breakage
     return [{ id, t, numbers: { load, limit, ratio: load / limit, t } }]
   }
+  // A swinging numerical method usually ends in an explosion too; name the cause, not the symptom.
+  if (ctx.studentFlight && isOscillating(r)) return [{ id: 'unstable', t: r.flight[0].t, numbers: { dt: ctx.stepDt ?? r.flight[1].t - r.flight[0].t } }]
   const exploded = isExploded(r)
   if (exploded) return [exploded]
   const events = [
     ...(ctx.angleLooksLikeDegrees ? [{ id: 'degrees_radians' as const, t: r.releaseT ?? 0, numbers: {} }] : []),
-    ...(ctx.studentFlight ? studentPhysics(r, ctx.g) : []),
-    // A stone that lands on a target was released well enough, whatever its angle.
+    // A stone that lands on a target was thrown and computed well enough: no faults to report.
+    ...(ctx.studentFlight && !landedOnTarget(r, ctx) ? studentPhysics(r, ctx) : []),
     ...(landedOnTarget(r, ctx) ? [] : releaseFailures(r)),
     ...landingFailures(r, ctx),
   ]

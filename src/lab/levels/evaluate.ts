@@ -73,12 +73,24 @@ export function looksLikeDegrees(speed: number, angleDeg: number, velocity: [num
   return close(velocity[0], speed * Math.cos(angleDeg)) && close(velocity[1], speed * Math.sin(angleDeg))
 }
 
+/** Coarse steps overshoot the ground; put the last sample exactly where the path crosses y = 0. */
+export function landOnGround(flight: FlightSample[]): FlightSample[] {
+  const n = flight.length
+  if (n < 2) return flight
+  const a = flight[n - 2]
+  const b = flight[n - 1]
+  if (!(b.y < 0 && a.y >= 0) || !Number.isFinite(b.y)) return flight
+  const f = a.y / (a.y - b.y)
+  const lerp = (p: number, q: number) => p + (q - p) * f
+  return [...flight.slice(0, -1), { t: lerp(a.t, b.t), x: lerp(a.x, b.x), y: 0, vx: lerp(a.vx, b.vx), vy: lerp(a.vy, b.vy) }]
+}
+
 /** step mission: the student's samples (without time) become the flight after release. */
 export function shotFromSteps(params: SimParams, samples: Array<Omit<FlightSample, 't'>>, dt: number): ShotResult {
   const arm = armForCode(params)
   const t0 = arm.run.release!.t
-  const flight = samples.map((s, i) => ({ ...s, t: t0 + i * dt }))
-  return shotFrom(arm, flight)
+  const timed = samples.map((s, i) => ({ ...s, t: t0 + i * dt }))
+  return shotFrom(arm, landOnGround(timed))
 }
 
 /** Counterweights the master is willing to try, lightest first. */

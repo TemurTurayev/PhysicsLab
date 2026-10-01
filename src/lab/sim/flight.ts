@@ -8,8 +8,13 @@ const SPHERE_CD = 0.47
 type State = readonly [number, number, number, number] // x, y, vx, vy
 
 /** Projectile flight with gravity and optional quadratic drag against the wind, integrated with RK4. */
+/** k in a = −k·|u|·u for a sphere of this mass and radius in sea-level air, 1/m. */
+export function dragFactor(mass: number, radius: number): number {
+  return (AIR_DENSITY * SPHERE_CD * Math.PI * radius ** 2) / (2 * mass)
+}
+
 export function simulateFlight(start: FlightSample, world: WorldParams, mass: number, radius: number): FlightSample[] {
-  const k = world.drag ? (AIR_DENSITY * SPHERE_CD * Math.PI * radius ** 2) / (2 * mass) : 0
+  const k = world.drag ? dragFactor(mass, radius) : 0
   const deriv = ([, , vx, vy]: State): State => {
     const rx = vx - world.wind
     const speed = Math.hypot(rx, vy)

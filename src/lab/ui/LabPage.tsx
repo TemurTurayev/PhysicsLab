@@ -41,7 +41,7 @@ function useLabScene(mission: Mission, universe: Universe) {
     const maxX = Math.max(110, ...mission.targets.map((t) => t.x * 1.5))
     // A sector this universe has not built yet falls back to Classic rather than an empty void.
     const env = universe.envFor(mission.chapter) ?? getUniverse('classic').envFor(mission.chapter)!
-    scene.setEnvironment(env, mission.targets, maxX)
+    scene.setEnvironment(env, mission.targets, maxX, mission.base.world.wind)
     scene.setTrebuchet(mission.base.trebuchet, universe.envFor(mission.chapter) ? universe.machine : 'wood')
     sceneRef.current = scene
     return () => {

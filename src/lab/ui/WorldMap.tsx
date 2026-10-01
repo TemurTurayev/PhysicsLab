@@ -34,6 +34,11 @@ const CHAPTER_THEMES: Record<EnvironmentId, { gradient: string; border: string }
       'linear-gradient(90deg, rgba(14, 17, 23, 0.82) 0%, rgba(14, 17, 23, 0.35) 70%, rgba(14, 17, 23, 0.1) 100%), linear-gradient(135deg, #2f4f86 0%, #c9849a 55%, #ffb26b 100%)',
     border: 'rgba(95, 168, 230, 0.35)',
   },
+  pass: {
+    gradient:
+      'linear-gradient(90deg, rgba(14, 17, 23, 0.82) 0%, rgba(14, 17, 23, 0.35) 70%, rgba(14, 17, 23, 0.1) 100%), linear-gradient(135deg, #5b7fa6 0%, #a9b9c6 55%, #dfe6ea 100%)',
+    border: 'rgba(95, 168, 230, 0.35)',
+  },
 }
 
 export function WorldMap(): JSX.Element {

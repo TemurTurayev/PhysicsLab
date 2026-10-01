@@ -1,7 +1,7 @@
 import type { SimParams } from '../sim/types'
 
 export type MissionKind = 'tune' | 'predict' | 'write' | 'fix' | 'challenge'
-export type EnvironmentId = 'workshop' | 'range' | 'siege'
+export type EnvironmentId = 'workshop' | 'range' | 'siege' | 'pass'
 
 export interface Target {
   x: number // distance from the trebuchet pivot at t = 0 (m)
@@ -29,6 +29,7 @@ export interface MissionCode {
   fn: 'step' | 'launch_velocity' | 'beam_moment'
   starter: string
   reference: string
+  dt?: number // step() missions: the time step the harness feeds the student's code (default 1/240 s)
 }
 
 export interface Prediction {
@@ -41,7 +42,7 @@ export interface Prediction {
 
 export interface Mission {
   id: string
-  chapter: 1 | 2 | 3
+  chapter: 1 | 2 | 3 | 4
   order: number
   kind: MissionKind
   env: EnvironmentId
@@ -59,7 +60,7 @@ export interface Mission {
 }
 
 export interface Chapter {
-  id: 1 | 2 | 3
+  id: 1 | 2 | 3 | 4
   title: string
   env: EnvironmentId
   tagline: string

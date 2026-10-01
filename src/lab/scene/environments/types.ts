@@ -17,6 +17,7 @@ export interface Environment {
 export interface EnvironmentOptions {
   targets: Target[]
   maxX: number // furthest distance the camera may show (m)
+  wind?: number // m/s along +x (negative = headwind); 0 or undefined = calm
 }
 
 export type EnvironmentFactory = (opts: EnvironmentOptions) => Environment
