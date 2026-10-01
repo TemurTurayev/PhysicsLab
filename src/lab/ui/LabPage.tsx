@@ -216,6 +216,7 @@ function MissionView({ mission }: { mission: Mission }) {
             shot={run.last?.shot ?? null}
             releaseDeg={releaseDeg}
             beamLimit={mission.base.trebuchet.beamStrength}
+            movingLabel={universe.terms.movingTarget}
             phase={phase}
             movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
           />

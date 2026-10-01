@@ -65,3 +65,14 @@ describe('structural failures', () => {
     expect(detectFailures(r, { g: 9.81, targets: [] }).map((e) => e.id)).toEqual(['sling_snap'])
   })
 })
+
+describe('a hit is never a failure', () => {
+  it('a flat, low throw that lands on the target is not reported as a late release', () => {
+    const r = simulateShot({ trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: 96 }, world: EARTH }) // 4.5° launch, 47 m
+    expect(detectFailures(r, { g: 9.81, targets: [{ x: 47, r: 2.5 }] })).toEqual([])
+  })
+  it('a shallow throw that misses is a miss, not a release fault', () => {
+    const r = simulateShot({ trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: 96 }, world: EARTH })
+    expect(detectFailures(r, { g: 9.81, targets: [{ x: 70, r: 2 }] }).map((e) => e.id)).toEqual(['short'])
+  })
+})

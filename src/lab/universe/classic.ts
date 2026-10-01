@@ -15,6 +15,6 @@ export const CLASSIC: Universe = {
   chapterTitles: { 1: 'Мастерская', 2: 'Полигон', 3: 'Осада' },
   chapterTaglines: {},
   machine: 'wood',
-  terms: { journal: 'Журнал инцидентов', incident: 'Инцидент', incidentNew: 'Новая запись в журнале' },
+  terms: { journal: 'Журнал инцидентов', incident: 'Инцидент', incidentNew: 'Новая запись в журнале', movingTarget: 'Тележка проедет' },
   retroByDefault: false,
 }

@@ -22,6 +22,6 @@ export interface Universe {
   /** CSS background for chapter banners on the world map; undefined keeps the chapter's own. */
   bannerFor?: (chapter: number) => string
   machine: 'wood' | 'steel'
-  terms: { journal: string; incident: string; incidentNew: string }
+  terms: { journal: string; incident: string; incidentNew: string; movingTarget: string }
   retroByDefault: boolean
 }

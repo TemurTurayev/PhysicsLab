@@ -21,7 +21,8 @@ describe('universes', () => {
   it('Classic opens every chapter; the complex opens only the sectors it has built', () => {
     for (const m of MISSIONS) expect(classic.envFor(m.chapter)).not.toBeNull()
     expect(sigma.envFor(1)).not.toBeNull()
-    expect(sigma.envFor(2)).toBeNull()
+    expect(sigma.envFor(2)).not.toBeNull()
+    expect(sigma.envFor(3)).toBeNull()
   })
 
   it('the complex never borrows names or symbols from Valve games', () => {

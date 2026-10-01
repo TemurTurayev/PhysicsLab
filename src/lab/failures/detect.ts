@@ -4,7 +4,7 @@ import type { DetectContext, FailureEvent } from './types'
 const RUNAWAY = 1e5 // m — anything this far is a numerical explosion, not a throw
 const SELF_HIT_X = 3 // m — landing behind this line falls on the machine or its crew
 const EARLY_DEG = 70
-const LATE_DEG = 8
+const LATE_DEG = -15 // clearly thrown downward; a flat low throw is a legitimate shot
 
 function isExploded(r: ShotResult): FailureEvent | null {
   const bad = r.flight.find((s) => [s.x, s.y, s.vx, s.vy].some((v) => !Number.isFinite(v) || Math.abs(v) > RUNAWAY))
@@ -43,6 +43,11 @@ function landingFailures(r: ShotResult, ctx: DetectContext): FailureEvent[] {
   return [{ id: miss < 0 ? 'short' : 'long', t, numbers: { miss, x, target: nearest.x } }]
 }
 
+function landedOnTarget(r: ShotResult, ctx: DetectContext): boolean {
+  const x = r.landing?.x
+  return x !== undefined && ctx.targets.some((t) => Math.abs(x - t.x) <= t.r)
+}
+
 /** Every way this shot went wrong, in the order the viewer sees them happen. */
 export function detectFailures(r: ShotResult, ctx: DetectContext): FailureEvent[] {
   if (!r.released) return [{ id: 'no_release', t: r.arm.at(-1)?.t ?? 0, numbers: {} }]
@@ -56,7 +61,8 @@ export function detectFailures(r: ShotResult, ctx: DetectContext): FailureEvent[
   const events = [
     ...(ctx.angleLooksLikeDegrees ? [{ id: 'degrees_radians' as const, t: r.releaseT ?? 0, numbers: {} }] : []),
     ...(ctx.studentFlight ? studentPhysics(r, ctx.g) : []),
-    ...releaseFailures(r),
+    // A stone that lands on a target was released well enough, whatever its angle.
+    ...(landedOnTarget(r, ctx) ? [] : releaseFailures(r)),
     ...landingFailures(r, ctx),
   ]
   return events.sort((a, b) => a.t - b.t)
