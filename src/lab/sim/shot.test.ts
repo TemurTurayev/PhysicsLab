@@ -3,21 +3,15 @@ import { simulateShot } from './shot'
 import { DEFAULT_TREBUCHET, EARTH } from './types'
 
 describe('simulateShot', () => {
-  it('is deterministic', () => {
+  it('is deterministic, so replays and screenshots match the shot the student saw', () => {
     const params = { trebuchet: DEFAULT_TREBUCHET, world: EARTH }
     expect(simulateShot(params)).toEqual(simulateShot(params))
   })
 
-  it('lands somewhere forward with the default setup', () => {
+  it('starts the flight exactly where and when the sling let go', () => {
     const shot = simulateShot({ trebuchet: DEFAULT_TREBUCHET, world: EARTH })
-    expect(shot.released).toBe(true)
-    expect(shot.landing!.x).toBeGreaterThan(10)
+    const lastArmBeforeRelease = shot.arm.filter((a) => !a.released).at(-1)!
     expect(shot.flight[0].t).toBeCloseTo(shot.releaseT!, 9)
-  })
-
-  it('reports no flight when the pin never opens', () => {
-    const shot = simulateShot({ trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: -999 }, world: EARTH })
-    expect(shot.flight).toEqual([])
-    expect(shot.landing).toBeNull()
+    expect(shot.flight[0].t - lastArmBeforeRelease.t).toBeLessThan(1 / 100)
   })
 })

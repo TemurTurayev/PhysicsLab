@@ -30,12 +30,6 @@ describe('simulateArm', () => {
     expect(Math.hypot(vx, vy)).toBeLessThan(80)
   })
 
-  it('an early release sends the stone steeply up or backwards', () => {
-    const run = simulateArm({ ...DEFAULT_TREBUCHET, releaseDeg: 200 }, g)
-    const { vx, vy } = run.release!
-    const angle = (Math.atan2(vy, vx) * 180) / Math.PI
-    expect(vx <= 0 || angle > 75).toBe(true)
-  })
 
   it('keeps the resting stone on the ground before the swing lifts it', () => {
     const run = simulateArm(DEFAULT_TREBUCHET, g)

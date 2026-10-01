@@ -4,9 +4,9 @@ export type MissionKind = 'tune' | 'predict' | 'write' | 'fix' | 'challenge'
 export type EnvironmentId = 'workshop' | 'range'
 
 export interface Target {
-  x: number // distance from the trebuchet pivot (m)
+  x: number // distance from the trebuchet pivot at t = 0 (m)
   r: number // hit radius (m)
-  moving?: { speed: number } // m/s along +x, starts at x when t = 0
+  moving?: { speed: number } // m/s along +x
 }
 
 export interface SliderSpec {
@@ -16,12 +16,21 @@ export interface SliderSpec {
   max: number
   step: number
   unit: string
+  start: number
 }
 
 export interface MissionCode {
-  fn: 'step' | 'release_angle'
+  fn: 'step' | 'launch_velocity'
   starter: string
   reference: string
+}
+
+export interface Prediction {
+  quantity: 'landingX' | 'apexY'
+  label: string
+  tolerance: number // m
+  min: number
+  max: number
 }
 
 export interface Mission {
@@ -37,7 +46,16 @@ export interface Mission {
   base: SimParams
   targets: Target[]
   code?: MissionCode
+  predict?: Prediction
   hints: string[]
-  theory: string[] // KaTeX strings
-  requires: string[] // mission ids that must be completed first
+  theory: string[] // KaTeX
+  requires: string[]
+}
+
+export interface Chapter {
+  id: 1 | 2
+  title: string
+  env: EnvironmentId
+  tagline: string
+  missions: Mission[]
 }

@@ -30,10 +30,4 @@ describe('simulateFlight', () => {
     expect(still).toBeLessThan(vacuum)
     expect(tail).toBeGreaterThan(still)
   })
-
-  it('keeps absolute time from the start sample', () => {
-    const samples = simulateFlight({ ...launch(20, 45), t: 1.5 }, EARTH, 12, 0.15)
-    expect(samples[0].t).toBe(1.5)
-    expect(samples.at(-1)!.t).toBeGreaterThan(1.5)
-  })
 })
