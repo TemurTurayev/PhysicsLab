@@ -81,9 +81,9 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const fill = new THREE.DirectionalLight(0xaac2d6, 0.4); fill.position.set(10, 12, 35); group.add(fill)
 
   // Ground plane: saddle between mountain ridges
-  const groundW = opts.maxX + 120
+  const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, 100, 70))
-  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX + 80 - 40) / 2, 0, 0)
+  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
   const posCount = groundGeo.attributes.position.count
   const gColors = new Float32Array(posCount * 3)
   const [cGrass, cScree, cRock, cSnow] = [new THREE.Color('#7d8a6a'), new THREE.Color('#5a5245'), new THREE.Color('#6c7075'), new THREE.Color('#e8eff4')]
@@ -320,6 +320,7 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
 
   return {
     group, fog, background,
+    skirt: '#7d8a6a',
     palette: { accent: '#f0a640', ground: '#7d8a6a', sky: '#dfe6ea' },
     update(t: number): void {
       for (const item of targetItems) {

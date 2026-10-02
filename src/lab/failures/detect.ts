@@ -87,12 +87,17 @@ export function detectFailures(r: ShotResult, ctx: DetectContext): FailureEvent[
   if (ctx.studentFlight && isOscillating(r)) return [{ id: 'unstable', t: r.flight[0].t, numbers: { dt: ctx.stepDt ?? r.flight[1].t - r.flight[0].t } }]
   const exploded = isExploded(r)
   if (exploded) return [exploded]
-  const events = [
+  // One root cause per shot: a code bug explains the odd release and the miss, a bad release explains the miss.
+  // Only a stone falling on the crew is always worth its own card.
+  const onTarget = landedOnTarget(r, ctx)
+  const codeFaults = [
     ...(ctx.angleLooksLikeDegrees ? [{ id: 'degrees_radians' as const, t: r.releaseT ?? 0, numbers: {} }] : []),
     // A stone that lands on a target was thrown and computed well enough: no faults to report.
-    ...(ctx.studentFlight && !landedOnTarget(r, ctx) ? studentPhysics(r, ctx) : []),
-    ...(landedOnTarget(r, ctx) ? [] : releaseFailures(r)),
-    ...landingFailures(r, ctx),
+    ...(ctx.studentFlight && !onTarget ? studentPhysics(r, ctx) : []),
   ]
+  const releaseFaults = codeFaults.length > 0 || onTarget ? [] : releaseFailures(r)
+  const landing = landingFailures(r, ctx)
+  const consequences = codeFaults.length + releaseFaults.length > 0 ? landing.filter((e) => e.id === 'self_hit') : landing
+  const events = [...codeFaults, ...releaseFaults, ...consequences]
   return events.sort((a, b) => a.t - b.t)
 }

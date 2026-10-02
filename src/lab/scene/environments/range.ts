@@ -102,9 +102,9 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   group.add(skyMesh)
 
   // Ground plane with mowing stripes along x
-  const groundW = opts.maxX + 120
+  const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, Math.min(50, Math.max(25, Math.round(groundW / 5))), 40))
-  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX + 40) / 2, 0, 0)
+  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
   const gColors = new Float32Array(groundGeo.attributes.position.count * 3)
   const [cGrass, cDark, cLight] = [new THREE.Color('#6f9a45'), new THREE.Color('#60883b'), new THREE.Color('#7ca64e')]
   for (let i = 0; i < groundGeo.attributes.position.count; i++) {
@@ -306,6 +306,7 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     group,
     fog,
     background,
+    skirt: '#6f9a45',
     palette: { accent: '#f0a640', ground: '#6f9a45', sky: '#cfe6f5' },
     update(t: number): void {
       for (let i = 0; i < flags.length; i++) {

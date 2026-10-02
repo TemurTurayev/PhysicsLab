@@ -25,8 +25,8 @@ describe('detectFailures', () => {
   it('flags an early release that comes back over the crew', () => {
     expect(ids(shot(170))).toEqual(expect.arrayContaining(['early_release', 'self_hit']))
   })
-  it('flags a late release slammed into the ground', () => {
-    expect(ids(shot(80))).toEqual(expect.arrayContaining(['late_release', 'short']))
+  it('flags a late release slammed into the ground, without a second "short" story', () => {
+    expect(ids(shot(80))).toEqual(['late_release'])
   })
   it('reports signed miss distance', () => {
     const [miss] = detectFailures(shot(110), { g: 9.81, targets: [{ x: 40, r: 3 }] })
@@ -46,6 +46,10 @@ describe('detectFailures', () => {
   })
   it('passes through the degrees/radians verdict of the mission', () => {
     expect(ids(shot(110), [], { angleLooksLikeDegrees: true })).toContain('degrees_radians')
+  })
+  it('names a code bug as the cause, not the release angle or the miss it produced', () => {
+    expect(ids(shot(170), [{ x: 73, r: 4 }], { angleLooksLikeDegrees: true })).toEqual(['degrees_radians', 'self_hit'])
+    expect(ids(shot(80), [{ x: 73, r: 4 }], { angleLooksLikeDegrees: true })).toEqual(['degrees_radians'])
   })
 })
 

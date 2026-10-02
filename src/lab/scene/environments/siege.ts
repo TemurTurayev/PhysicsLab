@@ -74,9 +74,9 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   const castleX = targetsWithH.length > 0 ? Math.max(...targetsWithH.map((t) => t.x)) : 100
 
   // Ground plane with vertex colours
-  const groundW = opts.maxX + 120
+  const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, 160, 90))
-  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX + 80 - 30) / 2, 0, 0)
+  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
   const gColors = new Float32Array(groundGeo.attributes.position.count * 3)
   const [cMud, cGrass, cDry, cMoatMud] = [new THREE.Color('#58442e'), new THREE.Color('#7b7a48'), new THREE.Color('#8c7a4e'), new THREE.Color('#383127')]
   for (let i = 0; i < groundGeo.attributes.position.count; i++) {
@@ -346,6 +346,7 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
 
   return {
     group, fog, background,
+    skirt: '#6b6a40',
     palette: { accent: '#ff8a3d', ground: '#7b7a48', sky: '#d9a07c' },
     update(t: number): void {
       for (const item of targetItems) {

@@ -126,7 +126,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
   const rimMat = track(new THREE.MeshBasicMaterial({ color: 0x3d94ff, side: THREE.BackSide, transparent: true, opacity: 0.38, blending: THREE.AdditiveBlending, depthWrite: false }))
   addMesh(group, track(new THREE.SphereGeometry(42, 28, 20)), rimMat, [earthPos.x, earthPos.y, earthPos.z], undefined, false, false)
 
-  const groundMinX = -60, groundMaxX = opts.maxX + 80, groundW = groundMaxX - groundMinX
+  const groundMinX = -100, groundMaxX = opts.maxX + 80, groundW = groundMaxX - groundMinX
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, 100, 70))
   groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((groundMinX + groundMaxX) / 2, 0, 0)
   const gPos = groundGeo.attributes.position, gCol = new Float32Array(gPos.count * 3)
@@ -328,6 +328,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
     group,
     fog: null,
     background: new THREE.Color('#000000'),
+    skirt: '#8a8883',
     palette: { accent: '#ff6a13', ground: '#9a9893', sky: '#000000' },
     update(t: number): void {
       lastT = t

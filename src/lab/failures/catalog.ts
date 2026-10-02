@@ -11,8 +11,8 @@ export interface FailureEntry {
   culprit: 'releaseDeg' | 'mc' | 'code' | 'target'
 }
 
-const f1 = (v: number | undefined) => (v === undefined ? '?' : v.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 }))
-const kN = (v: number | undefined) => (v === undefined ? '?' : (v / 1000).toLocaleString('ru-RU', { maximumFractionDigits: 1 }))
+export const f1 = (v: number | undefined) => (v === undefined ? '?' : v.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 }))
+export const kN = (v: number | undefined) => (v === undefined ? '?' : (v / 1000).toLocaleString('ru-RU', { maximumFractionDigits: 1 }))
 const abs1 = (v: number | undefined) => (v === undefined ? '?' : f1(Math.abs(v)))
 
 export const FAILURES: Record<FailureId, FailureEntry> = {
@@ -29,7 +29,7 @@ export const FAILURES: Record<FailureId, FailureEntry> = {
     title: 'Воздуха как будто нет',
     icon: '🌬️',
     what: (n) =>
-      `Горизонтальная скорость в твоём коде почти не меняется (${f1(n.ax)} м/с²), а воздух должен тормозить камень примерно на ${f1(n.expected)} м/с².`,
+      `Горизонтальная скорость в твоём коде почти не меняется (${f1(n.ax)} м/с²), а воздух должен тормозить камень с ускорением около ${abs1(n.expected)} м/с².`,
     why: 'Сопротивление воздуха растёт с квадратом скорости относительно воздуха: a = −k·|v − w|·(v − w). Без этой строки камень летит как в вакууме и улетает дальше цели.',
     realLife:
       'В 1971 году астронавт Дэвид Скотт («Аполлон-15») уронил на Луне молоток и перо — без воздуха они упали одновременно. На Земле перо тормозит воздух.',
@@ -85,7 +85,7 @@ export const FAILURES: Record<FailureId, FailureEntry> = {
     title: 'Камень вернулся к своим',
     icon: '🪵',
     what: (n) => `Камень упал на x = ${f1(n.x)} м, то есть у самой машины или позади неё.`,
-    why: 'При раннем отпуске скорость направлена назад, и камень летит туда, где стоит расчёт.',
+    why: 'Скорость вылета была направлена назад или круто вверх — из-за раннего отпуска или ошибки в расчёте, — и камень упал туда, где стоит расчёт.',
     realLife:
       'Поэтому вокруг требушета держат зону безопасности, в том числе позади машины. Здесь вместо людей деревянные манекены.',
     culprit: 'releaseDeg',
@@ -101,7 +101,7 @@ export const FAILURES: Record<FailureId, FailureEntry> = {
   short: {
     title: 'Недолёт',
     icon: '📏',
-    what: (n) => `Камень упал на ${abs1(n.miss)} м ближе цели (${f1(n.x)} м вместо ${f1(n.target)} м).`,
+    what: (n) => `Камень не долетел до цели ${abs1(n.miss)} м: упал на ${f1(n.x)} м, а цель на ${f1(n.target)} м.`,
     why: 'Не хватило дальности: угол вылета далёк от выгодного, либо скорость мала.',
     realLife: 'Артиллеристы называют это «недолёт» и поправляют следующий выстрел по разнице. Ты делаешь то же самое.',
     culprit: 'target',
@@ -109,8 +109,8 @@ export const FAILURES: Record<FailureId, FailureEntry> = {
   long: {
     title: 'Перелёт',
     icon: '🎯',
-    what: (n) => `Камень улетел на ${abs1(n.miss)} м дальше цели (${f1(n.x)} м вместо ${f1(n.target)} м).`,
-    why: 'Дальность больше нужной. Сдвинь момент отпуска, чтобы угол вылета стал менее выгодным.',
+    what: (n) => `Камень перелетел цель на ${abs1(n.miss)} м: упал на ${f1(n.x)} м, а цель на ${f1(n.target)} м.`,
+    why: 'Дальность больше нужной: камню досталось слишком много скорости или слишком выгодный угол вылета. Убавь одно из двух.',
     realLife: 'Перелёт тоже промах. Точность важнее силы.',
     culprit: 'target',
   },

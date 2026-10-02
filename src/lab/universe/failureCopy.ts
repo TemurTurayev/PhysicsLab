@@ -10,7 +10,15 @@ const STONE_TO_PROJECTILE: Array<[RegExp, string]> = [
   [/камню/g, 'снаряду'],
 ]
 
-const renameStone = (text: string) => STONE_TO_PROJECTILE.reduce((t, [re, to]) => t.replace(re, to), text)
+// The complex speaks to its intern formally, like the briefs do.
+const FORMAL: Array<[RegExp, string]> = [
+  [/В твоём коде/g, 'В вашем коде'],
+  [/в твоём коде/g, 'в вашем коде'],
+  [/Ты делаешь то же самое/g, 'Вы делаете то же самое'],
+  [/Убавь одно из двух/g, 'Убавьте одно из двух'],
+]
+
+const renameStone = (text: string) => [...STONE_TO_PROJECTILE, ...FORMAL].reduce((t, [re, to]) => t.replace(re, to), text)
 
 /** The post-mortem as this universe tells it: own lines where the setting differs, the same physics everywhere. */
 export function tellFailure(id: FailureId, u: Universe): FailureEntry {
@@ -22,6 +30,6 @@ export function tellFailure(id: FailureId, u: Universe): FailureEntry {
     title: renameStone(own.title ?? base.title),
     why: renameStone(own.why ?? base.why),
     realLife: renameStone(own.realLife ?? base.realLife),
-    what: (n) => renameStone(base.what(n)),
+    what: own.what ?? ((n) => renameStone(base.what(n))),
   }
 }

@@ -1,3 +1,4 @@
+import type { FailureEntry } from '../failures/catalog'
 import type { FailureId } from '../failures/types'
 import type { EnvironmentFactory } from '../scene/environments/types'
 
@@ -26,5 +27,5 @@ export interface Universe {
   terms: { journal: string; incident: string; incidentNew: string; movingTarget: string }
   retroByDefault: boolean
   /** Universe-specific lines for post-mortems; anything left out is the shared text. */
-  failureCopy?: Partial<Record<FailureId, { title?: string; why?: string; realLife?: string }>>
+  failureCopy?: Partial<Record<FailureId, { title?: string; what?: FailureEntry['what']; why?: string; realLife?: string }>>
 }

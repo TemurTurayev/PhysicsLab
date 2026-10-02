@@ -104,8 +104,8 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   group.add(fill)
 
   // Ground plane
-  const groundGeo = track(new THREE.PlaneGeometry(opts.maxX + 140, 240, 160, 90))
-  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX + 20) / 2, 0, 0)
+  const groundGeo = track(new THREE.PlaneGeometry(opts.maxX + 180, 240, 160, 90))
+  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
   const gColors = new Float32Array(groundGeo.attributes.position.count * 3)
   const cDirt = new THREE.Color(0xa08866); const cGrass = new THREE.Color('#86a052'); const cDry = new THREE.Color(0xa3a35c)
   for (let i = 0; i < groundGeo.attributes.position.count; i++) {
@@ -318,6 +318,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
 
   return {
     group, fog, background,
+    skirt: '#8d9a5a',
     palette: { accent: '#f0a640', ground: '#7a8f4e', sky: '#f6dcae' },
     update(t: number): void {
       for (const item of targetItems) {

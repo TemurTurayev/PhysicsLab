@@ -12,6 +12,8 @@ export interface Environment {
   setHit(index: number | null): void
   dispose(): void
   palette: { accent: string; ground: string; sky: string }
+  /** Outdoor worlds: colour of the endless ground beyond the detailed plane, so its edge never shows. */
+  skirt?: string
 }
 
 export interface EnvironmentOptions {

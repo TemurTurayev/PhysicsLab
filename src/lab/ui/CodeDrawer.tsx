@@ -1,5 +1,6 @@
 import Editor, { type OnMount } from '@monaco-editor/react'
 import { useEffect, useRef } from 'react'
+import { explainError } from '../python/explain'
 import type { StudentError } from '../python/protocol'
 
 export interface CodeDrawerProps {
@@ -61,6 +62,7 @@ export function CodeDrawer(p: CodeDrawerProps) {
           style={{ borderColor: 'var(--lab-line)', color: p.error ? 'var(--lab-bad)' : 'var(--lab-dim)' }}
         >
           {p.error ? `${p.error.line ? `Строка ${p.error.line}: ` : ''}${p.error.message}` : p.stdout}
+          {p.error && explainError(p.error.message) && <span style={{ color: 'var(--lab-text)' }}>{`\n${explainError(p.error.message)}`}</span>}
         </pre>
       )}
       <div className="flex gap-2 p-3 border-t" style={{ borderColor: 'var(--lab-line)' }}>

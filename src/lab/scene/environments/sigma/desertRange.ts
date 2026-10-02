@@ -89,7 +89,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
   const background = new THREE.Color('#f1dcb4')
 
   // Ground plane with vertex-color variation
-  const groundMinX = -60, groundMaxX = opts.maxX + 80, groundW = groundMaxX - groundMinX
+  const groundMinX = -100, groundMaxX = opts.maxX + 80, groundW = groundMaxX - groundMinX
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, 160, 90))
   groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((groundMinX + groundMaxX) / 2, 0, 0)
   const posAttr = groundGeo.attributes.position, gColors = new Float32Array(posAttr.count * 3)
@@ -365,6 +365,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
 
   return {
     group, fog, background,
+    skirt: '#c9a473',
     palette: { accent: '#ff6a13', ground: '#c9a473', sky: '#f1dcb4' },
     update(t: number): void {
       const blink = Math.sin(t * 6) > 0.1

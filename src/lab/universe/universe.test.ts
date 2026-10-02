@@ -44,6 +44,15 @@ describe('post-mortems per universe', () => {
     expect(told.realLife).not.toMatch(/требушет/i)
     expect(told.what(n)).toMatch(/114,6/)
   })
+  it('the steel machine never cracks like wood or tears like rope, and the intern is addressed formally', () => {
+    const n = { t: 0.8, load: 11500, limit: 11500, ratio: 1, angleDeg: 120, speed: 20, x: -20, miss: 5, target: 60, ay: 0, ax: 0, expected: -2, g: 1.62, dt: 0.5 }
+    for (const id of Object.keys(FAILURES) as Array<keyof typeof FAILURES>) {
+      const told = tellFailure(id, sigma)
+      const text = `${told.what(n)} ${told.why} ${told.realLife}`
+      expect(text, id).not.toMatch(/дерев|верёвк|веревк/i)
+      expect(text, id).not.toMatch(/\bты\b|тво[йеёия]/i)
+    }
+  })
   it('Classic keeps the original post-mortem', () => {
     expect(tellFailure('early_release', classic)).toBe(FAILURES.early_release)
   })

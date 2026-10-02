@@ -245,6 +245,8 @@ function MissionView({ mission }: { mission: Mission }) {
           won={run.won}
           stars={run.stars}
           onNext={next ? () => navigate(`/trebuchet/${next.id}`) : undefined}
+          onFinish={() => navigate('/trebuchet')}
+          formal={sigma}
         />
       )}
 

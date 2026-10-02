@@ -20,6 +20,7 @@ export interface ShotView {
 
 const TAIL_AFTER_LANDING = 3 // seconds the scene keeps running after impact
 const NO_LANDING_SHOWN = 6 // seconds of a flight that never lands
+const SKIRT_RADIUS = 3000 // m, far past every fog distance
 
 /**
  * Owns the renderer and everything in the 3D world. React talks to it through
@@ -30,6 +31,7 @@ export class LabScene {
   private readonly scene = new THREE.Scene()
   private readonly camera = new THREE.PerspectiveCamera(45, 1, 0.1, 3000)
   private env: Environment | null = null
+  private skirt: THREE.Mesh | null = null
   private envMap: THREE.WebGLRenderTarget | null = null
   private machine: TrebuchetModel | null = null
   private idle: ArmSample | null = null
@@ -87,6 +89,7 @@ export class LabScene {
     this.focusX = targets[0]?.x ?? maxX * 0.6
     this.env = factory({ targets, maxX, wind })
     this.scene.add(this.env.group)
+    this.setSkirt(this.env.skirt ?? null)
     this.scene.fog = this.env.fog
     this.scene.background = this.env.background
     this.envMap?.dispose()
@@ -99,6 +102,21 @@ export class LabScene {
       this.scene.environmentIntensity = 0.55
     }
     this.render()
+  }
+
+  /** A huge flat disc just below the ground plane: fogged into the horizon instead of a visible edge. */
+  private setSkirt(color: string | null): void {
+    if (this.skirt) {
+      this.scene.remove(this.skirt)
+      this.skirt.geometry.dispose()
+      ;(this.skirt.material as THREE.Material).dispose()
+      this.skirt = null
+    }
+    if (!color) return
+    const geo = new THREE.CircleGeometry(SKIRT_RADIUS, 48).rotateX(-Math.PI / 2)
+    this.skirt = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }))
+    this.skirt.position.y = -1.5
+    this.scene.add(this.skirt)
   }
 
   setTrebuchet(p: TrebuchetParams, skin: MachineSkin = 'wood'): void {
@@ -259,6 +277,7 @@ export class LabScene {
     cancelAnimationFrame(this.raf)
     this.resizeObserver.disconnect()
     this.env?.dispose()
+    this.setSkirt(null)
     this.envMap?.dispose()
     this.machine?.dispose()
     this.crew.dispose()

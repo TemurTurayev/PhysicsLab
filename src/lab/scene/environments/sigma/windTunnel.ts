@@ -82,7 +82,7 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
   }
 
   const wind = opts.wind ?? 0
-  const hallMinX = -45, hallMaxX = opts.maxX + 20, hallLen = hallMaxX - hallMinX, hallMidX = (hallMinX + hallMaxX) / 2
+  const hallMinX = -55, hallMaxX = opts.maxX + 20, hallLen = hallMaxX - hallMinX, hallMidX = (hallMinX + hallMaxX) / 2
   const dummy = new THREE.Object3D()
 
   // Sky & Lighting

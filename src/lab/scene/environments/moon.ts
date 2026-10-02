@@ -118,9 +118,9 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   rimMesh.position.copy(earthPos); group.add(rimMesh)
 
   // Ground plane: grey regolith with subtle vertex colors, flat in lane |z| < 6
-  const groundW = opts.maxX + 120
+  const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, 120, 75))
-  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX + 40) / 2, 0, 0)
+  groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
   const posCount = groundGeo.attributes.position.count
   const gColors = new Float32Array(posCount * 3)
   const [cRegolith, cDark] = [new THREE.Color('#9a9893'), new THREE.Color('#6f6d69')]
@@ -304,6 +304,7 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
 
   return {
     group, fog, background,
+    skirt: '#8a8883',
     palette: { accent: '#f0a640', ground: '#9a9893', sky: '#000000' },
     update(t: number): void {
       lastT = t
