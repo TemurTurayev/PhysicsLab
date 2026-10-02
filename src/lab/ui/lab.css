@@ -1,0 +1,46 @@
+/* PhysicsLab v1 — "instrument" UI over living 3D scenes. One amber accent per world. */
+.lab-root {
+  --lab-bg: #0d1016;
+  --lab-panel: rgba(14, 17, 23, 0.78);
+  --lab-panel-solid: #12161d;
+  --lab-line: rgba(255, 255, 255, 0.09);
+  --lab-text: #e8e3d8;
+  --lab-dim: #9aa3ad;
+  --lab-accent: #f0a640;
+  --lab-accent-soft: rgba(240, 166, 64, 0.16);
+  --lab-good: #7ee08a;
+  --lab-bad: #ff7a6b;
+  --lab-info: #58a6ff;
+  --lab-radius: 14px;
+  --lab-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --lab-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--lab-text);
+  font-family: var(--lab-sans);
+  background: var(--lab-bg);
+}
+.lab-panel {
+  background: var(--lab-panel);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+.lab-mono { font-family: var(--lab-mono); font-variant-numeric: tabular-nums; }
+.lab-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lab-dim); }
+.lab-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--lab-line);
+  background: rgba(255, 255, 255, 0.05); color: var(--lab-text); font-weight: 600; font-size: 14px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.lab-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.lab-btn:active { transform: translateY(1px); }
+.lab-btn:focus-visible, .lab-root input:focus-visible { outline: 2px solid var(--lab-accent); outline-offset: 2px; }
+.lab-btn-primary { background: var(--lab-accent); border-color: var(--lab-accent); color: #1a1206; }
+.lab-btn-primary:hover { background: #ffb85a; }
+.lab-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.lab-range { width: 100%; accent-color: var(--lab-accent); }
+@media (prefers-reduced-motion: reduce) {
+  .lab-root * { transition: none !important; animation: none !important; }
+}
