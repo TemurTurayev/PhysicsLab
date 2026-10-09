@@ -87,7 +87,7 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
 
   // Sky & Lighting
   const fog = new THREE.Fog('#14181a', 40, opts.maxX + 70), background = new THREE.Color('#0e1112')
-  group.add(new THREE.HemisphereLight(0x9fb0aa, 0x202224, 0.3))
+  group.add(new THREE.HemisphereLight(0x9fb0aa, 0x3a3c3e, 0.6))
   const sun = new THREE.DirectionalLight(0xdff3ee, 1.3)
   sun.position.set(5, 30, 8); sun.castShadow = true
   sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0003
@@ -168,7 +168,7 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
     for (const lz of [-15.7, 29.7]) {
       addMesh(group, lampGeo, lampMat, [x, 28, lz], undefined, false, false)
       if (fCount % 2 === 0) {
-        const spot = new THREE.SpotLight(0xdff3ee, 100, 60, 0.6, 0.4, 1.6)
+        const spot = new THREE.SpotLight(0xdff3ee, 380, 70, 0.85, 0.5, 1.5)
         spot.position.set(x, 27.8, lz); spot.target.position.set(x, 0, lz > 0 ? 8 : -4)
         group.add(spot, spot.target); spots.push(spot)
       }
@@ -362,6 +362,7 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
 
   return {
     group, fog, background,
+    bounds: { minX: hallMinX, maxX: hallMaxX, minZ: -16, maxZ: 30, maxY: 28 },
     palette: { accent: '#ff6a13', ground: '#8a877c', sky: '#0e1112' },
     update(t: number): void {
       for (const item of targetItems) {

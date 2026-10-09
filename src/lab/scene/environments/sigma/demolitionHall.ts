@@ -89,7 +89,7 @@ export const createDemolitionHall: EnvironmentFactory = (opts: EnvironmentOption
 
   const fog = new THREE.Fog('#3a2f34', 90, opts.maxX + 200)
   const background = new THREE.Color('#1c1a22')
-  group.add(new THREE.HemisphereLight(0x7a86a8, 0x2a2220, 0.45))
+  group.add(new THREE.HemisphereLight(0x7a86a8, 0x3a3230, 0.65))
 
   const sun = new THREE.DirectionalLight(0xffa874, 1.6)
   sun.position.copy(SUN_DIR).multiplyScalar(120)
@@ -195,7 +195,7 @@ export const createDemolitionHall: EnvironmentFactory = (opts: EnvironmentOption
       addMesh(group, dropGeo, wallSteel, [x, 32.7, lz], undefined, false, false)
       addMesh(group, lampGeo, lampMat, [x, 26, lz], undefined, false, false)
       if (lampCount % 3 === 0) {
-        const spot = new THREE.SpotLight(0xffb35c, 160, 70, 0.7, 0.5, 1.5)
+        const spot = new THREE.SpotLight(0xffb35c, 420, 80, 0.9, 0.5, 1.4)
         spot.position.set(x, 25.8, lz); spot.target.position.set(x, 0, lz)
         group.add(spot, spot.target); spots.push(spot)
       }
@@ -361,6 +361,7 @@ export const createDemolitionHall: EnvironmentFactory = (opts: EnvironmentOption
 
   return {
     group, fog, background,
+    bounds: { minX: hallMinX, maxX: hallMaxX, minZ: -22, maxZ: 30, maxY: 39 },
     palette: { accent: '#ff6a13', ground: '#6b675e', sky: '#f08a4b' },
     update(t: number): void {
       for (const item of targetItems) {

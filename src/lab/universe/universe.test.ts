@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { findMission, MISSIONS } from '../levels'
 import { FAILURES } from '../failures/catalog'
 import { applyCopy } from './copy'
-import { tellFailure } from './failureCopy'
+import { tellFailure, tellLine } from './failureCopy'
 import { getUniverse } from './index'
 
 const sigma = getUniverse('sigma')
@@ -52,6 +52,11 @@ describe('post-mortems per universe', () => {
       expect(text, id).not.toMatch(/дерев|верёвк|веревк/i)
       expect(text, id).not.toMatch(/\bты\b|тво[йеёия]/i)
     }
+  })
+  it('the placard in the complex talks about a projectile on a cable, formally', () => {
+    expect(tellLine('Праща раскроется, когда рука опустится до 110°. Жми «Огонь».', sigma)).toBe('Трос сойдёт с крюка, когда балка опустится до 110°. Нажмите «Огонь».')
+    expect(tellLine('Камень ушёл со скоростью 19,6 м/с', sigma)).toBe('Снаряд ушёл со скоростью 19,6 м/с')
+    expect(tellLine('Камень ушёл', classic)).toBe('Камень ушёл')
   })
   it('Classic keeps the original post-mortem', () => {
     expect(tellFailure('early_release', classic)).toBe(FAILURES.early_release)

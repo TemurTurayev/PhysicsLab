@@ -101,7 +101,7 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
 
   const fog = new THREE.Fog('#15181a', 30, opts.maxX + 60)
   const background = new THREE.Color('#0f1112')
-  group.add(new THREE.HemisphereLight(0x9fb0aa, 0x202224, 0.25))
+  group.add(new THREE.HemisphereLight(0x9fb0aa, 0x3a3c3e, 0.6))
 
   const sun = new THREE.DirectionalLight(0xdff3ee, 1.4)
   sun.position.set(5, 28, 5)
@@ -127,7 +127,7 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
     for (const z of [-5, 5]) {
       addMesh(group, lampGeo, lampMat, [x, 29, z], undefined, false, false)
       if (fCount % 2 === 0) {
-        const spot = new THREE.SpotLight(0xdff3ee, 120, 60, 0.6, 0.4, 1.6)
+        const spot = new THREE.SpotLight(0xdff3ee, 420, 70, 0.85, 0.5, 1.5)
         spot.position.set(x, 28.8, z)
         spot.target.position.set(x, 0, z)
         group.add(spot, spot.target)
@@ -405,6 +405,7 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
 
   return {
     group, fog, background,
+    bounds: { minX: hallMinX, maxX: hallMaxX, minZ: -14, maxZ: 30, maxY: 29 },
     palette: { accent: '#ff6a13', ground: '#8a877c', sky: '#0f1112' },
     update(t: number): void {
       for (const item of targetItems) {

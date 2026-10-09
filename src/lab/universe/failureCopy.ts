@@ -18,7 +18,19 @@ const FORMAL: Array<[RegExp, string]> = [
   [/Убавь одно из двух/g, 'Убавьте одно из двух'],
 ]
 
-const renameStone = (text: string) => [...STONE_TO_PROJECTILE, ...FORMAL].reduce((t, [re, to]) => t.replace(re, to), text)
+// The steel machine has a cable on a hook, not a sling that opens.
+const MACHINE: Array<[RegExp, string]> = [
+  [/Праща раскроется, когда рука опустится до/g, 'Трос сойдёт с крюка, когда балка опустится до'],
+  [/Праща не раскрылась/g, 'Трос не сошёл с крюка'],
+  [/Жми «Огонь»/g, 'Нажмите «Огонь»'],
+]
+
+const renameStone = (text: string) => [...STONE_TO_PROJECTILE, ...FORMAL, ...MACHINE].reduce((t, [re, to]) => t.replace(re, to), text)
+
+/** Any shared line (placard, hints) as this universe would say it. */
+export function tellLine(text: string, u: Universe): string {
+  return u.id === 'classic' ? text : renameStone(text)
+}
 
 /** The post-mortem as this universe tells it: own lines where the setting differs, the same physics everywhere. */
 export function tellFailure(id: FailureId, u: Universe): FailureEntry {

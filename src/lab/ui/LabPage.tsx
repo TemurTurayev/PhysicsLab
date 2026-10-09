@@ -8,6 +8,7 @@ import { isPythonReady, warmUpPython } from '../python/runStudent'
 import { LabScene } from '../scene/LabScene'
 import { useLabProgress } from '../state/labProgress'
 import { ActBar, type Act } from './ActBar'
+import { CameraChip } from './CameraChip'
 import { CodeDrawer } from './CodeDrawer'
 import { ControlPanel } from './ControlPanel'
 import { IncidentCard } from './IncidentCard'
@@ -21,6 +22,7 @@ import './lab.css'
 import './sigma.css'
 import { playSigma } from '../audio/packs/sigma'
 import { applyCopy, getUniverse, type Universe } from '../universe'
+import { tellLine } from '../universe/failureCopy'
 import { useUniverse } from '../universe/useUniverse'
 
 type Phase = 'idle' | 'flying' | 'landed'
@@ -35,9 +37,11 @@ export function LabPage() {
 function useLabScene(mission: Mission, universe: Universe) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sceneRef = useRef<LabScene | null>(null)
+  const [freeCamera, setFreeCamera] = useState(false)
   useEffect(() => {
     if (!canvasRef.current) return
     const scene = new LabScene(canvasRef.current)
+    scene.onCameraMode(setFreeCamera)
     const maxX = Math.max(110, ...mission.targets.map((t) => t.x * 1.5))
     // A sector this universe has not built yet falls back to Classic rather than an empty void.
     const env = universe.envFor(mission.chapter) ?? getUniverse('classic').envFor(mission.chapter)!
@@ -49,7 +53,7 @@ function useLabScene(mission: Mission, universe: Universe) {
       sceneRef.current = null
     }
   }, [mission, universe])
-  return { canvasRef, sceneRef }
+  return { canvasRef, sceneRef, freeCamera }
 }
 
 function MissionView({ mission }: { mission: Mission }) {
@@ -57,7 +61,8 @@ function MissionView({ mission }: { mission: Mission }) {
   const universe = useUniverse()
   const told = applyCopy(mission, universe)
   const sigma = universe.id === 'sigma'
-  const { canvasRef, sceneRef } = useLabScene(mission, universe)
+  const { canvasRef, sceneRef, freeCamera } = useLabScene(mission, universe)
+  const pressAt = useRef<{ x: number; y: number } | null>(null)
   const [retro, setRetro] = useState(universe.retroByDefault)
   useEffect(() => sceneRef.current?.setRetro(retro), [retro, sceneRef, universe])
   const run = useMissionRun(mission)
@@ -144,7 +149,11 @@ function MissionView({ mission }: { mission: Mission }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.won, run.stars, mission.id])
 
+  // A click places the flag; a drag only turns the camera.
   const placePrediction = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const down = pressAt.current
+    pressAt.current = null
+    if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return
     if (mission.predict?.quantity !== 'landingX' || phase === 'flying') return
     const x = sceneRef.current?.groundXAt(e.clientX, e.clientY)
     if (x === null || x === undefined) return
@@ -157,7 +166,12 @@ function MissionView({ mission }: { mission: Mission }) {
 
   return (
     <div className="lab-root fixed inset-0 overflow-hidden" data-universe={universe.id}>
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block touch-none" onPointerDown={placePrediction} />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full block touch-none"
+        onPointerDown={(e) => (pressAt.current = { x: e.clientX, y: e.clientY })}
+        onPointerUp={placePrediction}
+      />
 
       <div className="absolute top-0 inset-x-0 p-2 md:p-3 flex flex-col items-start gap-2 pointer-events-none [&>*]:pointer-events-auto">
         <div className="w-full">
@@ -211,12 +225,16 @@ function MissionView({ mission }: { mission: Mission }) {
             />
           </div>
         )}
+        <div className="self-start md:absolute md:left-3 md:bottom-[96px]">
+          <CameraChip free={freeCamera} onAuto={() => sceneRef.current?.autoCamera()} />
+        </div>
         <div className="w-full md:absolute md:bottom-0 md:inset-x-0 md:p-3">
           <Placard
             shot={run.last?.shot ?? null}
             releaseDeg={releaseDeg}
             beamLimit={mission.base.trebuchet.beamStrength}
             movingLabel={universe.terms.movingTarget}
+            tell={(line) => tellLine(line, universe)}
             phase={phase}
             movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
           />

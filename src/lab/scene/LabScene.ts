@@ -3,6 +3,7 @@ import { simulateArm } from '../sim/trebuchet'
 import type { ArmSample, FlightSample, ShotResult, TrebuchetParams } from '../sim/types'
 import type { Target } from '../levels/types'
 import { cameraAt } from './camera'
+import { CameraRig } from './cameraRig'
 import { createCrew, type Crew } from './crew'
 import { ForceArrows, ImpactBurst, PathLine, PredictionMarker } from './effects'
 import type { Environment, EnvironmentFactory } from './environments/types'
@@ -58,6 +59,7 @@ export class LabScene {
   private retro: RetroPass | null = null
 
   private readonly canvas: HTMLCanvasElement
+  private readonly rig: CameraRig
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -76,6 +78,7 @@ export class LabScene {
     this.stone.castShadow = true
     this.stone.visible = false
     this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group)
+    this.rig = new CameraRig(this.camera, canvas)
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(canvas)
     this.resize()
@@ -90,6 +93,7 @@ export class LabScene {
     this.env = factory({ targets, maxX, wind })
     this.scene.add(this.env.group)
     this.setSkirt(this.env.skirt ?? null)
+    this.rig.setBounds(this.env.bounds ?? null)
     this.scene.fog = this.env.fog
     this.scene.background = this.env.background
     this.envMap?.dispose()
@@ -246,8 +250,7 @@ export class LabScene {
 
     const landSample = shot?.landing ? (shot.flight.at(-1) ?? null) : null
     const cam = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX)
-    this.camera.position.copy(cam.position)
-    this.camera.lookAt(cam.target)
+    this.rig.apply(cam)
     if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
     else this.renderer.render(this.scene, this.camera)
   }
@@ -273,8 +276,18 @@ export class LabScene {
     this.render()
   }
 
+  /** Free orbit camera (the student dragged or zoomed) or the cinematic one. */
+  onCameraMode(cb: ((free: boolean) => void) | null): void {
+    this.rig.onModeChange(cb)
+  }
+
+  autoCamera(): void {
+    this.rig.backToAuto()
+  }
+
   dispose(): void {
     cancelAnimationFrame(this.raf)
+    this.rig.dispose()
     this.resizeObserver.disconnect()
     this.env?.dispose()
     this.setSkirt(null)

@@ -12,11 +12,12 @@ export class RetroPass {
   private readonly camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
   private readonly scale: number
 
-  constructor(scale = 0.5, levels = 32) {
+  constructor(scale = 0.75, levels = 64) {
     this.scale = scale
     this.target = new THREE.WebGLRenderTarget(1, 1, {
-      minFilter: THREE.NearestFilter,
-      magFilter: THREE.NearestFilter,
+      // Linear upscale from 3/4 resolution: soft like a CRT, without blocky uneven pixels.
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
       type: THREE.HalfFloatType,
       colorSpace: THREE.LinearSRGBColorSpace,
     })
@@ -40,7 +41,7 @@ export class RetroPass {
           ivec2 i = ivec2(mod(p, 4.0));
           int idx = i.x + i.y * 4;
           int m[16] = int[16](0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5);
-          return float(m[idx]) / 16.0 - 0.5;
+          return (float(m[idx]) / 16.0 - 0.5) * 0.6;
         }
         void main() {
           vec4 c = texture2D(tScene, vUv);
@@ -49,7 +50,7 @@ export class RetroPass {
           #include <colorspace_fragment>
           vec2 px = floor(vUv * uSize);
           vec3 q = floor(gl_FragColor.rgb * uLevels + bayer(px) + 0.5) / uLevels;
-          float line = 1.0 - uLines * 0.08 * step(0.5, mod(gl_FragCoord.y, 3.0) / 3.0);
+          float line = 1.0 - uLines * 0.05 * step(0.5, mod(gl_FragCoord.y, 3.0) / 3.0);
           gl_FragColor = vec4(q * line, 1.0);
         }`,
       depthTest: false,

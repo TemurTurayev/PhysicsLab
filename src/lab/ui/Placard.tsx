@@ -8,6 +8,8 @@ export interface PlacardProps {
   movingTargetSpeed?: number
   beamLimit?: number // N·m; when set, show the peak beam load as a share of it
   movingLabel?: string
+  /** Rewords the story for the current universe (stone → projectile, sling → cable). */
+  tell?: (line: string) => string
 }
 
 const fmt1 = (v: number): string =>
@@ -46,8 +48,8 @@ function getStory(
   return `Упал в ${fmt1(shot.landing.x)} м через ${fmt1(flightTime)} с полёта.${apexText}`
 }
 
-export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit, movingLabel = 'Тележка проедет' }: PlacardProps): JSX.Element {
-  const story = getStory(phase, shot, releaseDeg)
+export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit, movingLabel = 'Тележка проедет', tell = (s) => s }: PlacardProps): JSX.Element {
+  const story = tell(getStory(phase, shot, releaseDeg))
 
   const isFlyingOrLanded = phase === 'flying' || phase === 'landed'
   const speedVal = isFlyingOrLanded && shot?.launch ? `${fmt1(shot.launch.speed)} м/с` : '—'

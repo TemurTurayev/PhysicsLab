@@ -8,7 +8,7 @@ function hash(x: number, y: number, s = 0): number {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296
 }
 
-function quantize(val: number, steps = 8): number {
+function quantize(val: number, steps = 24): number {
   const step = 256 / steps
   return Math.min(255, Math.max(0, Math.round(val / step) * step))
 }
@@ -24,9 +24,11 @@ function makeCanvas(w: number, h: number): [HTMLCanvasElement, ImageData, Canvas
 
 function configureTexture(canvas: HTMLCanvasElement): THREE.CanvasTexture {
   const tex = new THREE.CanvasTexture(canvas)
-  tex.magFilter = THREE.NearestFilter
-  tex.minFilter = THREE.NearestFilter
-  tex.generateMipmaps = false
+  // Smooth filtering with mipmaps: crisp-pixel textures shimmer into black specks at a distance.
+  tex.magFilter = THREE.LinearFilter
+  tex.minFilter = THREE.LinearMipmapLinearFilter
+  tex.generateMipmaps = true
+  tex.anisotropy = 8
   tex.wrapS = THREE.RepeatWrapping
   tex.wrapT = THREE.RepeatWrapping
   tex.colorSpace = THREE.SRGBColorSpace
@@ -68,8 +70,8 @@ function bakeConcrete(dark: boolean): THREE.CanvasTexture {
       const streak2 = Math.max(0, 1 - Math.abs(x - 62) / 2) * (0.4 + 0.6 * (y / 128))
       const streak3 = Math.max(0, 1 - Math.abs(x - 96) / 3.5) * 0.4
       const streak = (streak1 + streak2 + streak3) * -35
-      const pore = hash(x, y, 13) > 0.95 ? -32 : 0
-      const mottling = (hash(x >> 1, y >> 1, 5) - 0.5) * 28 + (hash(x >> 3, y >> 3, 9) - 0.5) * 16
+      const pore = hash(x, y, 13) > 0.985 ? -12 : 0
+      const mottling = (hash(x >> 2, y >> 2, 5) - 0.5) * 12 + (hash(x >> 4, y >> 4, 9) - 0.5) * 16
       const total = seam + streak + pore + mottling
       const i = (y * 128 + x) * 4
       d[i] = quantize(base[0] + total)
@@ -205,7 +207,7 @@ function bakeRust(): THREE.CanvasTexture {
 const texCache = new Map<IndustrialTex, THREE.CanvasTexture>()
 const matCache = new Map<string, THREE.MeshLambertMaterial>()
 
-/** Retro texture: 128x128 (hazard 64x64), NearestFilter mag + min (no mipmaps), RepeatWrapping, sRGB colour space. Cached; callers must not dispose. */
+/** Retro texture: 128x128 (hazard 64x64), linear filtering with mipmaps, RepeatWrapping, sRGB colour space. Cached; callers must not dispose. */
 export function industrialTexture(kind: IndustrialTex): THREE.CanvasTexture {
   const cached = texCache.get(kind)
   if (cached) return cached
