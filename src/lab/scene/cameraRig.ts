@@ -31,7 +31,6 @@ export class CameraRig {
   private free = false
   private touching = false
   private listener: ((free: boolean) => void) | null = null
-  private followed: THREE.Vector3 | null = null
 
   constructor(camera: THREE.PerspectiveCamera, dom: HTMLElement) {
     this.camera = camera
@@ -77,7 +76,6 @@ export class CameraRig {
       this.camera.position.add(step)
       this.controls.target.add(step)
     }
-    this.followed = stone ? stone.clone() : null
     if (this.free) {
       this.controls.update()
     } else {
