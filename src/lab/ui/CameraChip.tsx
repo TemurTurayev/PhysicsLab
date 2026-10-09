@@ -32,11 +32,11 @@ export function CameraChip({ free, onAuto, slow, onSlow }: CameraChipProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <button type="button" className={`lab-btn lab-btn-float text-sm ${slow ? 'lab-btn-primary' : ''}`} onClick={onSlow} aria-pressed={slow} title="Полёт в 3 раза медленнее">
-        🐢 {slow ? 'Замедление вкл.' : 'Замедлить'}
+        🐢<span className="hidden md:inline">{slow ? 'Замедление вкл.' : 'Замедлить'}</span>
       </button>
       {free ? (
         <button type="button" className="lab-btn lab-btn-primary text-sm" onClick={onAuto} title="Вернуть автоматическую камеру">
-          🎥 Авто-камера
+          🎥<span className="hidden md:inline">Авто-камера</span>
         </button>
       ) : (
         !learned && <CameraHelp />

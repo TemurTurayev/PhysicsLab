@@ -269,7 +269,7 @@ function MissionView({ mission }: { mission: Mission }) {
         onPointerUp={placePrediction}
       />
 
-      <div className="absolute top-0 inset-x-0 p-2 md:p-3 pointer-events-none [&>*]:pointer-events-auto">
+      <div className="absolute top-0 inset-x-0 p-2 md:p-3 flex flex-col gap-2 pointer-events-none [&>*]:pointer-events-auto">
         <ActBar
           mission={told}
           retro={retro}
@@ -290,18 +290,18 @@ function MissionView({ mission }: { mission: Mission }) {
             setMutedState(!muted)
           }}
         />
-      </div>
 
-      {/* Story column: what just happened, the task, the theory. Fades while the stone flies. */}
-      <div
-        className={`absolute left-2 top-[118px] md:left-3 md:top-[72px] w-[min(340px,calc(100%-16px))] flex flex-col gap-2 overflow-y-auto transition-opacity duration-300 ${
-          feedback ? 'max-h-[62vh]' : 'max-h-[38vh]'
-        } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
-      >
-        {feedback}
-        <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} onReread={() => setIntro(true)} />
-        {!calcInDock && calc}
-        {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
+        {/* Story column: what just happened, the task, the theory. Fades while the stone flies. */}
+        <div
+          className={`w-[min(340px,100%)] md:absolute md:left-3 md:top-[72px] flex flex-col gap-2 overflow-y-auto transition-opacity duration-300 ${
+            feedback ? 'max-h-[62vh]' : 'max-h-[38vh]'
+          } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
+        >
+          {feedback}
+          <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} onReread={() => setIntro(true)} />
+          {!calcInDock && calc}
+          {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
+        </div>
       </div>
 
       {/* Desktop dock: numbers on top, controls under them; never overlapping. */}
@@ -341,7 +341,7 @@ function MissionView({ mission }: { mission: Mission }) {
             </div>
           </>
         )}
-        <div className="self-start md:hidden">{chips}</div>
+        <div className="self-end md:hidden">{chips}</div>
         <div className="w-full md:hidden">{placard}</div>
       </div>
 

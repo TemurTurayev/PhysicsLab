@@ -17,7 +17,7 @@ export interface ControlPanelProps {
 export function ControlPanel(p: ControlPanelProps) {
   const { mission } = p
   return (
-    <div className="lab-panel p-4 flex flex-col gap-4 w-full" data-coach="fire">
+    <div className="lab-panel p-3 md:p-4 flex flex-col gap-2.5 md:gap-4 w-full" data-coach="fire">
       {mission.sliders.map((s) => (
         <div key={s.key} className="flex flex-col gap-2">
           <span className="flex justify-between items-center gap-2">
@@ -35,12 +35,12 @@ export function ControlPanel(p: ControlPanelProps) {
             aria-label={s.label}
           />
           {s.key === 'releaseDeg' ? (
-            <span className="flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
+            <span className="hidden md:flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
               <span>раньше ← {s.max}{s.unit}</span>
               <span>{s.min}{s.unit} → позже</span>
             </span>
           ) : (
-            <span className="flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
+            <span className="hidden md:flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
               <span>{s.min.toLocaleString('ru-RU')} {s.unit}</span>
               <span>{s.max.toLocaleString('ru-RU')} {s.unit}</span>
             </span>
@@ -77,7 +77,7 @@ export function ControlPanel(p: ControlPanelProps) {
           )}
         </div>
       )}
-      <button type="button" className="lab-btn lab-btn-primary text-base min-h-[48px]" disabled={!p.canFire || p.busy} onClick={p.onFire}>
+      <button type="button" className="lab-btn lab-btn-primary text-base min-h-[44px] md:min-h-[48px]" disabled={!p.canFire || p.busy} onClick={p.onFire}>
         {p.busy ? 'Считаю…' : p.fireLabel}
         {!p.busy && <span className="lab-kbd hidden md:inline">Пробел</span>}
       </button>

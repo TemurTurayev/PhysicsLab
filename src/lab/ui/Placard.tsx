@@ -63,11 +63,11 @@ export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit,
       ? `${fmt1(movingTargetSpeed * flightTime)} м`
       : '—'
 
-  const readouts: Array<{ label: string; value: string }> = [
-    { label: 'Скорость', value: speedVal },
-    { label: 'Угол вылета', value: angleVal },
-    { label: 'Дальность', value: rangeVal },
-    { label: 'Время полёта', value: timeVal },
+  const readouts: Array<{ label: string; short?: string; value: string }> = [
+    { label: 'Скорость', short: 'v₀', value: speedVal },
+    { label: 'Угол вылета', short: 'α', value: angleVal },
+    { label: 'Дальность', short: 'R', value: rangeVal },
+    { label: 'Время полёта', short: 't', value: timeVal },
   ]
 
   if (movingTargetSpeed !== undefined) {
@@ -75,20 +75,23 @@ export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit,
   }
   if (beamLimit !== undefined) {
     const load = shot && isFlyingOrLanded ? Math.round((shot.peakMoment / beamLimit) * 100) : null
-    readouts.push({ label: 'Нагрузка балки', value: load === null ? '—' : `${load}%` })
+    readouts.push({ label: 'Нагрузка балки', short: 'балка', value: load === null ? '—' : `${load}%` })
   }
 
   return (
-    <div className="lab-panel px-3 py-2.5 md:px-4 md:py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-6 min-w-0">
-      <div className="min-w-0 flex-1">
+    <div className="lab-panel px-3 py-2 md:px-4 md:py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-6 min-w-0">
+      <div className="min-w-0 flex-1 hidden md:block">
         <p className="text-sm leading-snug" style={{ color: 'var(--lab-text)' }}>
           {story}
         </p>
       </div>
-      <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-x-3 gap-y-2 shrink-0 w-full md:w-auto">
+      <div className="grid grid-cols-5 sm:flex sm:flex-wrap items-center gap-x-3 gap-y-2 shrink-0 w-full md:w-auto">
         {readouts.map((r) => (
           <div key={r.label} className="flex flex-col min-w-0">
-            <span className="lab-label truncate">{r.label}</span>
+            <span className="lab-label truncate">
+              <span className="md:hidden normal-case text-[13px] tracking-normal">{r.short ?? r.label}</span>
+              <span className="hidden md:inline">{r.label}</span>
+            </span>
             <span className="lab-mono text-sm font-semibold truncate" style={{ color: 'var(--lab-accent)' }}>
               {r.value}
             </span>

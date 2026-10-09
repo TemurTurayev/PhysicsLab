@@ -39,7 +39,7 @@ export function ActBar(p: ActBarProps) {
       <Link to="/trebuchet" className="lab-btn !min-h-[38px] !px-3" aria-label="К карте мира" title="К карте мира">
         ←
       </Link>
-      <div className="min-w-0 mr-auto">
+      <div className="min-w-0 flex-1 basis-0">
         <div className="lab-label">
           Глава {p.mission.chapter} · миссия {p.mission.order}
         </div>
