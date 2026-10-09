@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addRegolithField, earthTexture, placeEarth } from './moonDressing'
 import { addGroundDetail } from '../textures/groundDetail'
 import type { Target } from '../../levels/types'
 import { woodMaterial } from '../wood'
@@ -8,6 +9,13 @@ let seed = 42
 function rand(): number {
   seed = (seed * 16807) % 2147483647
   return (seed - 1) / 2147483646
+}
+
+/** Flat lane for the physics, gentle swells beyond |z| = 6. */
+function moonHeight(gx: number, gz: number): number {
+  const d = Math.abs(gz) - 6
+  if (d <= 0) return 0
+  return Math.max(0, (d / 16) * (Math.sin(gx * 0.05 + 1.2) * Math.cos(gz * 0.05) * 2.2 + Math.sin(gx * 0.1) * 0.6))
 }
 
 function isReserved(x: number, z: number, m = 0.5): boolean {
@@ -34,20 +42,6 @@ function createSignTexture(text: string): THREE.CanvasTexture {
   return makeCanvas(256, 64, (ctx) => {
     ctx.fillStyle = '#ecdab4'; ctx.fillRect(0, 0, 256, 64); ctx.strokeStyle = '#54391c'; ctx.lineWidth = 4; ctx.strokeRect(3, 3, 250, 58)
     ctx.fillStyle = '#2b1b0b'; ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 128, 32)
-  })
-}
-
-function createEarthTexture(): THREE.CanvasTexture {
-  return makeCanvas(512, 256, (ctx) => {
-    ctx.fillStyle = '#103060'; ctx.fillRect(0, 0, 512, 256); ctx.fillStyle = '#2d5a27'
-    for (const [cx, cy, rx, ry] of [[160, 110, 65, 45], [190, 170, 40, 60], [320, 90, 90, 45], [340, 160, 55, 50], [430, 180, 45, 35], [80, 75, 45, 30]]) {
-      ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0.2, 0, Math.PI * 2); ctx.fill()
-    }
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.72)'
-    for (let i = 0; i < 28; i++) {
-      ctx.beginPath(); ctx.ellipse((i * 19.3 + 25) % 512, 40 + ((i * 37.1) % 176), 35 + (i % 5) * 8, 8 + (i % 3) * 4, 0.25, 0, Math.PI * 2); ctx.fill()
-    }
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 512, 18); ctx.fillRect(0, 238, 512, 18)
   })
 }
 
@@ -111,12 +105,8 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3)); starGeo.setAttribute('color', new THREE.BufferAttribute(starCols, 3))
   group.add(new THREE.Points(starGeo, track(new THREE.PointsMaterial({ size: 1.5, vertexColors: true, sizeAttenuation: false, depthWrite: false }))))
 
-  // Earth hanging in the sky: sphere radius 40 at (220, 260, -620)
-  const earthPos = new THREE.Vector3(220, 260, -620)
-  const earthMesh = new THREE.Mesh(track(new THREE.SphereGeometry(40, 28, 20)), track(new THREE.MeshLambertMaterial({ map: track(createEarthTexture()) })))
-  earthMesh.position.copy(earthPos); group.add(earthMesh)
-  const rimMesh = new THREE.Mesh(track(new THREE.SphereGeometry(42, 28, 20)), track(new THREE.MeshBasicMaterial({ color: 0x4aa3ff, side: THREE.BackSide, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false })))
-  rimMesh.position.copy(earthPos); group.add(rimMesh)
+  // Earth hanging over the far end of the range, where the camera looks
+  placeEarth(group, track, track(earthTexture()), 0x4aa3ff)
 
   // Ground plane: grey regolith with subtle vertex colors, flat in lane |z| < 6
   const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
@@ -127,14 +117,12 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const [cRegolith, cDark] = [new THREE.Color('#9a9893'), new THREE.Color('#6f6d69')]
 
   for (let i = 0; i < posCount; i++) {
-    const gx = groundGeo.attributes.position.getX(i); const gz = groundGeo.attributes.position.getZ(i); const absZ = Math.abs(gz)
-    let y = 0
-    if (absZ > 6) {
-      const d = absZ - 6; y = Math.max(0, (d / 16) * (Math.sin(gx * 0.05 + 1.2) * Math.cos(gz * 0.05) * 2.2 + Math.sin(gx * 0.1) * 0.6))
-    }
-    groundGeo.attributes.position.setY(i, y)
+    const gx = groundGeo.attributes.position.getX(i); const gz = groundGeo.attributes.position.getZ(i)
+    groundGeo.attributes.position.setY(i, moonHeight(gx, gz))
     const n = Math.sin(gx * 0.08) * Math.cos(gz * 0.07) * 0.5 + Math.sin(gx * 0.2 + gz * 0.18) * 0.25
-    const col = cRegolith.clone().lerp(cDark, Math.max(0, Math.min(1, 0.35 + n)))
+    // Highlands and maria: a slow light/dark swell under the fine mottling.
+    const mare = Math.sin(gx * 0.017 + 0.7) * Math.cos(gz * 0.021 - 0.4)
+    const col = cRegolith.clone().lerp(cDark, Math.max(0, Math.min(1, 0.35 + n))).multiplyScalar(0.86 + 0.26 * (mare * 0.5 + 0.5))
     gColors[i * 3] = col.r; gColors[i * 3 + 1] = col.g; gColors[i * 3 + 2] = col.b
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3)); groundGeo.computeVertexNormals()
@@ -163,20 +151,8 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
     group.add(cg)
   }
 
-  // Boulders: flat-shaded icosahedra (InstancedMesh)
-  const boulderCount = 35
-  const boulders = track(new THREE.InstancedMesh(track(new THREE.IcosahedronGeometry(0.5, 0)), track(new THREE.MeshStandardMaterial({ color: 0x767470, roughness: 0.92, flatShading: true })), boulderCount))
-  boulders.castShadow = true; boulders.receiveShadow = true
-  let bIdx = 0
-  while (bIdx < boulderCount) {
-    const bx = -28 + rand() * (opts.maxX + 65); const bz = -48 + rand() * 96
-    if (!isReserved(bx, bz, 1.2) && Math.abs(bz) > 6.5) {
-      dummy.position.set(bx, 0.25, bz); const s = 0.5 + rand() * 1.1
-      dummy.scale.set(s, s * (0.6 + rand() * 0.4), s * (0.8 + rand() * 0.4)); dummy.rotation.set(rand() * 3, rand() * 3, rand() * 3); dummy.updateMatrix()
-      boulders.setMatrixAt(bIdx++, dummy.matrix)
-    }
-  }
-  boulders.instanceMatrix.needsUpdate = true; group.add(boulders)
+  // Boulder field, pebbles and young craters on the real ground height
+  addRegolithField(group, track, { maxX: opts.maxX, rand, reserved: (x, z) => isReserved(x, z, 1.2), heightAt: moonHeight })
 
   // Track & footprint marks along the lane near trebuchet
   const trackMesh = track(new THREE.InstancedMesh(track(new THREE.BoxGeometry(0.24, 0.005, 0.1)), track(new THREE.MeshLambertMaterial({ color: 0x5a5854, flatShading: true })), 24))

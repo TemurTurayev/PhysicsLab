@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addRegolithField, earthTexture, placeEarth } from '../moonDressing'
 import { addGroundDetail } from '../../textures/groundDetail'
 import type { Target } from '../../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from '../types'
@@ -30,6 +31,13 @@ function rand(): number {
   return (seed - 1) / 2147483646
 }
 
+/** Flat lane for the physics, low swells beyond |z| = 6. */
+function stationHeight(gx: number, gz: number): number {
+  if (Math.abs(gz) < 6) return 0
+  const blend = Math.min(1, (Math.abs(gz) - 6) / 6)
+  return (Math.sin(gx * 0.04) * Math.cos(gz * 0.05) * 1.6 + Math.sin(gx * 0.08 + gz * 0.07) * 0.7) * blend
+}
+
 function isReserved(x: number, z: number, maxX: number, m = 0.6): boolean {
   if (x >= -6.5 - m && x <= 5.5 + m && Math.abs(z) <= 3.8 + m) return true
   if (x >= -13.0 - m && x <= -5.5 && Math.abs(z) <= 3.5 + m) return true
@@ -37,32 +45,6 @@ function isReserved(x: number, z: number, maxX: number, m = 0.6): boolean {
   if (Math.hypot(x - 28, z + 22) < 5.5) return true
   if (x >= -14 && x <= 12 && z >= -22 && z <= -14) return true
   return false
-}
-
-function makeEarthTexture(): THREE.CanvasTexture {
-  const canvas = document.createElement('canvas')
-  canvas.width = 256; canvas.height = 128
-  const ctx = canvas.getContext('2d')
-  if (ctx) {
-    ctx.fillStyle = '#102e5c'; ctx.fillRect(0, 0, 256, 128)
-    ctx.fillStyle = '#2c5a36'
-    const lands = [[70, 50, 28, 20], [140, 45, 34, 24], [160, 75, 26, 18], [85, 80, 22, 30], [210, 85, 20, 16], [50, 40, 18, 14], [120, 35, 22, 16], [180, 40, 28, 18]]
-    for (const [cx, cy, rx, ry] of lands) { ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0.2, 0, Math.PI * 2); ctx.fill() }
-    ctx.fillStyle = '#7a7042'
-    for (const [cx, cy, rx, ry] of [[75, 48, 12, 8], [145, 42, 16, 10], [212, 85, 10, 7]]) { ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, -0.1, 0, Math.PI * 2); ctx.fill() }
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 256, 10); ctx.fillRect(0, 120, 256, 8)
-    for (let y = 16; y < 112; y += 14) {
-      ctx.beginPath()
-      for (let x = 0; x < 256; x += 4) {
-        const cy = y + Math.sin(x * 0.08 + y * 0.2) * 6 + Math.cos(x * 0.04) * 4
-        if (x === 0) ctx.moveTo(x, cy); else ctx.lineTo(x, cy)
-      }
-      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'; ctx.stroke()
-    }
-  }
-  const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
-  return tex
 }
 
 function makeCrashTargetTexture(): THREE.CanvasTexture {
@@ -96,7 +78,6 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
     return mesh
   }
 
-  const dummy = new THREE.Object3D()
   const SUN_DIR = new THREE.Vector3(-0.6, 0.35, 0.5).normalize()
   const sun = new THREE.DirectionalLight(0xffffff, 3.4)
   sun.position.copy(SUN_DIR).multiplyScalar(100)
@@ -122,10 +103,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
   const starGeo = track(new THREE.BufferGeometry()); starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3)); starGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3))
   group.add(new THREE.Points(starGeo, track(new THREE.PointsMaterial({ size: 1.8, vertexColors: true, sizeAttenuation: false, fog: false, depthWrite: false }))))
 
-  const earthPos = new THREE.Vector3(220, 260, -620)
-  addMesh(group, track(new THREE.SphereGeometry(40, 28, 20)), track(new THREE.MeshLambertMaterial({ map: track(makeEarthTexture()) })), [earthPos.x, earthPos.y, earthPos.z], [0.35, -0.6, 0.15], false, false)
-  const rimMat = track(new THREE.MeshBasicMaterial({ color: 0x3d94ff, side: THREE.BackSide, transparent: true, opacity: 0.38, blending: THREE.AdditiveBlending, depthWrite: false }))
-  addMesh(group, track(new THREE.SphereGeometry(42, 28, 20)), rimMat, [earthPos.x, earthPos.y, earthPos.z], undefined, false, false)
+  placeEarth(group, track, track(earthTexture()), 0x3d94ff)
 
   const groundMinX = -100, groundMaxX = opts.maxX + 80, groundW = groundMaxX - groundMinX
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, 100, 70))
@@ -134,10 +112,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
   const [cRegolith, cDarkPatch, cLightPatch] = [new THREE.Color('#9a9893'), new THREE.Color('#6f6d69'), new THREE.Color('#afada8')]
   for (let i = 0; i < gPos.count; i++) {
     const gx = gPos.getX(i), gz = gPos.getZ(i)
-    if (Math.abs(gz) >= 6.0) {
-      const blend = Math.min(1, (Math.abs(gz) - 6.0) / 6.0)
-      gPos.setY(i, (Math.sin(gx * 0.04) * Math.cos(gz * 0.05) * 1.6 + Math.sin(gx * 0.08 + gz * 0.07) * 0.7) * blend)
-    }
+    gPos.setY(i, stationHeight(gx, gz))
     const n = Math.sin(gx * 0.05 + gz * 0.07) * 0.5 + Math.cos(gx * 0.1 - gz * 0.06) * 0.5
     const c = cRegolith.clone()
     if (n > 0.15) c.lerp(cLightPatch, Math.min(1, (n - 0.15) * 1.4))
@@ -150,21 +125,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
   const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
-  const boulderMat = track(new THREE.MeshLambertMaterial({ color: 0x75736e, flatShading: true }))
-  const boulders = track(new THREE.InstancedMesh(track(new THREE.IcosahedronGeometry(0.5, 0)), boulderMat, 36))
-  boulders.castShadow = true
-  let bCount = 0
-  while (bCount < 36) {
-    const bx = -45 + rand() * (opts.maxX + 90), bz = -80 + rand() * 160
-    if (!isReserved(bx, bz, opts.maxX, 1.2)) {
-      dummy.position.set(bx, 0.22, bz)
-      const s = 0.6 + rand() * 0.9
-      dummy.scale.set(s, s * (0.6 + rand() * 0.5), s)
-      dummy.rotation.set(rand() * 3, rand() * 3, rand() * 3); dummy.updateMatrix()
-      boulders.setMatrixAt(bCount++, dummy.matrix)
-    }
-  }
-  boulders.instanceMatrix.needsUpdate = true; group.add(boulders)
+  addRegolithField(group, track, { maxX: opts.maxX, rand, reserved: (x, z) => isReserved(x, z, opts.maxX, 1.2), heightAt: stationHeight })
 
   const craterRimMat = track(new THREE.MeshLambertMaterial({ color: 0x9a9893, flatShading: true })), craterBowlMat = track(new THREE.MeshLambertMaterial({ color: 0x55534f, flatShading: true }))
   const craterSpecs: [number, number, number][] = [[-35, -34, 7], [22, -38, 9], [68, -42, 11], [115, -46, 14], [-28, 28, 6], [32, 32, 8], [80, 36, 10], [opts.maxX + 35, -24, 13]]

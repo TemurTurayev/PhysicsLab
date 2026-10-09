@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { createSky } from '../sky'
 import { addGroundDetail } from '../textures/groundDetail'
+import { addMeadow, applyMeadowTerrain, meadowColor, rangeHeight } from './rangeDressing'
 import type { Target } from '../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from './types'
 
@@ -99,14 +100,16 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
 
   // Ground plane with mowing stripes along x
   const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
-  const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, Math.min(50, Math.max(25, Math.round(groundW / 5))), 40))
+  const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, Math.min(96, Math.max(40, Math.round(groundW / 3))), 80))
   groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
+  applyMeadowTerrain(groundGeo, opts.maxX)
   const gColors = new Float32Array(groundGeo.attributes.position.count * 3)
   const [cGrass, cDark, cLight] = [new THREE.Color('#6f9a45'), new THREE.Color('#60883b'), new THREE.Color('#7ca64e')]
   for (let i = 0; i < groundGeo.attributes.position.count; i++) {
     const gx = groundGeo.attributes.position.getX(i), gz = groundGeo.attributes.position.getZ(i)
     const n = Math.sin(gx * 0.08 + gz * 0.06) * 0.03 + (Math.sin(gz * 0.9) > 0 ? 0.04 : -0.04)
-    const col = cGrass.clone().lerp(n > 0 ? cLight : cDark, Math.min(1, Math.abs(n) * 8))
+    const mown = cGrass.clone().lerp(n > 0 ? cLight : cDark, Math.min(1, Math.abs(n) * 8))
+    const col = Math.abs(gz) < 6 && gx > -3 && gx < opts.maxX + 6 ? mown : meadowColor(gx, gz, cGrass)
     gColors.set([col.r, col.g, col.b], i * 3)
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3))
@@ -160,26 +163,13 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     flags.push(flag)
   }
 
-  // Rolling green hills in far background (z < -80 and beyond maxX)
-  const hillGeo = track(new THREE.ConeGeometry(35, 20, 7))
-  const hillMat1 = track(new THREE.MeshLambertMaterial({ color: 0x557a36, flatShading: true }))
-  const hillMat2 = track(new THREE.MeshLambertMaterial({ color: 0x48692d, flatShading: true }))
-  const hillCoords: [number, number, number, number, THREE.Material][] = [
-    [-30, -95, 1.4, 0.8, hillMat1], [15, -105, 1.6, 1.0, hillMat2], [65, -90, 1.3, 0.9, hillMat1],
-    [115, -100, 1.7, 1.1, hillMat2], [opts.maxX + 25, -55, 1.5, 0.9, hillMat1],
-    [opts.maxX + 45, 15, 1.4, 1.0, hillMat2], [opts.maxX + 35, 65, 1.6, 0.8, hillMat1],
-  ]
-  for (const [hx, hz, sx, sz, mat] of hillCoords) {
-    const hill = new THREE.Mesh(hillGeo, mat); hill.position.set(hx, 6, hz); hill.scale.set(sx, 1, sz); group.add(hill)
-  }
-
   // Distant trees (trunk + 2 cones)
   const trunkGeo = track(new THREE.CylinderGeometry(0.2, 0.35, 2.8, 6))
   const fGeo1 = track(new THREE.ConeGeometry(2.0, 2.4, 7))
   const fGeo2 = track(new THREE.ConeGeometry(1.5, 2.0, 7))
   const treeCoords = [[-18, -25], [12, -28], [45, -30], [80, -26], [-15, 18], [25, 20], [65, 19], [opts.maxX + 10, 22]]
   for (const [tx, tz] of treeCoords) {
-    const tree = new THREE.Group(); tree.position.set(tx, 0, tz)
+    const tree = new THREE.Group(); tree.position.set(tx, rangeHeight(tx, tz, opts.maxX), tz)
     const trunk = new THREE.Mesh(trunkGeo, darkWoodMat); trunk.position.set(0, 1.4, 0); trunk.castShadow = true
     const f1 = new THREE.Mesh(fGeo1, foliageMat); f1.position.set(0, 3.2, 0); f1.castShadow = true
     const f2 = new THREE.Mesh(fGeo2, foliageMat); f2.position.set(0, 4.5, 0); f2.castShadow = true
@@ -227,18 +217,8 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   const fRail = new THREE.Mesh(track(new THREE.BoxGeometry(opts.maxX + 45, 0.06, 0.06)), woodMat); fRail.position.set((opts.maxX - 5) / 2, 0.85, -16); fRail.castShadow = true
   group.add(fenceMesh, fRail)
 
-  // Grass tufts & stones
-  const tuftGeo = track(new THREE.ConeGeometry(0.16, 0.38, 4)); tuftGeo.translate(0, 0.19, 0)
-  const tufts = track(new THREE.InstancedMesh(tuftGeo, track(new THREE.MeshLambertMaterial({ color: 0x628833, flatShading: true })), 75))
-  let placedTufts = 0
-  while (placedTufts < 75) {
-    const gx = -22 + rand() * (opts.maxX + 40), gz = -22 + rand() * 44
-    if (!isReserved(gx, gz, opts.maxX, 0.6)) {
-      dummy.position.set(gx, 0, gz); const s = 0.7 + rand() * 0.5; dummy.scale.set(s, s, s); dummy.rotation.set(0, rand() * Math.PI * 2, 0); dummy.updateMatrix()
-      tufts.setMatrixAt(placedTufts++, dummy.matrix)
-    }
-  }
-  tufts.instanceMatrix.needsUpdate = true; group.add(tufts)
+  // Meadow: grass, flowers, boulders, hay, tent and soft hills
+  addMeadow(group, track, { maxX: opts.maxX, rand, reserved: (x, z) => isReserved(x, z, opts.maxX, 0.6) })
 
   const stones = track(new THREE.InstancedMesh(track(new THREE.DodecahedronGeometry(0.18, 0)), track(new THREE.MeshLambertMaterial({ color: 0x76736a, flatShading: true })), 22))
   stones.castShadow = true
@@ -294,7 +274,7 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     const back = new THREE.Mesh(track(new THREE.BoxGeometry(0.06, 1.2 * t.r, 1.2 * t.r)), woodMat); back.castShadow = true
     const boardDiscGeo = track(new THREE.CircleGeometry(0.55 * t.r, 24)); boardDiscGeo.rotateY(-Math.PI / 2)
     const boardMat = track(new THREE.MeshLambertMaterial({ map: targetTex }))
-    const boardDisc = new THREE.Mesh(boardDiscGeo, boardMat); boardDisc.position.set(-0.035, 0, 0)
+    const boardDisc = new THREE.Mesh(boardDiscGeo, boardMat); boardDisc.position.set(-0.05, 0, 0)
     boardPivot.add(back, boardDisc); frame.add(boardPivot); tGroup.add(frame)
 
     group.add(tGroup); targetObjects.push(tGroup); targetItems.push({ spec: t, boardPivot, ringMat, boardMat })
