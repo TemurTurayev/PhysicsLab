@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
 
-export function MissionBrief({ mission, shots, hitSoFar }: { mission: Mission; shots: number; hitSoFar: ReadonlySet<number> }) {
+export function MissionBrief({ mission, shots, hitSoFar, lives }: { mission: Mission; shots: number; hitSoFar: ReadonlySet<number>; lives: number }) {
   const [open, setOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 768)
   const [hints, setHints] = useState(0)
   return (
@@ -13,8 +14,14 @@ export function MissionBrief({ mission, shots, hitSoFar }: { mission: Mission; s
             {mission.goal}
           </span>
         </span>
-        <span aria-hidden className="text-sm" style={{ color: 'var(--lab-dim)' }}>
-          {open ? '▴' : '▾'}
+        <span className="flex items-center gap-2 shrink-0">
+          <span className="text-sm tracking-tight" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`} title="Жизни: каждый промах отнимает одну">
+            {'❤️'.repeat(lives)}
+            {'🖤'.repeat(Math.max(0, MAX_LIVES - lives))}
+          </span>
+          <span aria-hidden className="text-sm" style={{ color: 'var(--lab-dim)' }}>
+            {open ? '▴' : '▾'}
+          </span>
         </span>
       </button>
       {open && (

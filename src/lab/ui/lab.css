@@ -44,3 +44,6 @@
 @media (prefers-reduced-motion: reduce) {
   .lab-root * { transition: none !important; animation: none !important; }
 }
+
+/* Compact display formulas in the side panels. */
+.lab-root .katex-display { margin: 0.25em 0; }

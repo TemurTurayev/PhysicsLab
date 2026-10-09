@@ -5,6 +5,7 @@ import type { EnvironmentBounds } from './environments/types'
 
 const WALL_MARGIN = 1.5 // m the camera keeps from walls and ceiling
 const MIN_HEIGHT = 0.6 // m above the floor
+const LOCK_ON = 0.18 // share of the gap to the stone closed each frame
 
 /** Keep a point inside an indoor hall (and above the floor everywhere). Pure, so it is testable. */
 export function clampToBounds(p: THREE.Vector3, bounds: EnvironmentBounds | null): THREE.Vector3 {
@@ -30,6 +31,7 @@ export class CameraRig {
   private free = false
   private touching = false
   private listener: ((free: boolean) => void) | null = null
+  private followed: THREE.Vector3 | null = null
 
   constructor(camera: THREE.PerspectiveCamera, dom: HTMLElement) {
     this.camera = camera
@@ -64,8 +66,18 @@ export class CameraRig {
     this.setFree(false)
   }
 
-  /** Called every frame with the cinematic shot for this moment; used only while not free. */
-  apply(shot: CameraShot): void {
+  /**
+   * Called every frame with the cinematic shot for this moment (used only while not free) and the
+   * flying stone, if any: a free camera rides along with the stone, keeping the student's angle.
+   */
+  apply(shot: CameraShot, stone: THREE.Vector3 | null = null): void {
+    if (this.free && stone) {
+      // Lock on smoothly: the orbit centre slides onto the stone and the camera keeps its offset.
+      const step = stone.clone().sub(this.controls.target).multiplyScalar(LOCK_ON)
+      this.camera.position.add(step)
+      this.controls.target.add(step)
+    }
+    this.followed = stone ? stone.clone() : null
     if (this.free) {
       this.controls.update()
     } else {

@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { simulateArm } from '../sim/trebuchet'
 import type { ArmSample, FlightSample, ShotResult, TrebuchetParams } from '../sim/types'
 import type { Target } from '../levels/types'
+import { ShotAnnotations } from './annotations'
 import { cameraAt } from './camera'
 import { CameraRig } from './cameraRig'
 import { createCrew, type Crew } from './crew'
@@ -45,6 +46,8 @@ export class LabScene {
   private pivotY = 4
   private readonly marker = new PredictionMarker()
   private readonly arrows = new ForceArrows()
+  private readonly notes = new ShotAnnotations()
+  private baseSpeed = 1
   private view: ShotView | null = null
   private targets: Target[] = []
   private focusX = 60
@@ -77,7 +80,7 @@ export class LabScene {
     )
     this.stone.castShadow = true
     this.stone.visible = false
-    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group)
+    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group, this.notes.group)
     this.rig = new CameraRig(this.camera, canvas)
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(canvas)
@@ -146,7 +149,9 @@ export class LabScene {
     this.burst.trigger(landing?.x ?? 0, landing ? landing.t : null)
     const snapped = view?.shot.breakage?.kind === 'beam' ? view.shot.breakage.t : null
     this.splinters.trigger(0, snapped, this.pivotY)
+    this.notes.set(view?.shot ?? null)
     this.env?.setHit(null)
+    this.speed = this.baseSpeed
     this.t = 0
     this.playing = view !== null
     this.render()
@@ -180,7 +185,13 @@ export class LabScene {
     this.speed = speed
   }
 
-  replay(speed = this.speed): void {
+  /** Slow motion for every shot from now on, so there is time to turn the camera. */
+  setSlowMotion(on: boolean): void {
+    this.baseSpeed = on ? 0.35 : 1
+    this.speed = this.baseSpeed
+  }
+
+  replay(speed = this.baseSpeed): void {
     this.speed = speed
     this.t = 0
     this.playing = this.view !== null
@@ -239,6 +250,7 @@ export class LabScene {
     this.stone.visible = stoneNow !== null && !(landed && (this.view?.hitIndex ?? null) !== null)
     if (stoneNow) this.stone.position.set(stoneNow.x, Math.max(stoneNow.y, 0.15), 0)
     this.trail.reveal(t)
+    this.notes.reveal(t)
     this.ghost.reveal(Infinity)
     this.burst.update(t)
     this.splinters.update(t)
@@ -250,7 +262,7 @@ export class LabScene {
 
     const landSample = shot?.landing ? (shot.flight.at(-1) ?? null) : null
     const cam = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX)
-    this.rig.apply(cam)
+    this.rig.apply(cam, stoneNow && !landed ? new THREE.Vector3(stoneNow.x, Math.max(stoneNow.y, 0.15), 0) : null)
     if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
     else this.renderer.render(this.scene, this.camera)
   }
@@ -294,7 +306,7 @@ export class LabScene {
     this.envMap?.dispose()
     this.machine?.dispose()
     this.crew.dispose()
-    ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows].forEach((x) => x.dispose())
+    ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows, this.notes].forEach((x) => x.dispose())
     this.stone.geometry.dispose()
     ;(this.stone.material as THREE.Material).dispose()
     this.retro?.dispose()

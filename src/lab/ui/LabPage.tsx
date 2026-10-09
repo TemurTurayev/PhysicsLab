@@ -8,7 +8,9 @@ import { isPythonReady, warmUpPython } from '../python/runStudent'
 import { LabScene } from '../scene/LabScene'
 import { useLabProgress } from '../state/labProgress'
 import { ActBar, type Act } from './ActBar'
+import { CalcPanel, type ShotLogRow } from './CalcPanel'
 import { CameraChip } from './CameraChip'
+import { OutOfLives } from './OutOfLives'
 import { CodeDrawer } from './CodeDrawer'
 import { ControlPanel } from './ControlPanel'
 import { IncidentCard } from './IncidentCard'
@@ -79,6 +81,9 @@ function MissionView({ mission }: { mission: Mission }) {
   const [muted, setMutedState] = useState(isMuted())
   const [pythonReady, setPythonReady] = useState(isPythonReady())
   const cues = useRef({ whoosh: false, thud: false })
+  const [log, setLog] = useState<ShotLogRow[]>([])
+  const [slow, setSlow] = useState(false)
+  useEffect(() => sceneRef.current?.setSlowMotion(slow), [slow, sceneRef, universe])
 
   useEffect(() => {
     if (!mission.code) return
@@ -120,6 +125,17 @@ function MissionView({ mission }: { mission: Mission }) {
     const record = await run.fire({ values, code, prediction })
     if (!record) return
     const { shot } = record
+    setLog((rows) => [
+      ...rows,
+      {
+        values,
+        v0: shot.launch?.speed ?? null,
+        alphaDeg: shot.launch?.angleDeg ?? null,
+        range: shot.landing?.x ?? null,
+        time: shot.landing && shot.releaseT !== null ? shot.landing.t - shot.releaseT : null,
+        apex: shot.apex?.y ?? null,
+      },
+    ])
     const selfHit = record.failures.find((f) => f.id === 'self_hit')
     cues.current = { whoosh: false, thud: false }
     scene.setShot({ shot, ghost: record.ghost, crewScatterAt: selfHit ? selfHit.t : null, hitIndex: record.hits[0] ?? null })
@@ -191,7 +207,10 @@ function MissionView({ mission }: { mission: Mission }) {
           />
         </div>
         <div className="w-[min(340px,100%)] flex flex-col gap-2 max-h-[38vh] md:max-h-[calc(100vh-260px)] overflow-y-auto">
-          <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} />
+          <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} />
+          <div className={showCode ? '' : 'md:hidden'}>
+            <CalcPanel mission={mission} values={values} log={log} />
+          </div>
           {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
         </div>
       </div>
@@ -218,15 +237,20 @@ function MissionView({ mission }: { mission: Mission }) {
               onValue={(key, v) => setValues((cur) => ({ ...cur, [key]: v }))}
               prediction={prediction}
               onPrediction={setPrediction}
-              canFire={phase !== 'flying' && (!mission.predict || prediction !== null)}
+              canFire={phase !== 'flying' && (run.lives > 0 || run.won) && (!mission.predict || prediction !== null)}
               busy={run.busy}
               onFire={fire}
               fireLabel={fireLabel}
             />
           </div>
         )}
+        {!showCode && (
+          <div className="hidden md:block md:absolute md:right-3 md:top-[64px] md:w-[360px] md:max-h-[calc(100vh-64px-350px)] overflow-y-auto">
+            <CalcPanel mission={mission} values={values} log={log} />
+          </div>
+        )}
         <div className="self-start md:absolute md:left-3 md:bottom-[96px]">
-          <CameraChip free={freeCamera} onAuto={() => sceneRef.current?.autoCamera()} />
+          <CameraChip free={freeCamera} onAuto={() => sceneRef.current?.autoCamera()} slow={slow} onSlow={() => setSlow(!slow)} />
         </div>
         <div className="w-full md:absolute md:bottom-0 md:inset-x-0 md:p-3">
           <Placard
@@ -256,7 +280,19 @@ function MissionView({ mission }: { mission: Mission }) {
         </div>
       )}
 
-      {phase === 'landed' && !incident && (
+      {phase === 'landed' && !incident && run.lives === 0 && !run.won && (
+        <OutOfLives
+          formal={sigma}
+          onRestart={() => {
+            run.reset()
+            setLog([])
+            setPhase('idle')
+            sceneRef.current?.setShot(null)
+          }}
+        />
+      )}
+
+      {phase === 'landed' && !incident && (run.lives > 0 || run.won) && (
         <ResultBanner
           mission={mission}
           record={run.last}

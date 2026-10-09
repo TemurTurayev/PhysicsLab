@@ -33,12 +33,14 @@ export function ResultBanner({ mission, record, won, stars, onNext, onFinish, fo
   const headline = won && v.good ? (onNext ? 'Миссия пройдена' : 'Все миссии мира пройдены!') : v.text
   const footnote = won ? (v.good ? v.text : 'Миссия уже пройдена.') : null
   const nextAction = onNext ?? onFinish
+  const lifeNote = record.lifeLost ? (formal ? ' Списан один допуск.' : ' −1 ❤') : ''
   return (
     <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-10 w-[min(420px,calc(100%-16px))]" role="status">
       <div className="lab-panel px-4 py-3 flex items-center gap-3" style={{ borderColor: v.good ? 'rgba(126,224,138,0.5)' : undefined }}>
         <div className="flex-1">
           <div className="font-semibold" style={{ color: v.good ? 'var(--lab-good)' : 'var(--lab-text)' }}>
             {headline}
+            {lifeNote && <span style={{ color: 'var(--lab-bad)' }}>{lifeNote}</span>}
           </div>
           {footnote && (
             <div className="text-sm" style={{ color: 'var(--lab-dim)' }}>

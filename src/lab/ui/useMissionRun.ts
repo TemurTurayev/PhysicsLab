@@ -8,13 +8,13 @@ import {
   looksLikeDegrees,
   shotFromLaunch,
   shotFromSteps,
-  starsFor,
   targetsAt,
   withSliders,
   pickCounterweight,
   SAFETY_MASSES,
   clipAtWalls,
 } from '../levels/evaluate'
+import { costsLife, MAX_LIVES, starsForLives } from '../levels/lives'
 import type { Mission, SliderValues } from '../levels/types'
 import { runStudent } from '../python/runStudent'
 import type { StudentError } from '../python/protocol'
@@ -31,6 +31,7 @@ export interface ShotRecord {
   failures: FailureEvent[]
   hits: number[]
   predictionError: number | null
+  lifeLost: boolean
 }
 
 export interface MissionRun {
@@ -39,6 +40,7 @@ export interface MissionRun {
   hitSoFar: ReadonlySet<number>
   won: boolean
   stars: number
+  lives: number
   busy: boolean
   codeError: StudentError | null
   stdout: string
@@ -110,6 +112,7 @@ export function useMissionRun(m: Mission): MissionRun {
   const [hitSoFar, setHitSoFar] = useState<ReadonlySet<number>>(new Set())
   const [won, setWon] = useState(false)
   const [stars, setStars] = useState(0)
+  const [lives, setLives] = useState(MAX_LIVES)
   const [busy, setBusy] = useState(false)
   const [codeError, setCodeError] = useState<StudentError | null>(null)
   const [stdout, setStdout] = useState('')
@@ -120,12 +123,14 @@ export function useMissionRun(m: Mission): MissionRun {
     setHitSoFar(new Set())
     setWon(false)
     setStars(0)
+    setLives(MAX_LIVES)
     setCodeError(null)
     setStdout('')
   }, [])
 
   const fire = useCallback<MissionRun['fire']>(
     async ({ values, code, prediction }) => {
+      if (lives <= 0 && !won) return null
       setBusy(true)
       setCodeError(null)
       try {
@@ -147,27 +152,30 @@ export function useMissionRun(m: Mission): MissionRun {
           expectDrag: m.base.world.drag ? { k: dragFactor(m.base.trebuchet.mp, m.base.trebuchet.r), wind: m.base.world.wind } : undefined,
         })
         const { hits, predictionError } = evaluateShot(m, shot, prediction)
-        const record: ShotRecord = { shot, ghost, failures, hits, predictionError }
+        const lifeLost = !won && costsLife(m, { hits, predictionError }, code)
+        const record: ShotRecord = { shot, ghost, failures, hits, predictionError, lifeLost }
+        const livesLeft = lifeLost ? lives - 1 : lives
         const nextShots = shots + 1
         const nextHits = new Set([...hitSoFar, ...hits])
         const nowWon = !won && isMissionWon(m, nextHits, predictionError)
         setLast(record)
         setShots(nextShots)
         setHitSoFar(nextHits)
+        setLives(livesLeft)
         if (nowWon) {
           setWon(true)
-          setStars(starsFor(m, nextShots, predictionError))
+          setStars(starsForLives(livesLeft))
         }
         return record
       } finally {
         setBusy(false)
       }
     },
-    [m, shots, hitSoFar, won],
+    [m, shots, hitSoFar, won, lives],
   )
 
   return useMemo(
-    () => ({ last, shots, hitSoFar, won, stars, busy, codeError, stdout, fire, reset }),
-    [last, shots, hitSoFar, won, stars, busy, codeError, stdout, fire, reset],
+    () => ({ last, shots, hitSoFar, won, stars, lives, busy, codeError, stdout, fire, reset }),
+    [last, shots, hitSoFar, won, stars, lives, busy, codeError, stdout, fire, reset],
   )
 }

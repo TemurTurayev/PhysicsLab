@@ -135,15 +135,3 @@ export function isMissionWon(m: Mission, hitSoFar: ReadonlySet<number>, predicti
   if (m.predict) return predictionError !== null && Math.abs(predictionError) <= m.predict.tolerance
   return m.targets.length > 0 && m.targets.every((_, i) => hitSoFar.has(i))
 }
-
-export function starsFor(m: Mission, shots: number, predictionError: number | null): number {
-  if (m.predict) {
-    const tol = m.predict.tolerance
-    if (shots > 1) return 1
-    return predictionError !== null && Math.abs(predictionError) <= tol / 2 ? 3 : 2
-  }
-  const n = m.targets.length
-  if (shots <= n + 1) return 3
-  if (shots <= 2 * n + 3) return 2
-  return 1
-}
