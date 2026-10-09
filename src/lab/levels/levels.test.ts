@@ -3,6 +3,7 @@ import { simulateShot } from '../sim/shot'
 import { armForCode, clipAtWalls, evaluateShot, pickCounterweight, SAFETY_MASSES, looksLikeDegrees, shotFromLaunch, shotFromSteps, withRelease, withSliders } from './evaluate'
 import { detectFailures } from '../failures/detect'
 import { findMission, MISSIONS } from './index'
+import { applyCopy, getUniverse } from '../universe'
 
 const shotAt = (id: string, deg?: number) => {
   const m = findMission(id)!
@@ -233,5 +234,23 @@ describe('chapter 5 is solvable', () => {
       const m = findMission('5-4')!
       expect(evaluateShot(m, simulateShot(withSliders(m, { releaseDeg: deg })), null).hits).toEqual([0])
     }
+  })
+})
+
+describe('hints teach computing, not guessing', () => {
+  const ANSWER = /около \d+°|между \d+ и \d+|Попробуй(те)? около \d+ кг|Ищи(те)? окно|Предел .* — около/
+  it('no hint hands out a ready slider value, in either universe', () => {
+    for (const u of [getUniverse('classic'), getUniverse('sigma')]) {
+      for (const m of MISSIONS) expect(applyCopy(m, u).hints.join(' '), `${u.id} ${m.id}`).not.toMatch(ANSWER)
+    }
+  })
+  it('every mission without code points to the data panel', () => {
+    for (const u of [getUniverse('classic'), getUniverse('sigma')]) {
+      for (const m of MISSIONS.filter((x) => !x.code)) expect(applyCopy(m, u).hints.join(' '), `${u.id} ${m.id}`).toMatch(/Данные для расчёта|в панели/)
+    }
+  })
+  it('the complex speaks formally about a projectile in its hints too', () => {
+    const u = getUniverse('sigma')
+    for (const m of MISSIONS) expect(applyCopy(m, u).hints.join(' '), m.id).not.toMatch(/[Кк]амн?[еяю]|\bты\b|твой|Посчитай |Сравни |Двигай/)
   })
 })
