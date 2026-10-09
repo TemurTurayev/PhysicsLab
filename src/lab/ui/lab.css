@@ -52,3 +52,6 @@
 .lab-num.ok { border-color: var(--lab-good) !important; }
 .lab-num.close { border-color: #f2c94c !important; }
 .lab-num.wrong { border-color: var(--lab-bad) !important; }
+
+/* Buttons floating over the 3D scene need a solid plate to stay readable on bright floors. */
+.lab-btn-float:not(.lab-btn-primary) { background: var(--lab-panel-solid); }

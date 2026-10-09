@@ -14,16 +14,8 @@ export interface Environment {
   palette: { accent: string; ground: string; sky: string }
   /** Outdoor worlds: colour of the endless ground beyond the detailed plane, so its edge never shows. */
   skirt?: string
-  /** Indoor halls: inner walls and ceiling, so no camera ever ends up behind a wall. */
-  bounds?: EnvironmentBounds
-}
-
-export interface EnvironmentBounds {
-  minX: number
-  maxX: number
-  minZ: number
-  maxZ: number
-  maxY: number
+  /** Indoor halls: walls between the camera and the action are cut away instead of blocking the view. */
+  indoor?: boolean
 }
 
 export interface EnvironmentOptions {

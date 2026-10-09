@@ -5,6 +5,7 @@ import type { Target } from '../levels/types'
 import { ShotAnnotations } from './annotations'
 import { cameraAt } from './camera'
 import { CameraRig } from './cameraRig'
+import { Cutaway } from './cutaway'
 import { createCrew, type Crew } from './crew'
 import { ForceArrows, ImpactBurst, PathLine, PredictionMarker } from './effects'
 import type { Environment, EnvironmentFactory } from './environments/types'
@@ -66,6 +67,7 @@ export class LabScene {
 
   private readonly canvas: HTMLCanvasElement
   private readonly rig: CameraRig
+  private readonly cutaway = new Cutaway()
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -92,6 +94,7 @@ export class LabScene {
   }
 
   setEnvironment(factory: EnvironmentFactory, targets: Target[], maxX: number, wind = 0): void {
+    this.cutaway.restore()
     this.env?.dispose()
     if (this.env) this.scene.remove(this.env.group)
     this.targets = targets
@@ -99,7 +102,6 @@ export class LabScene {
     this.env = factory({ targets, maxX, wind })
     this.scene.add(this.env.group)
     this.setSkirt(this.env.skirt ?? null)
-    this.rig.setBounds(this.env.bounds ?? null)
     this.scene.fog = this.env.fog
     this.scene.background = this.env.background
     this.envMap?.dispose()
@@ -272,6 +274,7 @@ export class LabScene {
     const landSample = shot?.landing ? (shot.flight.at(-1) ?? null) : null
     const cam = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX)
     this.rig.apply(cam, stoneNow && !landed ? new THREE.Vector3(stoneNow.x, Math.max(stoneNow.y, 0.15), 0) : null)
+    this.cutaway.update(this.env?.indoor ? this.env.group : null, this.camera.position, this.rig.target)
     if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
     else this.renderer.render(this.scene, this.camera)
   }

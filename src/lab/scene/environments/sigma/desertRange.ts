@@ -41,7 +41,7 @@ function makeCrashTargetTexture(): THREE.CanvasTexture {
   }
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace
-  tex.magFilter = THREE.NearestFilter
+  tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -317,7 +317,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
       addMesh(tGroup, track(new THREE.BoxGeometry(0.1, pH * 0.9, 0.1)), steelMat, [0, pH * 0.45 + 0.2, 0])
       const pivot = new THREE.Group(); pivot.position.set(0, pH + 0.2, 0)
       const plateMat = track(new THREE.MeshLambertMaterial({ map: crashTex }))
-      addMesh(pivot, getPlateGeo(t.r), plateMat, [-0.03, 0, 0])
+      addMesh(pivot, getPlateGeo(t.r), plateMat, [-0.06, 0, 0]) // 3 cm proud of the steel backing: coplanar faces flicker
       addMesh(pivot, track(new THREE.CylinderGeometry(t.r * 0.95, t.r * 0.95, 0.06, 24)), steelMat, [0, 0, 0], [0, 0, Math.PI / 2])
       tGroup.add(pivot)
 
@@ -347,7 +347,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
 
       const pivot = new THREE.Group(); pivot.position.set(0, pH, 0)
       const plateMat = track(new THREE.MeshLambertMaterial({ map: crashTex }))
-      addMesh(pivot, getPlateGeo(r), plateMat, [-0.03, 0, 0])
+      addMesh(pivot, getPlateGeo(r), plateMat, [-0.06, 0, 0]) // 3 cm proud of the steel backing: coplanar faces flicker
       addMesh(pivot, track(new THREE.CylinderGeometry(r * 0.95, r * 0.95, 0.06, 24)), steelMat, [0, 0, 0], [0, 0, Math.PI / 2])
       tGroup.add(pivot)
 

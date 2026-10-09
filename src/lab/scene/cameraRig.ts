@@ -1,22 +1,13 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import type { CameraShot } from './camera'
-import type { EnvironmentBounds } from './environments/types'
 
-const WALL_MARGIN = 1.5 // m the camera keeps from walls and ceiling
 const MIN_HEIGHT = 0.6 // m above the floor
 const LOCK_ON = 0.18 // share of the gap to the stone closed each frame
 
-/** Keep a point inside an indoor hall (and above the floor everywhere). Pure, so it is testable. */
-export function clampToBounds(p: THREE.Vector3, bounds: EnvironmentBounds | null): THREE.Vector3 {
-  const out = p.clone()
-  out.y = Math.max(MIN_HEIGHT, out.y)
-  if (!bounds) return out
-  const m = WALL_MARGIN
-  out.x = THREE.MathUtils.clamp(out.x, bounds.minX + m, bounds.maxX - m)
-  out.z = THREE.MathUtils.clamp(out.z, bounds.minZ + m, bounds.maxZ - m)
-  out.y = Math.min(out.y, bounds.maxY - m)
-  return out
+/** The camera never goes below the floor; walls are cut away instead (see Cutaway). */
+export function aboveFloor(p: THREE.Vector3): THREE.Vector3 {
+  return new THREE.Vector3(p.x, Math.max(MIN_HEIGHT, p.y), p.z)
 }
 
 /**
@@ -27,7 +18,6 @@ export function clampToBounds(p: THREE.Vector3, bounds: EnvironmentBounds | null
 export class CameraRig {
   private readonly controls: OrbitControls
   private readonly camera: THREE.PerspectiveCamera
-  private bounds: EnvironmentBounds | null = null
   private free = false
   private touching = false
   private listener: ((free: boolean) => void) | null = null
@@ -52,8 +42,9 @@ export class CameraRig {
     return this.free
   }
 
-  setBounds(bounds: EnvironmentBounds | null): void {
-    this.bounds = bounds
+  /** Where the camera is looking: the orbit centre. */
+  get target(): THREE.Vector3 {
+    return this.controls.target
   }
 
   onModeChange(cb: ((free: boolean) => void) | null): void {
@@ -82,7 +73,7 @@ export class CameraRig {
       this.camera.position.copy(shot.position)
       this.controls.target.copy(shot.target)
     }
-    this.camera.position.copy(clampToBounds(this.camera.position, this.bounds))
+    this.camera.position.copy(aboveFloor(this.camera.position))
     this.camera.lookAt(this.controls.target)
   }
 

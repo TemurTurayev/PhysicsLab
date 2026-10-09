@@ -74,7 +74,7 @@ function makeCrashTargetTexture(): THREE.CanvasTexture {
     ctx.fillStyle = '#1b1b1b'; ctx.fillRect(125, 0, 6, 256); ctx.fillRect(0, 125, 256, 6)
   }
   const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -284,7 +284,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
 
       const pH = Math.max(1.2, t.r + 0.4), pivot = new THREE.Group(); pivot.position.set(0, pH, 0)
       const plateMat = track(new THREE.MeshLambertMaterial({ map: crashTex })), plateGeo = track(new THREE.CircleGeometry(t.r, 28)); plateGeo.rotateY(-Math.PI / 2)
-      addMesh(pivot, plateGeo, plateMat, [-0.03, 0, 0])
+      addMesh(pivot, plateGeo, plateMat, [-0.06, 0, 0]) // 3 cm proud of the steel backing: coplanar faces flicker
       addMesh(pivot, track(new THREE.CylinderGeometry(t.r * 0.95, t.r * 0.95, 0.06, 24)), steelMat, [0, 0, 0], [0, 0, Math.PI / 2]); tGroup.add(pivot)
 
       const ringGeo = track(new THREE.RingGeometry(Math.max(0.05, t.r - 0.18), t.r, 48)); ringGeo.rotateX(-Math.PI / 2)

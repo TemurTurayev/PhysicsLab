@@ -19,7 +19,7 @@ function makeCrashTargetTexture(): THREE.CanvasTexture {
     ctx.fillStyle = '#1b1b1b'; ctx.fillRect(125, 0, 6, 256); ctx.fillRect(0, 125, 256, 6)
   }
   const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -40,7 +40,7 @@ function makeCRTScreenTexture(): THREE.CanvasTexture {
     ctx.fillText('ТЕЛЕМЕТРИЯ ПОТОКА', 6, 20); ctx.fillText('СИГМА-7 ДАТЧИК-4', 6, 118)
   }
   const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -61,7 +61,7 @@ function makeWindDisplayTexture(wind: number): THREE.CanvasTexture {
     ctx.fillText(`АЭРОДИНАМИЧЕСКИЙ ЗАЛ · ${status}`, 256, 224)
   }
   const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -345,7 +345,7 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
       const pivot = new THREE.Group(); pivot.position.set(0, pH, 0)
       const plateMat = track(new THREE.MeshLambertMaterial({ map: crashTex }))
       const plateGeo = track(new THREE.CircleGeometry(r, 28)); plateGeo.rotateY(-Math.PI / 2)
-      addMesh(pivot, plateGeo, plateMat, [-0.03, 0, 0])
+      addMesh(pivot, plateGeo, plateMat, [-0.06, 0, 0]) // 3 cm proud of the steel backing: coplanar faces flicker
       addMesh(pivot, track(new THREE.CylinderGeometry(r * 0.95, r * 0.95, 0.06, 24)), fanSteel, [0, 0, 0], [0, 0, Math.PI / 2])
       tGroup.add(pivot)
 
@@ -362,7 +362,7 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
 
   return {
     group, fog, background,
-    bounds: { minX: hallMinX, maxX: hallMaxX, minZ: -16, maxZ: 30, maxY: 28 },
+    indoor: true,
     palette: { accent: '#ff6a13', ground: '#8a877c', sky: '#0e1112' },
     update(t: number): void {
       for (const item of targetItems) {

@@ -19,7 +19,7 @@ function makeCrashTargetTexture(): THREE.CanvasTexture {
     ctx.fillStyle = '#1b1b1b'; ctx.fillRect(125, 0, 6, 256); ctx.fillRect(0, 125, 256, 6)
   }
   const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -38,7 +38,7 @@ function makeGridTexture(): THREE.CanvasTexture {
     ctx.fillText('0.0', 6, 250); ctx.fillText('2.0', 6, 128); ctx.fillText('4.0', 6, 20)
   }
   const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -56,7 +56,7 @@ function makeGaugeTexture(): THREE.CanvasTexture {
     }
   }
   const tex = new THREE.CanvasTexture(canvas)
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -342,7 +342,7 @@ export const createDemolitionHall: EnvironmentFactory = (opts: EnvironmentOption
       const pivot = new THREE.Group(); pivot.position.set(0, pH, 0)
       const plateMat = track(new THREE.MeshLambertMaterial({ map: crashTex }))
       const plateGeo = track(new THREE.CircleGeometry(r, 28)); plateGeo.rotateY(-Math.PI / 2)
-      addMesh(pivot, plateGeo, plateMat, [-0.03, 0, 0])
+      addMesh(pivot, plateGeo, plateMat, [-0.06, 0, 0]) // 3 cm proud of the steel backing: coplanar faces flicker
       addMesh(pivot, track(new THREE.CylinderGeometry(r * 0.95, r * 0.95, 0.06, 24)), wallSteel, [0, 0, 0], [0, 0, Math.PI / 2])
       tGroup.add(pivot)
 
@@ -361,7 +361,7 @@ export const createDemolitionHall: EnvironmentFactory = (opts: EnvironmentOption
 
   return {
     group, fog, background,
-    bounds: { minX: hallMinX, maxX: hallMaxX, minZ: -22, maxZ: 30, maxY: 39 },
+    indoor: true,
     palette: { accent: '#ff6a13', ground: '#6b675e', sky: '#f08a4b' },
     update(t: number): void {
       for (const item of targetItems) {

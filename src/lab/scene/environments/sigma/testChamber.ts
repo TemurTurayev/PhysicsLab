@@ -35,7 +35,7 @@ function makeCrashTargetTexture(): THREE.CanvasTexture {
   }
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace
-  tex.magFilter = THREE.NearestFilter
+  tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -64,7 +64,7 @@ function makeCRTScreenTexture(): THREE.CanvasTexture {
   }
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace
-  tex.magFilter = THREE.NearestFilter
+  tex.magFilter = THREE.LinearFilter
   return tex
 }
 
@@ -378,7 +378,7 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
       const plateMat = track(new THREE.MeshLambertMaterial({ map: crashTex }))
       const plateGeo = track(new THREE.CircleGeometry(r, 28))
       plateGeo.rotateY(-Math.PI / 2)
-      addMesh(pivot, plateGeo, plateMat, [-0.03, 0, 0])
+      addMesh(pivot, plateGeo, plateMat, [-0.06, 0, 0]) // 3 cm proud of the steel backing: coplanar faces flicker
       addMesh(pivot, track(new THREE.CylinderGeometry(r * 0.95, r * 0.95, 0.06, 24)), metalMat, [0, 0, 0], [0, 0, Math.PI / 2])
       tGroup.add(pivot)
 
@@ -405,7 +405,7 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
 
   return {
     group, fog, background,
-    bounds: { minX: hallMinX, maxX: hallMaxX, minZ: -14, maxZ: 30, maxY: 29 },
+    indoor: true,
     palette: { accent: '#ff6a13', ground: '#8a877c', sky: '#0f1112' },
     update(t: number): void {
       for (const item of targetItems) {
