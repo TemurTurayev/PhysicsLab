@@ -17,7 +17,7 @@ const ENVS: Record<number, EnvironmentFactory> = { 1: createTestChamber, 2: crea
 export const SIGMA: Universe = {
   id: 'sigma',
   name: 'Комплекс',
-  tagline: 'НИИ «Сигма-7», 1998 год. Бетон, гул ламп, протоколы испытаний. Ты — новый стажёр отдела прикладной механики.',
+  tagline: 'НИИ «Сигма-7», 1998 год. Бетон, гул ламп, протоколы испытаний. Вы — новый стажёр отдела прикладной механики.',
   envFor: (chapter) => ENVS[chapter] ?? null,
   chapterTitles: { 1: 'Испытательная камера 3', 2: 'Наземный полигон', 3: 'Испытание на разрушение', 4: 'Аэродинамический зал', 5: 'Станция «Сигма-Л»' },
   chapterTaglines: {
