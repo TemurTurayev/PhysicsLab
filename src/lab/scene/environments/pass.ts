@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addGroundDetail } from '../textures/groundDetail'
 import type { Target } from '../../levels/types'
 import { createSky } from '../sky'
 import { woodMaterial } from '../wood'
@@ -67,8 +68,8 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
 
   // Sky, fog and lighting
   const SUN_DIR = new THREE.Vector3(-0.4, 0.55, 0.6).normalize()
-  const fog = new THREE.Fog('#d6dee3', 35, opts.maxX + 90); const background = new THREE.Color('#dfe6ea')
-  const sky = createSky({ zenith: '#5b7fa6', mid: '#a9b9c6', horizon: '#dfe6ea', ground: '#c9d2d6', sunDir: SUN_DIR, sunColor: '#fff6e8', halo: 0.6 })
+  const fog = new THREE.Fog('#d6dee3', 60, opts.maxX + 140); const background = new THREE.Color('#dfe6ea')
+  const sky = createSky({ zenith: '#5b7fa6', mid: '#a9b9c6', horizon: '#dfe6ea', ground: '#c9d2d6', sunDir: SUN_DIR, sunColor: '#fff6e8', halo: 0.6, clouds: { cover: 0.5, color: '#f7f9fb' } })
   track(sky.geometry); track(sky.material as THREE.Material); group.add(sky)
   group.add(new THREE.HemisphereLight(0xdbe7f2, 0x5f6658, 0.7))
 
@@ -112,7 +113,9 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3))
   groundGeo.computeVertexNormals()
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0.05, flatShading: true })))
+  const groundMat = track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0.05, flatShading: true }))
+  track(addGroundDetail(groundMat, 'grass', groundW, 240))
+  const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   // Distant snow-capped mountain peaks

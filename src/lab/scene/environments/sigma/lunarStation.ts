@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addGroundDetail } from '../../textures/groundDetail'
 import type { Target } from '../../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from '../types'
 import { industrialMaterial, signTexture } from '../../textures/industrial'
@@ -105,7 +106,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
   sun.shadow.camera.left = -30; sun.shadow.camera.right = 40
   sun.shadow.camera.top = 25; sun.shadow.camera.bottom = -25
   sun.target.position.set(5, 0, 0)
-  group.add(sun, sun.target, new THREE.HemisphereLight(0x8899aa, 0x111111, 0.12))
+  group.add(sun, sun.target, new THREE.HemisphereLight(0x8899aa, 0x2a2a2a, 0.3))
 
   const sunDisk = new THREE.Mesh(track(new THREE.CircleGeometry(16, 20)), track(new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, depthWrite: false })))
   sunDisk.position.copy(SUN_DIR).multiplyScalar(800); sunDisk.lookAt(0, 0, 0); group.add(sunDisk)
@@ -144,7 +145,9 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
     gCol[i * 3] = c.r; gCol[i * 3 + 1] = c.g; gCol[i * 3 + 2] = c.b
   }
   groundGeo.computeVertexNormals(); groundGeo.setAttribute('color', new THREE.BufferAttribute(gCol, 3))
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true })))
+  const groundMat = track(new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }))
+  track(addGroundDetail(groundMat, 'regolith', groundW, 240))
+  const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   const boulderMat = track(new THREE.MeshLambertMaterial({ color: 0x75736e, flatShading: true }))

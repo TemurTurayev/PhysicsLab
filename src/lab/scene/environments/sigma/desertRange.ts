@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addGroundDetail } from '../../textures/groundDetail'
 import type { Target } from '../../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from '../types'
 import { industrialMaterial, signTexture } from '../../textures/industrial'
@@ -69,6 +70,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
   const sky = createSky({
     zenith: '#3a78c2', mid: '#9fc0d8', horizon: '#f1dcb4', ground: '#d8b98c',
     sunDir: SUN_DIR, sunColor: '#fff1d0', halo: 0.8,
+    clouds: { cover: 0.16, color: '#fffaf0' },
   })
   group.add(sky)
   if (Array.isArray(sky.material)) sky.material.forEach(track); else track(sky.material)
@@ -104,7 +106,9 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
     gColors[i * 3] = col.r; gColors[i * 3 + 1] = col.g; gColors[i * 3 + 2] = col.b
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3))
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true })))
+  const groundMat = track(new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }))
+  track(addGroundDetail(groundMat, 'sand', groundW, 240))
+  const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   // Distance lines & sign plates every 50 m

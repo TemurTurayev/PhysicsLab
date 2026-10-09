@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addGroundDetail } from '../textures/groundDetail'
 import { createSky } from '../sky'
 import { woodMaterial } from '../wood'
 import type { Target } from '../../levels/types'
@@ -80,6 +81,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
     sunDir: SUN_DIR,
     sunColor: '#ffd59a',
     halo: 1.1,
+    clouds: { cover: 0.32, color: '#fff3e0' },
   })
   track(sky.geometry)
   track(sky.material as THREE.Material)
@@ -119,7 +121,9 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
     gColors[i * 3] = col.r; gColors[i * 3 + 1] = col.g; gColors[i * 3 + 2] = col.b
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3))
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 })))
+  const groundMat = track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 }))
+  track(addGroundDetail(groundMat, 'grass', opts.maxX + 180, 240))
+  const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   // Materials

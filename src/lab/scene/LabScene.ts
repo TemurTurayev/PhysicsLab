@@ -12,6 +12,7 @@ import type { Environment, EnvironmentFactory } from './environments/types'
 import { armAt, flightAt } from './sampling'
 import { skyEnvironment } from './sky'
 import { RetroPass } from './retroPass'
+import { defaultQuality, PostFx, type FxQuality } from './postFx'
 import { createTrebuchet, type MachineSkin, type TrebuchetModel } from './trebuchetModel'
 
 export interface ShotView {
@@ -64,6 +65,7 @@ export class LabScene {
   private onTime: ((t: number, done: boolean) => void) | null = null
   private readonly resizeObserver: ResizeObserver
   private retro: RetroPass | null = null
+  private fx: PostFx | null = null
 
   private readonly canvas: HTMLCanvasElement
   private readonly rig: CameraRig
@@ -87,6 +89,7 @@ export class LabScene {
     this.stone.visible = false
     this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group, this.notes.group, ...this.past.map((p) => p.line))
     this.rig = new CameraRig(this.camera, canvas)
+    this.setQuality(defaultQuality())
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(canvas)
     this.resize()
@@ -276,6 +279,7 @@ export class LabScene {
     this.rig.apply(cam, stoneNow && !landed ? new THREE.Vector3(stoneNow.x, Math.max(stoneNow.y, 0.15), 0) : null)
     this.cutaway.update(this.env?.indoor ? this.env.group : null, this.camera.position, this.rig.target)
     if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
+    else if (this.fx) this.fx.render()
     else this.renderer.render(this.scene, this.camera)
   }
 
@@ -293,11 +297,19 @@ export class LabScene {
     const h = this.canvas.clientHeight
     if (w === 0 || h === 0) return
     this.renderer.setSize(w, h, false)
+    this.fx?.setSize(w, h, this.renderer.getPixelRatio())
     const buffer = this.renderer.getDrawingBufferSize(new THREE.Vector2())
     this.retro?.setSize(buffer.x, buffer.y)
     this.camera.aspect = w / h
     this.camera.updateProjectionMatrix()
     this.render()
+  }
+
+  /** Graphics quality: ambient occlusion + bloom + grade, bloom + grade only, or the plain render. */
+  setQuality(q: FxQuality): void {
+    this.fx?.dispose()
+    this.fx = q === 'off' ? null : new PostFx(this.renderer, this.scene, this.camera, q)
+    if (this.canvas.clientWidth > 0) this.resize()
   }
 
   /** Free orbit camera (the student dragged or zoomed) or the cinematic one. */
@@ -322,6 +334,7 @@ export class LabScene {
     this.stone.geometry.dispose()
     ;(this.stone.material as THREE.Material).dispose()
     this.retro?.dispose()
+    this.fx?.dispose()
     this.renderer.dispose()
   }
 }

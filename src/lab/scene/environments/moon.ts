@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addGroundDetail } from '../textures/groundDetail'
 import type { Target } from '../../levels/types'
 import { woodMaterial } from '../wood'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from './types'
@@ -85,7 +86,7 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const fog = null
   const background = new THREE.Color('#000000')
   const SUN_DIR = new THREE.Vector3(-0.6, 0.35, 0.5).normalize()
-  group.add(new THREE.HemisphereLight(0x8899aa, 0x111111, 0.12))
+  group.add(new THREE.HemisphereLight(0x8899aa, 0x2a2a2a, 0.3))
 
   const sun = new THREE.DirectionalLight(0xffffff, 3.4)
   sun.position.copy(SUN_DIR).multiplyScalar(100); sun.castShadow = true
@@ -137,7 +138,9 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
     gColors[i * 3] = col.r; gColors[i * 3 + 1] = col.g; gColors[i * 3 + 2] = col.b
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3)); groundGeo.computeVertexNormals()
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0.05, flatShading: true })))
+  const groundMat = track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0.05, flatShading: true }))
+  track(addGroundDetail(groundMat, 'regolith', groundW, 240))
+  const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   // Shared props materials

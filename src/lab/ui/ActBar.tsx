@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Mission } from '../levels/types'
+import type { FxQuality } from '../scene/postFx'
 
 export type Act = 'see' | 'understand' | 'build'
 
@@ -20,7 +21,15 @@ export interface ActBarProps {
   onMute: () => void
   retro: boolean
   onRetro: () => void
+  quality: FxQuality
+  onQuality: (q: FxQuality) => void
 }
+
+const QUALITY: Array<[FxQuality, string]> = [
+  ['high', 'Высокое'],
+  ['low', 'Обычное'],
+  ['off', 'Без эффектов'],
+]
 
 /** Where am I (chapter · mission · title), which way of looking at it (three steps), and the few global toggles. */
 export function ActBar(p: ActBarProps) {
@@ -74,13 +83,28 @@ export function ActBar(p: ActBarProps) {
           ⚙
         </button>
         {menu && (
-          <div className="lab-panel lab-rise absolute right-0 top-[46px] z-30 p-2 flex flex-col gap-1 w-[220px]" role="menu">
+          <div className="lab-panel lab-rise absolute right-0 top-[46px] z-30 p-2 flex flex-col gap-1 w-[260px]" role="menu">
             <button type="button" role="menuitemcheckbox" aria-checked={!p.muted} className="lab-btn justify-between w-full" onClick={p.onMute}>
               Звук <span>{p.muted ? '🔇 выкл' : '🔊 вкл'}</span>
             </button>
             <button type="button" role="menuitemcheckbox" aria-checked={p.retro} className="lab-btn justify-between w-full" onClick={p.onRetro}>
               Ретро-экран <span className="lab-mono text-xs">{p.retro ? 'вкл' : 'выкл'}</span>
             </button>
+            <div className="lab-label px-1 pt-2">Графика</div>
+            <div className="grid grid-cols-3 gap-1">
+              {QUALITY.map(([q, label]) => (
+                <button
+                  key={q}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={p.quality === q}
+                  className={`lab-btn !min-h-[32px] !px-1 text-[11px] ${p.quality === q ? 'lab-btn-primary' : ''}`}
+                  onClick={() => p.onQuality(q)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

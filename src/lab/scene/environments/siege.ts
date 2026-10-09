@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addGroundDetail } from '../textures/groundDetail'
 import type { Target } from '../../levels/types'
 import { createSky } from '../sky'
 import { woodMaterial } from '../wood'
@@ -43,15 +44,16 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   }
 
   // Sun, Fog, Sky and Lighting
-  const SUN_DIR = new THREE.Vector3(-0.75, 0.16, 0.45).normalize()
+  const SUN_DIR = new THREE.Vector3(-0.75, 0.24, 0.45).normalize()
   const fog = new THREE.Fog('#d9a07c', 70, opts.maxX + 180)
   const background = new THREE.Color('#d9a07c')
   const sky = createSky({
     zenith: '#2f4f86', mid: '#c9849a', horizon: '#ffb26b', ground: '#c98d6a',
     sunDir: SUN_DIR, sunColor: '#ffb066', halo: 1.4,
+    clouds: { cover: 0.3, color: '#ffc39a' },
   })
   track(sky.geometry); track(sky.material as THREE.Material); group.add(sky)
-  group.add(new THREE.HemisphereLight(0x8fa6d6, 0x4a3328, 0.5))
+  group.add(new THREE.HemisphereLight(0x9fb0dc, 0x6e5038, 0.9))
 
   const sun = new THREE.DirectionalLight(0xffb57a, 2.6)
   sun.position.copy(SUN_DIR).multiplyScalar(80)
@@ -65,7 +67,7 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   sun.target.position.set(7.5, 0, 0)
   group.add(sun.target); group.add(sun)
 
-  const fill = new THREE.DirectionalLight(0x9fb4e0, 0.35)
+  const fill = new THREE.DirectionalLight(0xffc9a0, 0.7)
   fill.position.set(10, 10, 40)
   group.add(fill)
 
@@ -90,7 +92,9 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     gColors[i * 3] = col.r; gColors[i * 3 + 1] = col.g; gColors[i * 3 + 2] = col.b
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3))
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0, flatShading: true })))
+  const groundMat = track(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0, flatShading: true }))
+  track(addGroundDetail(groundMat, 'grass', groundW, 240))
+  const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   // Materials

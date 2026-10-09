@@ -1,4 +1,6 @@
 import * as THREE from 'three'
+import { createSky } from '../sky'
+import { addGroundDetail } from '../textures/groundDetail'
 import type { Target } from '../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from './types'
 
@@ -76,8 +78,8 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   const background = new THREE.Color('#cfe6f5')
 
   // Lights
-  const hemi = new THREE.HemisphereLight(0xd8ecf8, 0x6f9a45, 0.75)
-  const sun = new THREE.DirectionalLight(0xfffaea, 1.8)
+  const hemi = new THREE.HemisphereLight(0xd8ecf8, 0x5d8a3c, 0.6)
+  const sun = new THREE.DirectionalLight(0xfff1d6, 3.0)
   sun.position.set(-20, 60, 30); sun.castShadow = true
   sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005
   sun.shadow.camera.near = 10; sun.shadow.camera.far = 130
@@ -86,20 +88,14 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   sun.target.position.set(5, 0, 0)
   group.add(hemi, sun, sun.target)
 
-  // Sky dome (BackSide)
-  const skyRadius = Math.max(300, opts.maxX + 200)
-  const skyGeo = track(new THREE.SphereGeometry(skyRadius, 24, 16))
-  const skyColors = new Float32Array(skyGeo.attributes.position.count * 3)
-  const [cZenith, cHorizon, cBelow] = [new THREE.Color('#5fa8e6'), new THREE.Color('#cfe6f5'), new THREE.Color('#6f9a45')]
-  for (let i = 0; i < skyGeo.attributes.position.count; i++) {
-    const ny = skyGeo.attributes.position.getY(i) / skyRadius
-    const col = ny >= 0 ? cHorizon.clone().lerp(cZenith, Math.pow(ny, 0.75)) : cHorizon.clone().lerp(cBelow, Math.min(1, -ny * 2.5))
-    skyColors.set([col.r, col.g, col.b], i * 3)
-  }
-  skyGeo.setAttribute('color', new THREE.BufferAttribute(skyColors, 3))
-  const skyMesh = new THREE.Mesh(skyGeo, track(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false, fog: false })))
-  skyMesh.position.set(opts.maxX / 2, 0, 0)
-  group.add(skyMesh)
+  // Sky dome: the shared procedural sky with fair-weather clouds, sun on the key light's direction
+  const sky = createSky({
+    zenith: '#4f93d6', mid: '#9cc6e8', horizon: '#e4f0f7', ground: '#cfe6f5',
+    sunDir: sun.position.clone().normalize(), sunColor: '#fff4dc', halo: 0.7,
+    clouds: { cover: 0.42, color: '#ffffff' },
+  })
+  track(sky.geometry); track(sky.material as THREE.Material)
+  group.add(sky)
 
   // Ground plane with mowing stripes along x
   const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
@@ -114,7 +110,9 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     gColors.set([col.r, col.g, col.b], i * 3)
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3))
-  const groundMesh = new THREE.Mesh(groundGeo, track(new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true })))
+  const groundMat = track(new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }))
+  track(addGroundDetail(groundMat, 'grass', groundW, 240))
+  const groundMesh = new THREE.Mesh(groundGeo, groundMat)
   groundMesh.receiveShadow = true
   group.add(groundMesh)
 

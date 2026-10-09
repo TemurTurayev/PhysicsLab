@@ -131,7 +131,7 @@ function bakeSteelPanel(): THREE.CanvasTexture {
 function bakeFloorTile(): THREE.CanvasTexture {
   const [canvas, img, ctx] = makeCanvas(128, 128)
   const d = img.data
-  const base = [207, 211, 204]
+  const base = [184, 188, 182]
   for (let y = 0; y < 128; y++) {
     const ty = y % 32
     for (let x = 0; x < 128; x++) {

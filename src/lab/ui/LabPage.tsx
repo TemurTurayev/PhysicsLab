@@ -15,6 +15,7 @@ import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
 import { useIsDesktop } from './useIsDesktop'
+import { defaultQuality, saveQuality, type FxQuality } from '../scene/postFx'
 import { CodeDrawer } from './CodeDrawer'
 import { ControlPanel } from './ControlPanel'
 import { IncidentCard } from './IncidentCard'
@@ -81,6 +82,7 @@ function MissionView({ mission }: { mission: Mission }) {
   const { canvasRef, sceneRef, freeCamera } = useLabScene(mission, universe)
   const pressAt = useRef<{ x: number; y: number } | null>(null)
   const [retro, setRetro] = useState(universe.retroByDefault)
+  const [quality, setQuality] = useState<FxQuality>(defaultQuality)
   useEffect(() => sceneRef.current?.setRetro(retro), [retro, sceneRef, universe])
   const run = useMissionRun(mission)
   const progress = useLabProgress()
@@ -272,6 +274,12 @@ function MissionView({ mission }: { mission: Mission }) {
           mission={told}
           retro={retro}
           onRetro={() => setRetro(!retro)}
+          quality={quality}
+          onQuality={(q) => {
+            setQuality(q)
+            saveQuality(q)
+            sceneRef.current?.setQuality(q)
+          }}
           act={act}
           onAct={setAct}
           incidents={progress.incidents.length}
