@@ -47,3 +47,8 @@
 
 /* Compact display formulas in the side panels. */
 .lab-root .katex-display { margin: 0.25em 0; }
+
+.lab-num:focus { outline: 2px solid var(--lab-accent); outline-offset: 1px; }
+.lab-num.ok { border-color: var(--lab-good) !important; }
+.lab-num.close { border-color: #f2c94c !important; }
+.lab-num.wrong { border-color: var(--lab-bad) !important; }

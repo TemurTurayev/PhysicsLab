@@ -47,6 +47,9 @@ export class LabScene {
   private readonly marker = new PredictionMarker()
   private readonly arrows = new ForceArrows()
   private readonly notes = new ShotAnnotations()
+  // The last three throws stay as fading lines, so attempts can be compared by eye.
+  private readonly past = [0.38, 0.24, 0.13].map((o) => new PathLine('#ffb4a2', o, false))
+  private pastFlights: FlightSample[][] = []
   private baseSpeed = 1
   private view: ShotView | null = null
   private targets: Target[] = []
@@ -80,7 +83,7 @@ export class LabScene {
     )
     this.stone.castShadow = true
     this.stone.visible = false
-    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group, this.notes.group)
+    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group, this.notes.group, ...this.past.map((p) => p.line))
     this.rig = new CameraRig(this.camera, canvas)
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(canvas)
@@ -142,6 +145,12 @@ export class LabScene {
 
   /** Load a shot and play it from the trigger. */
   setShot(view: ShotView | null): void {
+    const previous = this.view?.shot.flight
+    this.pastFlights = view === null ? [] : previous?.length ? [previous, ...this.pastFlights].slice(0, this.past.length) : this.pastFlights
+    this.past.forEach((line, i) => {
+      line.set(this.pastFlights[i] ?? [])
+      line.reveal(Infinity)
+    })
     this.view = view
     this.trail.set(view?.shot.flight ?? [])
     this.ghost.set(view?.ghost ?? [])
@@ -306,7 +315,7 @@ export class LabScene {
     this.envMap?.dispose()
     this.machine?.dispose()
     this.crew.dispose()
-    ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows, this.notes].forEach((x) => x.dispose())
+    ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows, this.notes, ...this.past].forEach((x) => x.dispose())
     this.stone.geometry.dispose()
     ;(this.stone.material as THREE.Material).dispose()
     this.retro?.dispose()

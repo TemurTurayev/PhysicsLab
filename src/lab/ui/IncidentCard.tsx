@@ -102,12 +102,12 @@ export function IncidentCard({ event, isNew, onReplaySlow, onClose }: IncidentCa
         </p>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <span className="lab-label">Как в жизни</span>
-        <p className="text-xs italic leading-relaxed" style={{ color: 'var(--lab-dim)' }}>
+      <details className="flex flex-col gap-1">
+        <summary className="lab-label cursor-pointer select-none">Как в жизни</summary>
+        <p className="text-xs italic leading-relaxed mt-1" style={{ color: 'var(--lab-dim)' }}>
           {entry.realLife}
         </p>
-      </div>
+      </details>
 
       <div className="flex items-center gap-2 pt-1 flex-wrap sm:flex-nowrap">
         <button

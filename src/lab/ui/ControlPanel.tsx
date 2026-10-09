@@ -1,4 +1,5 @@
 import type { Mission, SliderKey, SliderValues } from '../levels/types'
+import { NumberField } from './NumberField'
 
 export interface ControlPanelProps {
   mission: Mission
@@ -12,20 +13,16 @@ export interface ControlPanelProps {
   fireLabel: string
 }
 
-const fmt = (v: number) => v.toLocaleString('ru-RU', { maximumFractionDigits: 1 })
 
 export function ControlPanel(p: ControlPanelProps) {
   const { mission } = p
   return (
     <div className="lab-panel p-4 flex flex-col gap-4 w-full">
       {mission.sliders.map((s) => (
-        <label key={s.key} className="flex flex-col gap-2">
-          <span className="flex justify-between items-baseline">
+        <div key={s.key} className="flex flex-col gap-2">
+          <span className="flex justify-between items-center gap-2">
             <span className="lab-label">{s.label}</span>
-            <span className="lab-mono text-lg" style={{ color: 'var(--lab-accent)' }}>
-              {(p.values[s.key] ?? s.start).toLocaleString('ru-RU')}
-              {s.unit === '°' ? s.unit : `\u00a0${s.unit}`}
-            </span>
+            <NumberField value={p.values[s.key] ?? s.start} min={s.min} max={s.max} step={s.step} unit={s.unit} label={s.label} onCommit={(v) => p.onValue(s.key, v)} />
           </span>
           <input
             className="lab-range"
@@ -35,6 +32,7 @@ export function ControlPanel(p: ControlPanelProps) {
             step={s.step}
             value={p.values[s.key] ?? s.start}
             onChange={(e) => p.onValue(s.key, Number(e.target.value))}
+            aria-label={s.label}
           />
           {s.key === 'releaseDeg' ? (
             <span className="flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
@@ -47,15 +45,21 @@ export function ControlPanel(p: ControlPanelProps) {
               <span>{s.max.toLocaleString('ru-RU')} {s.unit}</span>
             </span>
           )}
-        </label>
+        </div>
       ))}
       {mission.predict && (
-        <label className="flex flex-col gap-2">
-          <span className="flex justify-between items-baseline">
+        <div className="flex flex-col gap-2">
+          <span className="flex justify-between items-center gap-2">
             <span className="lab-label">{mission.predict.label}</span>
-            <span className="lab-mono text-lg" style={{ color: 'var(--lab-accent)' }}>
-              {p.prediction === null ? '—' : `${fmt(p.prediction)} ${mission.predict.unit ?? 'м'}`}
-            </span>
+            <NumberField
+              value={p.prediction}
+              min={mission.predict.min}
+              max={mission.predict.max}
+              step={0.1}
+              unit={mission.predict.unit ?? 'м'}
+              label={mission.predict.label}
+              onCommit={p.onPrediction}
+            />
           </span>
           <input
             className="lab-range"
@@ -68,10 +72,10 @@ export function ControlPanel(p: ControlPanelProps) {
           />
           {mission.predict.quantity === 'landingX' && (
             <span className="text-xs" style={{ color: 'var(--lab-dim)' }}>
-              Или кликни по земле, чтобы поставить флажок.
+              Впиши посчитанное число, двигай ползунок или кликни по земле.
             </span>
           )}
-        </label>
+        </div>
       )}
       <button type="button" className="lab-btn lab-btn-primary text-base min-h-[48px]" disabled={!p.canFire || p.busy} onClick={p.onFire}>
         {p.busy ? 'Считаю…' : p.fireLabel}

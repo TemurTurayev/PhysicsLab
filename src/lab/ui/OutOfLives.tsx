@@ -1,7 +1,7 @@
 /** All three lives spent: no more guessing — compute from the table and start the mission again. */
 export function OutOfLives({ formal, onRestart }: { formal: boolean; onRestart: () => void }) {
   return (
-    <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-10 w-[min(440px,calc(100%-16px))]" role="alert">
+    <div className="w-full" role="alert">
       <div className="lab-panel px-4 py-3 flex flex-col gap-2" style={{ borderColor: 'rgba(255,107,107,0.55)' }}>
         <div className="font-semibold" style={{ color: 'var(--lab-bad)' }}>
           {formal ? 'Допуск к установке приостановлен' : 'Жизни кончились'}

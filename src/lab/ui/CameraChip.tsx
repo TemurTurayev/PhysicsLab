@@ -1,3 +1,15 @@
+import { useEffect, useState } from 'react'
+
+const LEARNED_KEY = 'physicslab-camera-learned'
+
+const readLearned = () => {
+  try {
+    return localStorage.getItem(LEARNED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 interface CameraChipProps {
   free: boolean
   onAuto: () => void
@@ -7,6 +19,16 @@ interface CameraChipProps {
 
 /** Camera help or «back to auto», plus slow motion so there is time to look around the flight. */
 export function CameraChip({ free, onAuto, slow, onSlow }: CameraChipProps) {
+  // The how-to chip retires for good once the student has turned the camera themselves.
+  const [learned] = useState(readLearned)
+  useEffect(() => {
+    if (!free) return
+    try {
+      localStorage.setItem(LEARNED_KEY, '1')
+    } catch {
+      // private mode: the chip simply keeps showing
+    }
+  }, [free])
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <button type="button" className={`lab-btn text-sm ${slow ? 'lab-btn-primary' : ''}`} onClick={onSlow} aria-pressed={slow} title="Полёт в 3 раза медленнее">
@@ -17,7 +39,7 @@ export function CameraChip({ free, onAuto, slow, onSlow }: CameraChipProps) {
           🎥 Авто-камера
         </button>
       ) : (
-        <CameraHelp />
+        !learned && <CameraHelp />
       )}
     </div>
   )

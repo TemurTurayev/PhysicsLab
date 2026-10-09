@@ -126,15 +126,6 @@ export function WorldMap(): JSX.Element {
                 </div>
 
                 <div className="relative flex flex-col lg:flex-row items-stretch gap-4 pb-2">
-                  <div
-                    aria-hidden="true"
-                    className="hidden lg:block absolute top-1/2 left-8 right-8 h-0.5 bg-[var(--lab-line)] -translate-y-1/2 pointer-events-none"
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="lg:hidden absolute top-8 bottom-8 left-8 w-0.5 bg-[var(--lab-line)] pointer-events-none"
-                  />
-
                   {chapter.missions.map((authored) => {
                     const mission = applyCopy(authored, universe)
                     const unlocked = sectorOpen && isUnlocked(mission, completed)
@@ -155,7 +146,7 @@ export function WorldMap(): JSX.Element {
                         }
                         className={`lab-panel relative z-10 flex-1 flex flex-col justify-between p-4 sm:p-5 text-left rounded-[var(--lab-radius)] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--lab-accent)] focus-visible:outline-offset-2 ${
                           !unlocked
-                            ? 'opacity-45 cursor-not-allowed border-[var(--lab-line)]'
+                            ? 'opacity-60 cursor-not-allowed border-[var(--lab-line)]'
                             : isNext
                               ? 'ring-2 ring-[var(--lab-accent)] shadow-[0_0_18px_rgba(240,166,64,0.35)] animate-pulse motion-reduce:animate-none border-[var(--lab-accent)]'
                               : 'hover:border-white/20 hover:bg-white/[0.07] cursor-pointer'

@@ -11,6 +11,7 @@ import { ActBar, type Act } from './ActBar'
 import { CalcPanel, type ShotLogRow } from './CalcPanel'
 import { CameraChip } from './CameraChip'
 import { OutOfLives } from './OutOfLives'
+import { useIsDesktop } from './useIsDesktop'
 import { CodeDrawer } from './CodeDrawer'
 import { ControlPanel } from './ControlPanel'
 import { IncidentCard } from './IncidentCard'
@@ -166,6 +167,20 @@ function MissionView({ mission }: { mission: Mission }) {
   }, [run.won, run.stars, mission.id])
 
   // A click places the flag; a drag only turns the camera.
+  // Space fires, unless the student is typing a number or code.
+  const fireRef = useRef(fire)
+  fireRef.current = fire
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      if (e.code !== 'Space' || el?.closest('input, textarea, [contenteditable], .monaco-editor, button')) return
+      e.preventDefault()
+      if (phase !== 'flying' && !mission.code && (run.lives > 0 || run.won) && (!mission.predict || prediction !== null)) void fireRef.current()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [phase, mission, run.lives, run.won, prediction])
+
   const placePrediction = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const down = pressAt.current
     pressAt.current = null
@@ -180,6 +195,53 @@ function MissionView({ mission }: { mission: Mission }) {
   const showCode = act === 'build' && mission.code
   const fireLabel = mission.code ? 'Огонь (с твоим кодом)' : 'Огонь'
 
+  const desktop = useIsDesktop()
+  const calcInDock = desktop && !showCode
+  const calc = <CalcPanel mission={mission} values={values} log={log} />
+  const restart = () => {
+    run.reset()
+    setLog([])
+    setPhase('idle')
+    sceneRef.current?.setShot(null)
+  }
+  const feedback =
+    phase !== 'landed' ? null : incident ? (
+      <IncidentCard
+        event={incident.event}
+        isNew={incident.isNew}
+        onClose={() => setIncidents((q) => q.slice(1))}
+        onReplaySlow={() => {
+          setPhase('flying')
+          sceneRef.current?.replay(0.25)
+          sceneRef.current?.onTimeUpdate((_, done) => done && setPhase('landed'))
+        }}
+      />
+    ) : run.lives === 0 && !run.won ? (
+      <OutOfLives formal={sigma} onRestart={restart} />
+    ) : (
+      <ResultBanner
+        mission={mission}
+        record={run.last}
+        won={run.won}
+        stars={run.stars}
+        onNext={next ? () => navigate(`/trebuchet/${next.id}`) : undefined}
+        onFinish={() => navigate('/trebuchet')}
+        formal={sigma}
+      />
+    )
+  const chips = <CameraChip free={freeCamera} onAuto={() => sceneRef.current?.autoCamera()} slow={slow} onSlow={() => setSlow(!slow)} />
+  const placard = (
+    <Placard
+      shot={run.last?.shot ?? null}
+      releaseDeg={releaseDeg}
+      beamLimit={mission.base.trebuchet.beamStrength}
+      movingLabel={universe.terms.movingTarget}
+      tell={(line) => tellLine(line, universe)}
+      phase={phase}
+      movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
+    />
+  )
+
   return (
     <div className="lab-root fixed inset-0 overflow-hidden" data-universe={universe.id}>
       <canvas
@@ -189,35 +251,43 @@ function MissionView({ mission }: { mission: Mission }) {
         onPointerUp={placePrediction}
       />
 
-      <div className="absolute top-0 inset-x-0 p-2 md:p-3 flex flex-col items-start gap-2 pointer-events-none [&>*]:pointer-events-auto">
-        <div className="w-full">
-          <ActBar
-            mission={told}
-            retro={retro}
-            onRetro={() => setRetro(!retro)}
-            act={act}
-            onAct={setAct}
-            incidents={progress.incidents.length}
-            onJournal={() => setJournalOpen(true)}
-            muted={muted}
-            onMute={() => {
-              setMuted(!muted)
-              setMutedState(!muted)
-            }}
-          />
-        </div>
-        <div className="w-[min(340px,100%)] flex flex-col gap-2 max-h-[38vh] md:max-h-[calc(100vh-260px)] overflow-y-auto">
-          <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} />
-          <div className={showCode ? '' : 'md:hidden'}>
-            <CalcPanel mission={mission} values={values} log={log} />
-          </div>
-          {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
-        </div>
+      <div className="absolute top-0 inset-x-0 p-2 md:p-3 pointer-events-none [&>*]:pointer-events-auto">
+        <ActBar
+          mission={told}
+          retro={retro}
+          onRetro={() => setRetro(!retro)}
+          act={act}
+          onAct={setAct}
+          incidents={progress.incidents.length}
+          onJournal={() => setJournalOpen(true)}
+          muted={muted}
+          onMute={() => {
+            setMuted(!muted)
+            setMutedState(!muted)
+          }}
+        />
       </div>
 
-      <div className="absolute bottom-0 inset-x-0 p-2 flex flex-col items-end gap-2 pointer-events-none [&>*]:pointer-events-auto md:static md:p-0">
+      {/* Story column: what just happened, the task, the theory. Fades while the stone flies. */}
+      <div
+        className={`absolute left-2 top-[118px] md:left-3 md:top-[72px] w-[min(340px,calc(100%-16px))] flex flex-col gap-2 overflow-y-auto transition-opacity duration-300 ${
+          feedback ? 'max-h-[62vh]' : 'max-h-[38vh]'
+        } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
+      >
+        {feedback}
+        <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} />
+        {!calcInDock && calc}
+        {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
+      </div>
+
+      {/* Desktop dock: numbers on top, controls under them; never overlapping. */}
+      <div
+        className={`absolute bottom-0 inset-x-0 p-2 flex flex-col items-end gap-2 pointer-events-none [&>*]:pointer-events-auto md:p-0 md:inset-x-auto md:right-3 md:top-[72px] md:bottom-[96px] ${
+          showCode ? 'md:w-[460px]' : 'md:w-[360px]'
+        } transition-opacity duration-300 ${phase === 'flying' ? 'md:opacity-35 md:hover:opacity-100' : ''}`}
+      >
         {showCode ? (
-          <div className="w-full h-[50vh] md:absolute md:right-3 md:top-[64px] md:bottom-[96px] md:w-[460px] md:h-auto">
+          <div className="w-full h-[50vh] md:h-full">
             <CodeDrawer
               code={code}
               onChange={setCode}
@@ -230,79 +300,29 @@ function MissionView({ mission }: { mission: Mission }) {
             />
           </div>
         ) : (
-          <div className="w-[min(320px,100%)] md:absolute md:right-3 md:bottom-[96px]">
-            <ControlPanel
-              mission={mission}
-              values={values}
-              onValue={(key, v) => setValues((cur) => ({ ...cur, [key]: v }))}
-              prediction={prediction}
-              onPrediction={setPrediction}
-              canFire={phase !== 'flying' && (run.lives > 0 || run.won) && (!mission.predict || prediction !== null)}
-              busy={run.busy}
-              onFire={fire}
-              fireLabel={fireLabel}
-            />
-          </div>
+          <>
+            {calcInDock && <div className="w-full min-h-0 flex-1 overflow-y-auto">{calc}</div>}
+            <div className="w-[min(320px,100%)] md:w-full shrink-0">
+              <ControlPanel
+                mission={mission}
+                values={values}
+                onValue={(key, v) => setValues((cur) => ({ ...cur, [key]: v }))}
+                prediction={prediction}
+                onPrediction={setPrediction}
+                canFire={phase !== 'flying' && (run.lives > 0 || run.won) && (!mission.predict || prediction !== null)}
+                busy={run.busy}
+                onFire={fire}
+                fireLabel={fireLabel}
+              />
+            </div>
+          </>
         )}
-        {!showCode && (
-          <div className="hidden md:block md:absolute md:right-3 md:top-[64px] md:w-[360px] md:max-h-[calc(100vh-64px-350px)] overflow-y-auto">
-            <CalcPanel mission={mission} values={values} log={log} />
-          </div>
-        )}
-        <div className="self-start md:absolute md:left-3 md:bottom-[96px]">
-          <CameraChip free={freeCamera} onAuto={() => sceneRef.current?.autoCamera()} slow={slow} onSlow={() => setSlow(!slow)} />
-        </div>
-        <div className="w-full md:absolute md:bottom-0 md:inset-x-0 md:p-3">
-          <Placard
-            shot={run.last?.shot ?? null}
-            releaseDeg={releaseDeg}
-            beamLimit={mission.base.trebuchet.beamStrength}
-            movingLabel={universe.terms.movingTarget}
-            tell={(line) => tellLine(line, universe)}
-            phase={phase}
-            movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
-          />
-        </div>
+        <div className="self-start md:hidden">{chips}</div>
+        <div className="w-full md:hidden">{placard}</div>
       </div>
 
-      {incident && phase === 'landed' && (
-        <div className="absolute inset-x-2 bottom-[140px] md:bottom-auto md:top-[64px] md:left-1/2 md:-translate-x-1/2 md:w-[420px] z-20">
-          <IncidentCard
-            event={incident.event}
-            isNew={incident.isNew}
-            onClose={() => setIncidents((q) => q.slice(1))}
-            onReplaySlow={() => {
-              setPhase('flying')
-              sceneRef.current?.replay(0.25)
-              sceneRef.current?.onTimeUpdate((_, done) => done && setPhase('landed'))
-            }}
-          />
-        </div>
-      )}
-
-      {phase === 'landed' && !incident && run.lives === 0 && !run.won && (
-        <OutOfLives
-          formal={sigma}
-          onRestart={() => {
-            run.reset()
-            setLog([])
-            setPhase('idle')
-            sceneRef.current?.setShot(null)
-          }}
-        />
-      )}
-
-      {phase === 'landed' && !incident && (run.lives > 0 || run.won) && (
-        <ResultBanner
-          mission={mission}
-          record={run.last}
-          won={run.won}
-          stars={run.stars}
-          onNext={next ? () => navigate(`/trebuchet/${next.id}`) : undefined}
-          onFinish={() => navigate('/trebuchet')}
-          formal={sigma}
-        />
-      )}
+      <div className="hidden md:block absolute left-3 bottom-[96px]">{chips}</div>
+      <div className="hidden md:block absolute bottom-0 inset-x-0 p-3">{placard}</div>
 
       {journalOpen && <IncidentJournal found={progress.incidents} onClose={() => setJournalOpen(false)} />}
       <Link to="/trebuchet" className="sr-only">

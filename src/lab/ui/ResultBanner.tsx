@@ -35,7 +35,7 @@ export function ResultBanner({ mission, record, won, stars, onNext, onFinish, fo
   const nextAction = onNext ?? onFinish
   const lifeNote = record.lifeLost ? (formal ? ' Списан один допуск.' : ' −1 ❤') : ''
   return (
-    <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-10 w-[min(420px,calc(100%-16px))]" role="status">
+    <div className="w-full" role="status">
       <div className="lab-panel px-4 py-3 flex items-center gap-3" style={{ borderColor: v.good ? 'rgba(126,224,138,0.5)' : undefined }}>
         <div className="flex-1">
           <div className="font-semibold" style={{ color: v.good ? 'var(--lab-good)' : 'var(--lab-text)' }}>

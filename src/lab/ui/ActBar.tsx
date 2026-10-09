@@ -33,7 +33,7 @@ export function ActBar(p: ActBarProps) {
         </div>
         <div className="font-semibold truncate">{p.mission.title}</div>
       </div>
-      <div role="tablist" aria-label="Акт" className="flex rounded-[10px] p-0.5" style={{ background: 'rgba(255,255,255,0.05)' }}>
+      <div role="tablist" aria-label="Акт" className="flex rounded-[10px] p-0.5 order-last w-full md:order-none md:w-auto [&>button]:flex-1 md:[&>button]:flex-none" style={{ background: 'rgba(255,255,255,0.05)' }}>
         {ACTS.map((a) => {
           const disabled = a.id === 'build' && !p.mission.code
           const active = p.act === a.id
@@ -54,19 +54,19 @@ export function ActBar(p: ActBarProps) {
           )
         })}
       </div>
-      <button type="button" className="lab-btn !min-h-[36px] !px-3" onClick={p.onJournal} title="Журнал инцидентов">
+      <button type="button" className="lab-btn !min-h-[36px] !px-2.5 md:!px-3" onClick={p.onJournal} title="Журнал инцидентов">
         📓 <span className="lab-mono">{p.incidents}</span>
       </button>
       <button
         type="button"
-        className={`lab-btn !min-h-[36px] !px-3 lab-mono text-xs ${p.retro ? 'lab-btn-primary' : ''}`}
+        className={`lab-btn !min-h-[36px] !px-2.5 md:!px-3 lab-mono text-xs ${p.retro ? 'lab-btn-primary' : ''}`}
         onClick={p.onRetro}
         aria-pressed={p.retro}
         title="Ретро-режим: пиксели и строки развёртки"
       >
         ЭЛТ
       </button>
-      <button type="button" className="lab-btn !min-h-[36px] !px-3" onClick={p.onMute} aria-label={p.muted ? 'Включить звук' : 'Выключить звук'}>
+      <button type="button" className="lab-btn !min-h-[36px] !px-2.5 md:!px-3" onClick={p.onMute} aria-label={p.muted ? 'Включить звук' : 'Выключить звук'}>
         {p.muted ? '🔇' : '🔊'}
       </button>
     </div>

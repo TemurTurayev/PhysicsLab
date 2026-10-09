@@ -4,6 +4,7 @@ import { withSliders } from '../levels/evaluate'
 import type { Mission, SliderValues } from '../levels/types'
 import { dragFactor } from '../sim/flight'
 import { Formula } from './Formula'
+import { WorkSheet } from './WorkSheet'
 
 export interface ShotLogRow {
   values: SliderValues
@@ -31,6 +32,8 @@ function formulasFor(m: Mission): string[] {
   if (m.base.world.drag) extra.push('\\vec a = \\vec g - k\\,|\\vec v - \\vec w|\\,(\\vec v - \\vec w),\\quad k = \\dfrac{\\rho C_d \\pi r^2}{2m}')
   return [...BASE_FORMULAS, ...extra]
 }
+
+const PREDICTED_SLOT: Record<string, string> = { landingX: 'R', apexY: 'h', flightTime: 't' }
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
@@ -132,6 +135,8 @@ export function CalcPanel({ mission, values, log }: { mission: Mission; values: 
           {formulas.map((f) => (
             <Formula key={f} tex={f} className="overflow-x-auto text-xs" />
           ))}
+
+          {sheet && <WorkSheet key={setting} sheet={sheet} showVelocity={!hideVelocity} vacuumNote={w.drag} hidden={PREDICTED_SLOT[mission.predict?.quantity ?? ''] ?? null} />}
 
           {log.length > 0 && (
             <>
