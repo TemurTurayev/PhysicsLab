@@ -1,23 +1,44 @@
-/* PhysicsLab v1 — "instrument" UI over living 3D scenes. One amber accent per world. */
+/* PhysicsLab — "engineer's field notebook" over living 3D scenes: book serif titles,
+   instrument numerals, one brass accent per world. The complex re-skins the same tokens. */
+@import '@fontsource/literata/600.css';
+@import '@fontsource/literata/700.css';
+@import '@fontsource/golos-text/400.css';
+@import '@fontsource/golos-text/500.css';
+@import '@fontsource/golos-text/600.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
 .lab-root {
-  --lab-bg: #0d1016;
-  --lab-panel: rgba(14, 17, 23, 0.78);
-  --lab-panel-solid: #12161d;
-  --lab-line: rgba(255, 255, 255, 0.09);
-  --lab-text: #e8e3d8;
-  --lab-dim: #9aa3ad;
-  --lab-accent: #f0a640;
-  --lab-accent-soft: rgba(240, 166, 64, 0.16);
-  --lab-good: #7ee08a;
-  --lab-bad: #ff7a6b;
-  --lab-info: #58a6ff;
+  --lab-bg: #0e0c0a;
+  --lab-panel: rgba(21, 18, 14, 0.84);
+  --lab-panel-solid: #17140f;
+  --lab-raise: rgba(255, 240, 214, 0.05);
+  --lab-line: rgba(255, 236, 200, 0.11);
+  --lab-text: #f1e9d8;
+  --lab-dim: #aaa08d;
+  --lab-accent: #eca64b;
+  --lab-accent-soft: rgba(236, 166, 75, 0.16);
+  --lab-good: #8fdc96;
+  --lab-bad: #ff8270;
+  --lab-info: #7cb8ff;
   --lab-radius: 14px;
-  --lab-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-  --lab-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --lab-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --lab-sans: 'Golos Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lab-display: 'Literata', Georgia, 'Times New Roman', serif;
   color: var(--lab-text);
   font-family: var(--lab-sans);
   background: var(--lab-bg);
+  -webkit-font-smoothing: antialiased;
 }
+.lab-title { font-family: var(--lab-display); font-weight: 600; letter-spacing: -0.01em; }
+.lab-kbd {
+  font-family: var(--lab-mono); font-size: 10px; padding: 1px 5px; border-radius: 4px;
+  border: 1px solid currentColor; opacity: 0.6;
+}
+@keyframes lab-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes lab-pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); } }
+.lab-rise { animation: lab-rise 0.32s ease-out both; }
+.lab-pop { display: inline-block; animation: lab-pop 0.45s cubic-bezier(.2,.9,.3,1.4) both; }
+@media (prefers-reduced-motion: reduce) { .lab-rise, .lab-pop { animation: none; } }
 .lab-panel {
   background: var(--lab-panel);
   border: 1px solid var(--lab-line);

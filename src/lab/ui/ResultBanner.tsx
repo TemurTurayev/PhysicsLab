@@ -35,7 +35,7 @@ export function ResultBanner({ mission, record, won, stars, onNext, onFinish, fo
   const nextAction = onNext ?? onFinish
   const lifeNote = record.lifeLost ? (formal ? ' Списан один допуск.' : ' −1 ❤') : ''
   return (
-    <div className="w-full" role="status">
+    <div className="w-full lab-rise" role="status">
       <div className="lab-panel px-4 py-3 flex items-center gap-3" style={{ borderColor: v.good ? 'rgba(126,224,138,0.5)' : undefined }}>
         <div className="flex-1">
           <div className="font-semibold" style={{ color: v.good ? 'var(--lab-good)' : 'var(--lab-text)' }}>
@@ -46,8 +46,11 @@ export function ResultBanner({ mission, record, won, stars, onNext, onFinish, fo
             <div className="text-sm" style={{ color: 'var(--lab-dim)' }}>
               {footnote}{' '}
               <span className="lab-mono" style={{ color: 'var(--lab-accent)' }} aria-label={`${stars} из 3 звёзд`}>
-                {'★'.repeat(stars)}
-                {'☆'.repeat(3 - stars)}
+                {Array.from({ length: 3 }, (_, i) => (
+                  <span key={i} className="lab-pop text-base" style={{ animationDelay: `${0.15 + i * 0.14}s`, opacity: i < stars ? 1 : 0.3 }}>
+                    {i < stars ? '★' : '☆'}
+                  </span>
+                ))}
               </span>
             </div>
           )}

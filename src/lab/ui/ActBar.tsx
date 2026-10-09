@@ -1,12 +1,13 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Mission } from '../levels/types'
 
 export type Act = 'see' | 'understand' | 'build'
 
 const ACTS: Array<{ id: Act; label: string; hint: string }> = [
-  { id: 'see', label: 'Увидь', hint: 'Крути и стреляй' },
-  { id: 'understand', label: 'Пойми', hint: 'Векторы и формулы' },
-  { id: 'build', label: 'Собери', hint: 'Python-движок' },
+  { id: 'see', label: 'Увидь', hint: 'Стреляй и смотри' },
+  { id: 'understand', label: 'Пойми', hint: 'Силы, векторы и формулы на сцене' },
+  { id: 'build', label: 'Собери', hint: 'Свой движок на Python' },
 ]
 
 export interface ActBarProps {
@@ -21,54 +22,68 @@ export interface ActBarProps {
   onRetro: () => void
 }
 
+/** Where am I (chapter · mission · title), which way of looking at it (three steps), and the few global toggles. */
 export function ActBar(p: ActBarProps) {
+  const [menu, setMenu] = useState(false)
   return (
-    <div className="lab-panel flex items-center gap-2 px-2 py-1.5 flex-wrap">
-      <Link to="/trebuchet" className="lab-btn !min-h-[36px] !px-3" aria-label="К карте мира">
+    <div className="lab-panel flex items-center gap-x-3 gap-y-2 px-2 py-1.5 flex-wrap">
+      <Link to="/trebuchet" className="lab-btn !min-h-[38px] !px-3" aria-label="К карте мира" title="К карте мира">
         ←
       </Link>
       <div className="min-w-0 mr-auto">
         <div className="lab-label">
           Глава {p.mission.chapter} · миссия {p.mission.order}
         </div>
-        <div className="font-semibold truncate">{p.mission.title}</div>
+        <div className="lab-title text-[17px] md:text-lg leading-tight truncate">{p.mission.title}</div>
       </div>
-      <div role="tablist" aria-label="Акт" className="flex rounded-[10px] p-0.5 order-last w-full md:order-none md:w-auto [&>button]:flex-1 md:[&>button]:flex-none" style={{ background: 'rgba(255,255,255,0.05)' }}>
-        {ACTS.map((a) => {
+
+      <div role="tablist" aria-label="Режим" className="order-last w-full md:order-none md:w-auto flex items-center gap-1">
+        {ACTS.map((a, i) => {
           const disabled = a.id === 'build' && !p.mission.code
           const active = p.act === a.id
           return (
-            <button
-              key={a.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              disabled={disabled}
-              title={disabled ? 'В этой миссии код не нужен' : a.hint}
-              onClick={() => p.onAct(a.id)}
-              className="px-3 min-h-[34px] rounded-[8px] text-sm font-semibold disabled:opacity-35"
-              style={active ? { background: 'var(--lab-accent)', color: '#1a1206' } : { color: 'var(--lab-text)' }}
-            >
-              {a.label}
-            </button>
+            <div key={a.id} className="flex items-center gap-1 flex-1 md:flex-none">
+              {i > 0 && (
+                <span aria-hidden className="hidden md:inline text-xs" style={{ color: 'var(--lab-dim)' }}>
+                  →
+                </span>
+              )}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={active}
+                disabled={disabled}
+                title={disabled ? 'В этой миссии код не нужен' : a.hint}
+                onClick={() => p.onAct(a.id)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 min-h-[36px] rounded-[9px] text-sm font-semibold transition-colors disabled:opacity-30"
+                style={active ? { background: 'var(--lab-accent)', color: '#1a1206' } : { background: 'var(--lab-raise)', color: 'var(--lab-text)' }}
+              >
+                <span className="lab-mono text-[11px] opacity-70">{i + 1}</span>
+                {a.label}
+              </button>
+            </div>
           )
         })}
       </div>
-      <button type="button" className="lab-btn !min-h-[36px] !px-2.5 md:!px-3" onClick={p.onJournal} title="Журнал инцидентов">
+
+      <button type="button" className="lab-btn !min-h-[38px] !px-3" onClick={p.onJournal} title="Журнал провалов: всё, что уже случалось">
         📓 <span className="lab-mono">{p.incidents}</span>
       </button>
-      <button
-        type="button"
-        className={`lab-btn !min-h-[36px] !px-2.5 md:!px-3 lab-mono text-xs ${p.retro ? 'lab-btn-primary' : ''}`}
-        onClick={p.onRetro}
-        aria-pressed={p.retro}
-        title="Ретро-режим: пиксели и строки развёртки"
-      >
-        ЭЛТ
-      </button>
-      <button type="button" className="lab-btn !min-h-[36px] !px-2.5 md:!px-3" onClick={p.onMute} aria-label={p.muted ? 'Включить звук' : 'Выключить звук'}>
-        {p.muted ? '🔇' : '🔊'}
-      </button>
+      <div className="relative">
+        <button type="button" className="lab-btn !min-h-[38px] !px-3" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Настройки" title="Настройки">
+          ⚙
+        </button>
+        {menu && (
+          <div className="lab-panel lab-rise absolute right-0 top-[46px] z-30 p-2 flex flex-col gap-1 w-[220px]" role="menu">
+            <button type="button" role="menuitemcheckbox" aria-checked={!p.muted} className="lab-btn justify-between w-full" onClick={p.onMute}>
+              Звук <span>{p.muted ? '🔇 выкл' : '🔊 вкл'}</span>
+            </button>
+            <button type="button" role="menuitemcheckbox" aria-checked={p.retro} className="lab-btn justify-between w-full" onClick={p.onRetro}>
+              Ретро-экран <span className="lab-mono text-xs">{p.retro ? 'вкл' : 'выкл'}</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

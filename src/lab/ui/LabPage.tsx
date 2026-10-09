@@ -11,6 +11,9 @@ import { ActBar, type Act } from './ActBar'
 import { CalcPanel, type ShotLogRow } from './CalcPanel'
 import { CameraChip } from './CameraChip'
 import { OutOfLives } from './OutOfLives'
+import { CoachMarks, type CoachStep } from './CoachMarks'
+import { coachDone } from './coachStore'
+import { MissionIntro } from './MissionIntro'
 import { useIsDesktop } from './useIsDesktop'
 import { CodeDrawer } from './CodeDrawer'
 import { ControlPanel } from './ControlPanel'
@@ -29,6 +32,17 @@ import { tellLine } from '../universe/failureCopy'
 import { useUniverse } from '../universe/useUniverse'
 
 type Phase = 'idle' | 'flying' | 'landed'
+
+const COACH: CoachStep[] = [
+  { target: 'goal', title: 'Цель и жизни', text: 'Здесь то, во что нужно попасть. Промах отнимает жизнь, поэтому сначала считай, потом стреляй. Подсказки — тут же.' },
+  { target: 'calc', title: 'Числа для расчёта', text: 'Скорость, угол и точка вылета для текущей настройки, формулы и проверка твоего расчёта. Двинул слайдер — числа пересчитались.' },
+  { target: 'fire', title: 'Настройка и выстрел', text: 'Двигай слайдер или впиши точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камеру можно крутить мышью.' },
+]
+const COACH_FORMAL: CoachStep[] = [
+  { target: 'goal', title: 'Задание и допуски', text: 'Здесь цель испытания. Неудачный пуск списывает допуск, поэтому сначала расчёт, потом пуск. Подсказки — тут же.' },
+  { target: 'calc', title: 'Данные для расчёта', text: 'Скорость, угол и точка схода для текущей настройки, формулы и проверка вашего расчёта. Меняете настройку — данные пересчитываются.' },
+  { target: 'fire', title: 'Настройка и пуск', text: 'Слайдер или точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камера вращается мышью.' },
+]
 
 export function LabPage() {
   const { missionId } = useParams()
@@ -83,6 +97,8 @@ function MissionView({ mission }: { mission: Mission }) {
   const [pythonReady, setPythonReady] = useState(isPythonReady())
   const cues = useRef({ whoosh: false, thud: false })
   const [log, setLog] = useState<ShotLogRow[]>([])
+  const [intro, setIntro] = useState(true)
+  const [coach, setCoach] = useState(false)
   const [slow, setSlow] = useState(false)
   useEffect(() => sceneRef.current?.setSlowMotion(slow), [slow, sceneRef, universe])
 
@@ -173,13 +189,13 @@ function MissionView({ mission }: { mission: Mission }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null
-      if (e.code !== 'Space' || el?.closest('input, textarea, [contenteditable], .monaco-editor, button')) return
+      if (e.code !== 'Space' || intro || coach || el?.closest('input, textarea, [contenteditable], .monaco-editor, button')) return
       e.preventDefault()
       if (phase !== 'flying' && !mission.code && (run.lives > 0 || run.won) && (!mission.predict || prediction !== null)) void fireRef.current()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [phase, mission, run.lives, run.won, prediction])
+  }, [phase, mission, run.lives, run.won, prediction, intro, coach])
 
   const placePrediction = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const down = pressAt.current
@@ -275,7 +291,7 @@ function MissionView({ mission }: { mission: Mission }) {
         } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
       >
         {feedback}
-        <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} />
+        <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} onReread={() => setIntro(true)} />
         {!calcInDock && calc}
         {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
       </div>
@@ -323,6 +339,18 @@ function MissionView({ mission }: { mission: Mission }) {
 
       <div className="hidden md:block absolute left-3 bottom-[96px]">{chips}</div>
       <div className="hidden md:block absolute bottom-0 inset-x-0 p-3">{placard}</div>
+
+      {intro && (
+        <MissionIntro
+          mission={told}
+          formal={sigma}
+          onStart={() => {
+            setIntro(false)
+            if (!coachDone() && !mission.code) setCoach(true)
+          }}
+        />
+      )}
+      {coach && !intro && <CoachMarks steps={sigma ? COACH_FORMAL : COACH} onDone={() => setCoach(false)} />}
 
       {journalOpen && <IncidentJournal found={progress.incidents} onClose={() => setJournalOpen(false)} />}
       <Link to="/trebuchet" className="sr-only">

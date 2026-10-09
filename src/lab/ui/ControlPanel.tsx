@@ -17,7 +17,7 @@ export interface ControlPanelProps {
 export function ControlPanel(p: ControlPanelProps) {
   const { mission } = p
   return (
-    <div className="lab-panel p-4 flex flex-col gap-4 w-full">
+    <div className="lab-panel p-4 flex flex-col gap-4 w-full" data-coach="fire">
       {mission.sliders.map((s) => (
         <div key={s.key} className="flex flex-col gap-2">
           <span className="flex justify-between items-center gap-2">
@@ -79,6 +79,7 @@ export function ControlPanel(p: ControlPanelProps) {
       )}
       <button type="button" className="lab-btn lab-btn-primary text-base min-h-[48px]" disabled={!p.canFire || p.busy} onClick={p.onFire}>
         {p.busy ? 'Считаю…' : p.fireLabel}
+        {!p.busy && <span className="lab-kbd hidden md:inline">Пробел</span>}
       </button>
     </div>
   )
