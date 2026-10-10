@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import * as THREE from 'three'
 
 const STEP = 10 // m between marks
@@ -38,7 +39,7 @@ export function createDistanceMarks(maxX: number): { group: THREE.Group; dispose
   group.name = 'distance-marks'
   for (let x = 0; x <= maxX; x += STEP) {
     const major = x % 50 === 0
-    const s = plate(x === 0 ? '0 м' : `${x} м`, major)
+    const s = plate(x === 0 ? tr('0 м') : tr(`{0} м`, [x]), major)
     s.position.set(x, PLATE_H * 0.75, SIDE_Z)
     group.add(s)
   }

@@ -1,3 +1,4 @@
+import { tr } from '../i18n'
 import { Link } from 'react-router-dom'
 import '../lab/ui/lab.css'
 import './home.css'
@@ -10,12 +11,14 @@ export function NotFound() {
       <div className="flex flex-col items-center gap-4 max-w-md">
         <Logo size={56} />
         <div className="lab-mono text-sm" style={{ color: 'var(--lab-accent)' }}>
-          404 · перелёт
+          
+          {tr("404 · перелёт")}
         </div>
-        <h1 className="home-display text-4xl">Камень улетел мимо</h1>
-        <p style={{ color: 'var(--lab-dim)' }}>Такой страницы нет. Вернись в мастерскую и попробуй ещё раз — с поправкой на ветер.</p>
+        <h1 className="home-display text-4xl">{tr("Камень улетел мимо")}</h1>
+        <p style={{ color: 'var(--lab-dim)' }}>{tr("Такой страницы нет. Вернись в мастерскую и попробуй ещё раз — с поправкой на ветер.")}</p>
         <Link to="/" className="lab-btn lab-btn-primary mt-2">
-          На главную
+          
+          {tr("На главную")}
         </Link>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import type { JSX } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHAPTERS, chapterLabel, isUnlocked } from '../levels'
@@ -8,16 +9,18 @@ import './lab.css'
 import './sigma.css'
 import { applyCopy, UNIVERSES } from '../universe'
 import { AccountButton } from '../account/AccountButton'
+import { LanguageSwitch } from '../../i18n/LanguageSwitch'
 import { MusicToggle } from '../audio/MusicToggle'
+import { SigmaMap } from './SigmaMap'
 import { UniversePicker } from '../universe/UniversePicker'
 import { useUniverse } from '../universe/useUniverse'
 
 const KIND_LABELS: Record<MissionKind, string> = {
-  tune: 'Настрой',
-  predict: 'Предскажи',
-  write: 'Напиши код',
-  fix: 'Почини',
-  challenge: 'Испытание',
+  tune: tr('Настрой'),
+  predict: tr('Предскажи'),
+  write: tr('Напиши код'),
+  fix: tr('Почини'),
+  challenge: tr('Испытание'),
 }
 
 const CHAPTER_THEMES: Record<EnvironmentId, { gradient: string; border: string }> = {
@@ -58,6 +61,8 @@ export function WorldMap(): JSX.Element {
   const setUniverse = useLabProgress((s) => s.setUniverse)
   const universe = useUniverse()
   if (chosen === null) return <UniversePicker />
+  // The complex has its own map: an old-school windowed game menu.
+  if (universe.id === 'sigma') return <SigmaMap />
 
   const allMissions = CHAPTERS.flatMap((c) => c.missions)
   const nextMission = allMissions.find((m) => isUnlocked(m, completed) && (completed[m.id] ?? 0) === 0)
@@ -72,9 +77,11 @@ export function WorldMap(): JSX.Element {
               onClick={() => navigate('/')}
               className="lab-btn text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--lab-accent)] focus-visible:outline-offset-2"
             >
-              ← Главная
+              
+              {tr("← Главная")}
             </button>
             <div className="flex items-center gap-2 ml-auto">
+              <LanguageSwitch />
               <MusicToggle />
               <AccountButton />
               <div className="lab-mono text-xs px-3 py-1.5 rounded-full border border-[var(--lab-line)] bg-white/5 text-[var(--lab-dim)]">
@@ -85,19 +92,21 @@ export function WorldMap(): JSX.Element {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--lab-text)]">
-              Требушет · карта миссий
+              
+              {tr("Требушет · карта миссий")}
             </h1>
             <p className="text-sm text-[var(--lab-dim)] mt-1.5 max-w-2xl leading-relaxed">
-              Физика броска: от момента отпуска до параболы и собственного движка на Python.
+              
+              {tr("Физика броска: от момента отпуска до параболы и собственного движка на Python.")}
             </p>
           </div>
           {nextMission && (
             <button type="button" className="map-cta lab-btn lab-btn-primary self-start !min-h-[52px] !px-6 !text-base" onClick={() => navigate(`/trebuchet/${nextMission.id}`)}>
-              {Object.keys(completed).length === 0 ? 'Начать' : 'Продолжить'}
+              {Object.keys(completed).length === 0 ? tr('Начать') : tr('Продолжить')}
               <span className="font-normal opacity-80">· {applyCopy(nextMission, universe).title}</span> <span aria-hidden>→</span>
             </button>
           )}
-          <div role="radiogroup" aria-label="Вселенная" className="flex gap-2 flex-wrap">
+          <div role="radiogroup" aria-label={tr("Вселенная")} className="flex gap-2 flex-wrap">
             {UNIVERSES.map((u) => (
               <button
                 key={u.id}
@@ -129,7 +138,8 @@ export function WorldMap(): JSX.Element {
                   </h2>
                   {!sectorOpen && (
                     <p className="lab-mono text-xs mt-2" style={{ color: 'var(--lab-accent)' }}>
-                      Сектор на реконструкции — эту главу пока можно пройти в «Классике».
+                      
+                      {tr("Сектор на реконструкции — эту главу пока можно пройти в «Классике».")}
                     </p>
                   )}
                   <p className="text-sm text-[var(--lab-dim)] mt-1 max-w-2xl leading-relaxed">
@@ -150,11 +160,11 @@ export function WorldMap(): JSX.Element {
                         type="button"
                         onClick={() => navigate(`/trebuchet/${mission.id}`)}
                         disabled={!unlocked}
-                        title={!unlocked ? 'Сначала пройди предыдущую миссию' : undefined}
+                        title={!unlocked ? tr('Сначала пройди предыдущую миссию') : undefined}
                         aria-label={
                           !unlocked
-                            ? `${mission.title} — Сначала пройди предыдущую миссию`
-                            : `${mission.title}, ${KIND_LABELS[mission.kind]}, ${stars} из 3 звёзд`
+                            ? tr(`{0} — Сначала пройди предыдущую миссию`, [mission.title])
+                            : tr(`{0}, {1}, {2} из 3 звёзд`, [mission.title, KIND_LABELS[mission.kind], stars])
                         }
                         data-state={!unlocked ? 'locked' : isNext ? 'next' : stars > 0 ? 'done' : 'open'}
                         className="map-card lab-panel relative z-10 flex flex-col justify-between p-4 sm:p-5 text-left rounded-[var(--lab-radius)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--lab-accent)] focus-visible:outline-offset-2"
@@ -186,7 +196,8 @@ export function WorldMap(): JSX.Element {
                               </svg>
                             ) : isNext ? (
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--lab-accent)] text-[#1a1206] uppercase tracking-wider shrink-0">
-                                Дальше
+                                
+                                {tr("Дальше")}
                               </span>
                             ) : null}
                           </div>

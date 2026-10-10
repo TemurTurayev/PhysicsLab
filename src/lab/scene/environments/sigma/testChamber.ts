@@ -1,3 +1,4 @@
+import { tr } from '../../../../i18n'
 import * as THREE from 'three'
 import type { Target } from '../../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from '../types'
@@ -59,8 +60,8 @@ function makeCRTScreenTexture(): THREE.CanvasTexture {
     ctx.stroke()
     ctx.fillStyle = '#7dff8a'
     ctx.font = 'bold 12px monospace'
-    ctx.fillText('СИГМА-7 ТЕЛЕМЕТРИЯ', 8, 22)
-    ctx.fillText('СТАТУС: ГОТОВ', 8, 116)
+    ctx.fillText(tr('СИГМА-7 ТЕЛЕМЕТРИЯ'), 8, 22)
+    ctx.fillText(tr('СТАТУС: ГОТОВ'), 8, 116)
   }
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace
@@ -259,12 +260,12 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
     addMesh(group, signPlateGeo, sMat, [x, 2.5, -13.98], undefined, false, false)
   }
   const bigSign1 = track(new THREE.PlaneGeometry(3.0, 0.9))
-  const sTex1 = track(signTexture('КАМЕРА 3', '#f2c400', '#1b1b1b', 256, 80))
+  const sTex1 = track(signTexture(tr('КАМЕРА 3'), '#f2c400', '#1b1b1b', 256, 80))
   const sMat1 = track(new THREE.MeshLambertMaterial({ map: sTex1 }))
   addMesh(group, bigSign1, sMat1, [-24.98, 8.5, 0], [0, Math.PI / 2, 0], false, false)
 
   const bigSign2 = track(new THREE.PlaneGeometry(4.8, 0.65))
-  const sTex2 = track(signTexture('ОТДЕЛ ПРИКЛАДНОЙ МЕХАНИКИ', '#cfd3cc', '#1b1b1b', 512, 64))
+  const sTex2 = track(signTexture(tr('ОТДЕЛ ПРИКЛАДНОЙ МЕХАНИКИ'), '#cfd3cc', '#1b1b1b', 512, 64))
   const sMat2 = track(new THREE.MeshLambertMaterial({ map: sTex2 }))
   addMesh(group, bigSign2, sMat2, [-24.98, 7.0, 0], [0, Math.PI / 2, 0], false, false)
 
@@ -287,7 +288,7 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
   bollards.instanceMatrix.needsUpdate = true
   group.add(bollards)
 
-  const warnTex = track(signTexture('ОСТОРОЖНО: ЗОНА ИСПЫТАНИЙ', '#f2c400', '#1b1b1b', 384, 64))
+  const warnTex = track(signTexture(tr('ОСТОРОЖНО: ЗОНА ИСПЫТАНИЙ'), '#f2c400', '#1b1b1b', 384, 64))
   const warnMat = track(new THREE.MeshLambertMaterial({ map: warnTex, side: THREE.DoubleSide }))
   addMesh(group, track(new THREE.PlaneGeometry(1.6, 0.35)), warnMat, [-8, 1.1, 4.6])
 

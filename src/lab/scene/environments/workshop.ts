@@ -1,3 +1,4 @@
+import { tr } from '../../../i18n'
 import * as THREE from 'three'
 import { addBoulders, addDomeHills, addFlowers, addGrass, addPines, addRoundTrees, applyHeight, rollingHeight } from './natureDressing'
 import { addGroundDetail } from '../textures/groundDetail'
@@ -271,7 +272,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   const plateGeo = track(new THREE.PlaneGeometry(0.55, 0.28))
   for (let x = 10; x <= opts.maxX; x += 10) {
     addMesh(group, stakeGeo, woodMat, [x, 0.45, -3])
-    const signTex = track(createSignTexture(`${x} м`))
+    const signTex = track(createSignTexture(tr(`{0} м`, [x])))
     const signMat = track(new THREE.MeshLambertMaterial({ map: signTex, side: THREE.DoubleSide }))
     addMesh(group, plateGeo, signMat, [x, 0.75, -2.95], undefined, false)
   }

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useLabProgress } from '../state/labProgress'
 import { mergeProgress, type ProgressData } from '../state/mergeProgress'
+import { localizeServerError } from '../../i18n/foreign'
 import { api } from './api'
 
 type SyncState = 'idle' | 'saving' | 'saved' | 'offline'
@@ -29,7 +30,7 @@ export const useAccount = create<Account>()(
       sync: 'idle',
       signIn: async (mode, username, password) => {
         const res = mode === 'login' ? await api.login(username, password) : await api.register(username, password)
-        if (!res.success) return res.error
+        if (!res.success) return localizeServerError(res.error)
         set({ username: res.data.username, token: res.data.token })
         await get().pull()
         return null

@@ -1,3 +1,4 @@
+import { tr } from '../../../i18n'
 import * as THREE from 'three'
 import { addRegolithField, earthTexture, placeEarth } from './moonDressing'
 import { addGroundDetail } from '../textures/groundDetail'
@@ -211,7 +212,7 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   // Wooden signpost 'МОРЕ СПОКОЙСТВИЯ'
   const signpost = new THREE.Group(); signpost.position.set(-5.5, 0, -4.5)
   addMesh(signpost, track(new THREE.BoxGeometry(0.1, 1.4, 0.1)), woodMat, [0, 0.7, 0]); addMesh(signpost, track(new THREE.BoxGeometry(1.6, 0.42, 0.04)), woodMat, [0, 1.2, 0])
-  const sMat = track(new THREE.MeshLambertMaterial({ map: track(createSignTexture('МОРЕ СПОКОЙСТВИЯ')), side: THREE.DoubleSide }))
+  const sMat = track(new THREE.MeshLambertMaterial({ map: track(createSignTexture(tr('МОРЕ СПОКОЙСТВИЯ'))), side: THREE.DoubleSide }))
   addMesh(signpost, track(new THREE.PlaneGeometry(1.56, 0.38)), sMat, [0, 1.2, 0.025], undefined, false, false); group.add(signpost)
 
   // Bullet-shaped brass capsule, well clear of the machine's silhouette from the main camera
@@ -228,7 +229,7 @@ export const createMoon: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const markerGeo = track(new THREE.BoxGeometry(0.08, 0.9, 0.08)); const mPlateGeo = track(new THREE.PlaneGeometry(0.55, 0.28))
   for (let x = 20; x <= opts.maxX; x += 20) {
     addMesh(group, markerGeo, woodMat, [x, 0.45, -4.5])
-    addMesh(group, mPlateGeo, track(new THREE.MeshLambertMaterial({ map: track(createSignTexture(`${x} м`)), side: THREE.DoubleSide })), [x, 0.72, -4.45], undefined, true, false)
+    addMesh(group, mPlateGeo, track(new THREE.MeshLambertMaterial({ map: track(createSignTexture(tr(`{0} м`, [x]))), side: THREE.DoubleSide })), [x, 0.72, -4.45], undefined, true, false)
   }
 
   // Targets: moving cart or static stand, accent ring, ballistic dust puff

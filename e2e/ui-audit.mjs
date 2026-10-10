@@ -2,9 +2,16 @@
 // on screen (or reachable by scrolling) and not covered by something else. Fails on any problem.
 //   npm run e2e:ui            (needs the dev server: npm run dev)
 import { chromium } from 'playwright-core'
+import { readFileSync } from 'node:fs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:5180'
 const UNIVERSE = process.env.UNIVERSE || 'classic'
+// Controls are found by their visible names, in the language under test (LOCALE=en|ru|uz).
+const LOCALE = process.env.LOCALE || 'ru'
+const DICT = LOCALE === 'ru' ? {} : JSON.parse(readFileSync(new URL(`../src/i18n/${LOCALE}.json`, import.meta.url), 'utf8'))
+const L = (ru) => DICT[ru] ?? ru
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const re = (...alts) => new RegExp(`^(${alts.map((a) => esc(L(a))).join('|')})`, 'i')
 const VIEWPORTS = [
   [1920, 1080], [1440, 900], [1366, 768], [1280, 720], [1024, 640], [1024, 768], [768, 1024], [390, 844], [375, 667], [360, 640], [844, 390],
 ]
@@ -96,9 +103,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 for (const [w, h] of ONLY) {
   const vp = `${w}x${h}`
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 768, isMobile: w < 768 })
-  await ctx.addInitScript((u) => {
+  await ctx.addInitScript(([u, l]) => {
     localStorage.setItem('physicslab-lab-v1', JSON.stringify({ state: { completed: {}, incidents: [], universe: u }, version: 0 }))
-  }, UNIVERSE)
+    localStorage.setItem('physicslab-locale', JSON.stringify({ state: { locale: l }, version: 0 }))
+  }, [UNIVERSE, LOCALE])
   const page = await ctx.newPage()
   page.on('pageerror', (e) => report.push(`${vp} PAGEERROR ${e.message}`))
   const check = async (state) => {
@@ -124,7 +132,7 @@ for (const [w, h] of ONLY) {
 
   await page.goto(`${BASE}/`)
   await check('home')
-  if (await click(/^Войти$/, 'login')) {
+  if (await click(re('Войти'), 'login')) {
     await sleep(400)
     await check('login dialog')
     await page.keyboard.press('Escape')
@@ -142,31 +150,31 @@ for (const [w, h] of ONLY) {
   await page.keyboard.press('Enter')
   await sleep(500)
   for (let i = 0; i < 3; i++) {
-    const tour = page.locator('[aria-label="Знакомство с лабораторией"]')
+    const tour = page.locator(`[aria-label="${L('Знакомство с лабораторией')}"]`)
     if (!(await tour.count())) {
       report.push(`${vp} [tour] tour closed early at step ${i + 1}`)
       break
     }
     await check(`tour ${i + 1}`)
     if (i === 0) await page.keyboard.press('Enter')
-    else await click(/^(Дальше|Понятно, стреляю)/, `tour ${i + 1}`)
+    else await click(re('Дальше', 'Понятно, стреляю'), `tour ${i + 1}`)
     await sleep(300)
   }
-  if (await page.locator('[aria-label="Знакомство с лабораторией"]').count()) report.push(`${vp} [tour] still open after the last step`)
+  if (await page.locator(`[aria-label="${L('Знакомство с лабораторией')}"]`).count()) report.push(`${vp} [tour] still open after the last step`)
   await check('mission')
-  if (await click(/^Настройки$/, 'settings')) {
+  if (await click(re('Настройки'), 'settings')) {
     await check('settings menu')
     await page.keyboard.press('Escape')
     await sleep(200)
     if (await page.locator('[role=menu]').count()) report.push(`${vp} [settings] Esc does not close the menu`)
   }
   // A miss → incident card, then a hit → result banner.
-  await click(/^Огонь/, 'fire')
+  await click(re('Огонь'), 'fire')
   await sleep(4500)
   await check('after miss')
-  for (let i = 0; i < 3; i++) if (!(await page.getByRole('button', { name: /^Понятно/ }).count()) || !(await click(/^Понятно/, 'incident'))) break
+  for (let i = 0; i < 3; i++) if (!(await page.getByRole('button', { name: re('Понятно') }).count()) || !(await click(re('Понятно'), 'incident'))) break
   await check('after incident')
-  const journal = page.getByRole('button', { name: /Журнал|📓/ }).first()
+  const journal = page.getByRole('button', { name: /📓/ }).first()
   if (await journal.count()) {
     await journal.click()
     await check('journal')
@@ -182,9 +190,9 @@ for (const [w, h] of ONLY) {
     const field = page.locator('input[inputmode=decimal]').last()
     await field.fill('5')
     await field.press('Enter')
-    await click(/^Огонь/, `life ${i + 1}`)
+    await click(re('Огонь'), `life ${i + 1}`)
     await sleep(4000)
-    for (let k = 0; k < 3; k++) if (!(await page.getByRole('button', { name: /^Понятно/ }).count()) || !(await click(/^Понятно/, 'incident'))) break
+    for (let k = 0; k < 3; k++) if (!(await page.getByRole('button', { name: re('Понятно') }).count()) || !(await click(re('Понятно'), 'incident'))) break
   }
   await check('out of lives')
 

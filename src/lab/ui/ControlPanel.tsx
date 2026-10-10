@@ -1,3 +1,4 @@
+import { localeTag, tr } from '../../i18n'
 import type { Mission, SliderKey, SliderValues } from '../levels/types'
 import { NumberField } from './NumberField'
 
@@ -36,13 +37,13 @@ export function ControlPanel(p: ControlPanelProps) {
           />
           {s.key === 'releaseDeg' ? (
             <span className="hidden md:flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
-              <span>раньше ← {s.max}{s.unit}</span>
-              <span>{s.min}{s.unit} → позже</span>
+              <span>{tr("раньше ←") + ' '}{s.max}{s.unit}</span>
+              <span>{s.min}{s.unit} {' ' + tr("→ позже")}</span>
             </span>
           ) : (
             <span className="hidden md:flex justify-between text-xs" style={{ color: 'var(--lab-dim)' }}>
-              <span>{s.min.toLocaleString('ru-RU')} {s.unit}</span>
-              <span>{s.max.toLocaleString('ru-RU')} {s.unit}</span>
+              <span>{s.min.toLocaleString(localeTag())} {s.unit}</span>
+              <span>{s.max.toLocaleString(localeTag())} {s.unit}</span>
             </span>
           )}
         </div>
@@ -56,7 +57,7 @@ export function ControlPanel(p: ControlPanelProps) {
               min={mission.predict.min}
               max={mission.predict.max}
               step={0.1}
-              unit={mission.predict.unit ?? 'м'}
+              unit={mission.predict.unit ?? tr('м')}
               label={mission.predict.label}
               onCommit={p.onPrediction}
             />
@@ -72,14 +73,15 @@ export function ControlPanel(p: ControlPanelProps) {
           />
           {mission.predict.quantity === 'landingX' && (
             <span className="text-xs" style={{ color: 'var(--lab-dim)' }}>
-              Впиши посчитанное число, двигай ползунок или кликни по земле.
+              
+              {tr("Впиши посчитанное число, двигай ползунок или кликни по земле.")}
             </span>
           )}
         </div>
       )}
       <button type="button" className="lab-btn lab-btn-primary text-base min-h-[44px] md:min-h-[48px]" disabled={!p.canFire || p.busy} onClick={p.onFire}>
-        {p.busy ? 'Считаю…' : p.fireLabel}
-        {!p.busy && <span className="lab-kbd hidden md:inline">Пробел</span>}
+        {p.busy ? tr('Считаю…') : p.fireLabel}
+        {!p.busy && <span className="lab-kbd hidden md:inline">{tr("Пробел")}</span>}
       </button>
     </div>
   )

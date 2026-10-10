@@ -78,7 +78,7 @@ export interface Mission {
   theory: string[] // KaTeX
   requires: string[]
   /** School subject this step trains, shown as a tag in the basics chapter. */
-  subject?: 'Алгебра' | 'Геометрия' | 'Физика' | 'Python'
+  subject?: string // Алгебра, Геометрия, Физика, Python — translated like any text
   /** Practice steps cost no lives: here you learn, not pass. */
   practice?: boolean
   panel?: PanelSpec

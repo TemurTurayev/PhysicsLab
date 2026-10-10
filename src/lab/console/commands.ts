@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 /**
  * The developer console: a tiny command language in the spirit of old PC shooters.
  * Pure logic — the app passes in what a command may touch (navigation, the open mission, settings).
@@ -32,21 +33,21 @@ export interface Result {
 }
 
 const HELP = [
-  'Команды:',
-  '  help, cmdlist         — этот список',
-  '  maps                  — все миссии; map <id> — открыть миссию (например, map 2-3)',
-  '  status                — текущая миссия, g, жизни',
-  '  host_timescale <x>    — скорость времени (0.1–4), 1 = норма',
-  '  r_drawmarks 0|1       — таблички с метрами на поле',
-  '  music 0|1             — фоновая музыка',
-  '  universe classic|sigma — сменить вселенную',
-  '  disconnect            — к карте миссий; quit — на главную',
-  '  clear, echo <текст>',
-  'Читы (нужен sv_cheats 1, миссия не засчитывается):',
-  '  sv_gravity <м/с²>     — своя гравитация (9.81 Земля, 3.71 Марс, 1.62 Луна)',
-  '  god                   — промахи не отнимают жизни',
-  '  impulse 101           — вернуть все жизни',
-  '  +attack               — выстрел',
+  tr('Команды:'),
+  tr('  help, cmdlist         — этот список'),
+  tr('  maps                  — все миссии; map <id> — открыть миссию (например, map 2-3)'),
+  tr('  status                — текущая миссия, g, жизни'),
+  tr('  host_timescale <x>    — скорость времени (0.1–4), 1 = норма'),
+  tr('  r_drawmarks 0|1       — таблички с метрами на поле'),
+  tr('  music 0|1             — фоновая музыка'),
+  tr('  universe classic|sigma — сменить вселенную'),
+  tr('  disconnect            — к карте миссий; quit — на главную'),
+  tr('  clear, echo <текст>'),
+  tr('Читы (нужен sv_cheats 1, миссия не засчитывается):'),
+  tr('  sv_gravity <м/с²>     — своя гравитация (9.81 Земля, 3.71 Марс, 1.62 Луна)'),
+  tr('  god                   — промахи не отнимают жизни'),
+  tr('  impulse 101           — вернуть все жизни'),
+  tr('  +attack               — выстрел'),
 ]
 
 const num = (s: string | undefined) => (s !== undefined && s.trim() !== '' && Number.isFinite(Number(s.replace(',', '.'))) ? Number(s.replace(',', '.')) : null)
@@ -59,7 +60,7 @@ export function runCommand(input: string, cvars: Cvars, host: ConsoleHost): Resu
   const [cmd = '', ...args] = input.trim().split(/\s+/)
   const name = cmd.toLowerCase()
   const say = (...lines: string[]): Result => ({ lines, cvars })
-  const needCheats = (): Result | null => (cvars.sv_cheats ? null : say(`Нельзя использовать «${name}» без sv_cheats 1`))
+  const needCheats = (): Result | null => (cvars.sv_cheats ? null : say(tr(`Нельзя использовать «{0}» без sv_cheats 1`, [name])))
 
   switch (name) {
     case '':
@@ -72,25 +73,25 @@ export function runCommand(input: string, cvars: Cvars, host: ConsoleHost): Resu
     case 'echo':
       return say(args.join(' '))
     case 'maps':
-      return say(...host.missions.map((m) => `  ${m.id.padEnd(5)} ${m.open || cvars.sv_cheats ? m.title : '— закрыта —'}`))
+      return say(...host.missions.map((m) => `  ${m.id.padEnd(5)} ${m.open || cvars.sv_cheats ? m.title : tr('— закрыта —')}`))
     case 'map': {
       const m = host.missions.find((x) => x.id === args[0])
-      if (!m) return say(`map: нет миссии «${args[0] ?? ''}». Список: maps`)
-      if (!m.open && !cvars.sv_cheats) return say(`map: миссия ${m.id} ещё закрыта (или sv_cheats 1)`)
+      if (!m) return say(tr(`map: нет миссии «{0}». Список: maps`, [args[0] ?? '']))
+      if (!m.open && !cvars.sv_cheats) return say(tr(`map: миссия {0} ещё закрыта (или sv_cheats 1)`, [m.id]))
       host.go(`/trebuchet/${m.id}`)
-      return say(`Загрузка ${m.id} «${m.title}»…`)
+      return say(tr(`Загрузка {0} «{1}»…`, [m.id, m.title]))
     }
     case 'disconnect':
       host.go('/trebuchet')
-      return say('Отключено.')
+      return say(tr('Отключено.'))
     case 'quit':
       host.go('/')
-      return say('Выход в главное меню.')
+      return say(tr('Выход в главное меню.'))
     case 'status': {
       const c = host.current
-      if (!c) return say('Миссия не загружена. map <id>')
+      if (!c) return say(tr('Миссия не загружена. map <id>'))
       const g = cvars.sv_gravity ?? c.g
-      return say(`миссия: ${c.id} «${c.title}»`, `g: ${g} м/с²${cvars.sv_gravity !== null ? ' (sv_gravity)' : ''}`, `жизни: ${c.lives}, выстрелов: ${c.shots}`, `читы: ${cvars.sv_cheats ? 'вкл' : 'выкл'}`)
+      return say(tr(`миссия: {0} «{1}»`, [c.id, c.title]), tr(`g: {0} м/с²{1}`, [g, cvars.sv_gravity !== null ? ' (sv_gravity)' : '']), tr(`жизни: {0}, выстрелов: {1}`, [c.lives, c.shots]), tr(`читы: {0}`, [cvars.sv_cheats ? tr('вкл') : tr('выкл')]))
     }
     case 'host_timescale': {
       const v = num(args[0])
@@ -107,13 +108,13 @@ export function runCommand(input: string, cvars: Cvars, host: ConsoleHost): Resu
       const v = num(args[0])
       if (v === null) return say('music 0|1')
       host.setMusic(v !== 0)
-      return say(v !== 0 ? 'Музыка включена.' : 'Музыка выключена.')
+      return say(v !== 0 ? tr('Музыка включена.') : tr('Музыка выключена.'))
     }
     case 'universe': {
       const u = args[0]
       if (u !== 'classic' && u !== 'sigma') return say('universe classic|sigma')
       host.setUniverse(u)
-      return say(`Вселенная: ${u}`)
+      return say(tr(`Вселенная: {0}`, [u]))
     }
     case 'sv_cheats': {
       const v = num(args[0])
@@ -127,7 +128,7 @@ export function runCommand(input: string, cvars: Cvars, host: ConsoleHost): Resu
       if (v === null) return say(show('sv_gravity', cvars.sv_gravity ?? host.current?.g ?? 9.81))
       const blocked = needCheats()
       if (blocked) return blocked
-      if (v <= 0 || v > 100) return say('sv_gravity: от 0.1 до 100 м/с²')
+      if (v <= 0 || v > 100) return say(tr('sv_gravity: от 0.1 до 100 м/с²'))
       return { lines: [show('sv_gravity', v)], cvars: { ...cvars, sv_gravity: v }, cheated: true }
     }
     case 'god': {
@@ -137,15 +138,15 @@ export function runCommand(input: string, cvars: Cvars, host: ConsoleHost): Resu
       return { lines: [god ? 'godmode ON' : 'godmode OFF'], cvars: { ...cvars, god }, cheated: god }
     }
     case 'impulse': {
-      if (args[0] !== '101') return say('impulse: неизвестный номер')
+      if (args[0] !== '101') return say(tr('impulse: неизвестный номер'))
       const blocked = needCheats()
       if (blocked) return blocked
-      return host.refillLives() ? { lines: ['Жизни восстановлены.'], cvars, cheated: true } : say('Сначала открой миссию.')
+      return host.refillLives() ? { lines: [tr('Жизни восстановлены.')], cvars, cheated: true } : say(tr('Сначала открой миссию.'))
     }
     case '+attack':
-      return host.fire() ? say() : say('Сейчас выстрелить нельзя.')
+      return host.fire() ? say() : say(tr('Сейчас выстрелить нельзя.'))
     default:
-      return say(`Неизвестная команда: ${cmd}`)
+      return say(tr(`Неизвестная команда: {0}`, [cmd]))
   }
 }
 

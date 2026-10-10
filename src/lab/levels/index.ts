@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { CHAPTER_0 } from './chapter0'
 import { CHAPTER_1 } from './chapter1'
 import { CHAPTER_2 } from './chapter2'
@@ -25,5 +26,5 @@ export function nextMission(id: string): Mission | undefined {
 
 /** «Основы» for the basics, «Глава N» for the rest. */
 export function chapterLabel(id: number): string {
-  return id === 0 ? 'Основы' : `Глава ${id}`
+  return id === 0 ? tr('Основы') : tr(`Глава {0}`, [id])
 }

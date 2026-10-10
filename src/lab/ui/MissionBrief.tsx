@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useState } from 'react'
 import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
@@ -26,7 +27,7 @@ export function MissionBrief({ mission, shots, hitSoFar, lives, onReread }: Miss
         <span className="lab-title text-sm truncate flex-1" style={{ color: 'var(--lab-accent)' }}>
           {mission.goal}
         </span>
-        <span className="text-xs shrink-0" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`}>
+        <span className="text-xs shrink-0" aria-label={tr(`Жизней: {0} из {1}`, [lives, MAX_LIVES])}>
           {mission.practice ? '🎓' : '❤️'.repeat(lives)}
         </span>
         <span aria-hidden className="text-xs" style={{ color: 'var(--lab-dim)' }}>
@@ -39,14 +40,16 @@ export function MissionBrief({ mission, shots, hitSoFar, lives, onReread }: Miss
     <div className="lab-panel p-3.5 flex flex-col gap-2.5" data-coach="goal">
       <div className="flex items-center justify-between gap-2">
         <button type="button" className="lab-label text-left" onClick={() => setExpanded(false)} disabled={desktop || shots === 0}>
-          Цель
+          
+          {tr("Цель")}
         </button>
         {mission.practice ? (
-          <span className="text-xs" style={{ color: 'var(--lab-dim)' }} title="Здесь промахи ничего не стоят">
-            🎓 разминка
+          <span className="text-xs" style={{ color: 'var(--lab-dim)' }} title={tr("Здесь промахи ничего не стоят")}>
+            
+            {tr("🎓 разминка")}
           </span>
         ) : (
-          <span className="text-[15px] tracking-tight" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`} title="Жизни: каждый промах отнимает одну">
+          <span className="text-[15px] tracking-tight" aria-label={tr(`Жизней: {0} из {1}`, [lives, MAX_LIVES])} title={tr("Жизни: каждый промах отнимает одну")}>
             {Array.from({ length: MAX_LIVES }, (_, i) => (
               <span key={i} className={i < lives ? '' : 'opacity-25 grayscale'}>
                 ❤️
@@ -66,28 +69,32 @@ export function MissionBrief({ mission, shots, hitSoFar, lives, onReread }: Miss
               className="lab-mono text-xs px-2 py-1 rounded-md"
               style={{ background: hitSoFar.has(i) ? 'rgba(143,220,150,0.18)' : 'var(--lab-raise)', color: hitSoFar.has(i) ? 'var(--lab-good)' : 'var(--lab-dim)' }}
             >
-              {hitSoFar.has(i) ? '✓' : '○'} {t.x} м
+              {hitSoFar.has(i) ? '✓' : '○'} {t.x} {' ' + tr("м")}
             </span>
           ))}
         </div>
       )}
       <div className="flex items-center gap-2 flex-wrap">
         <button type="button" className="lab-btn !min-h-[32px] !px-2.5 text-xs" onClick={onReread}>
-          📄 Условие
+          
+          {tr("📄 Условие")}
         </button>
         {hints < unlocked ? (
           <button type="button" className="lab-btn !min-h-[32px] !px-2.5 text-xs" onClick={() => setHints(hints + 1)} data-coach="hint">
-            💡 Подсказка {hints + 1}/{mission.hints.length}
+            
+            {tr("💡 Подсказка") + ' '}{hints + 1}/{mission.hints.length}
           </button>
         ) : (
           hints < mission.hints.length && (
             <span className="text-xs" style={{ color: 'var(--lab-dim)' }}>
-              💡 следующая — после выстрела
+              
+              {tr("💡 следующая — после выстрела")}
             </span>
           )
         )}
         <span className="lab-mono text-xs ml-auto" style={{ color: 'var(--lab-dim)' }}>
-          выстрелов: {shots}
+          
+          {tr("выстрелов:") + ' '}{shots}
         </span>
       </div>
       {hints > 0 && (

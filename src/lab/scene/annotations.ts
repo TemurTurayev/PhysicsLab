@@ -1,7 +1,8 @@
+import { localeTag, tr } from '../../i18n'
 import * as THREE from 'three'
 import type { ShotResult } from '../sim/types'
 
-const ru = (v: number, d = 1) => v.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
+const ru = (v: number, d = 1) => v.toLocaleString(localeTag(), { minimumFractionDigits: d, maximumFractionDigits: d })
 const LABEL_H = 0.03 // label size, constant on screen: readable at any zoom
 
 export function label(text: string, color: string): THREE.Sprite {
@@ -81,11 +82,11 @@ export class ShotAnnotations {
 
     // Release: height above the ground, v₀ and its components, the angle.
     this.add(t0, line([new THREE.Vector3(p0.x, 0, 0), p0], '#9fd3ff', true))
-    this.add(t0, this.at(label(`y₀ = ${ru(start.y)} м`, '#9fd3ff'), p0.x - 1.5, p0.y / 2))
+    this.add(t0, this.at(label(tr(`y₀ = {0} м`, [ru(start.y)]), '#9fd3ff'), p0.x - 1.5, p0.y / 2))
     this.add(t0, arrow(p0, p0.clone().add(new THREE.Vector3(vx, vy, 0)), '#ffd166'))
     this.add(t0, arrow(p0, p0.clone().add(new THREE.Vector3(vx, 0, 0)), '#ff8fa3'))
     this.add(t0, arrow(p0, p0.clone().add(new THREE.Vector3(0, vy, 0)), '#7ee08a'))
-    this.add(t0, this.at(label(`v₀ = ${ru(speed)} м/с · α = ${ru(angleDeg)}°`, '#ffd166'), p0.x + vx, p0.y + vy + 1.2))
+    this.add(t0, this.at(label(tr(`v₀ = {0} м/с · α = {1}°`, [ru(speed), ru(angleDeg)]), '#ffd166'), p0.x + vx, p0.y + vy + 1.2))
     this.add(t0, this.at(label(`vx = ${ru(start.vx)}`, '#ff8fa3'), p0.x + vx / 2, p0.y - 0.9))
     this.add(t0, this.at(label(`vy = ${ru(start.vy)}`, '#7ee08a'), p0.x - 2.2, p0.y + vy / 2))
     this.add(t0, this.angleArc(p0, angleDeg))
@@ -94,13 +95,13 @@ export class ShotAnnotations {
       const a = shot.apex
       const tApex = shot.flight.reduce((best, s) => (s.y > best.y ? s : best), start).t
       this.add(tApex, line([new THREE.Vector3(a.x, 0, 0), new THREE.Vector3(a.x, a.y, 0)], '#c3a6ff', true))
-      this.add(tApex, this.at(label(`h = ${ru(a.y)} м  (x = ${ru(a.x)} м)`, '#c3a6ff'), a.x, a.y + 1.6))
+      this.add(tApex, this.at(label(tr(`h = {0} м  (x = {1} м)`, [ru(a.y), ru(a.x)]), '#c3a6ff'), a.x, a.y + 1.6))
     }
 
     if (shot.landing) {
       const { x, t } = shot.landing
       this.add(t, this.ruler(x))
-      this.add(t, this.at(label(`R = ${ru(x)} м · t = ${ru(t - t0)} с`, '#ffffff'), x / 2, 1.4))
+      this.add(t, this.at(label(tr(`R = {0} м · t = {1} с`, [ru(x), ru(t - t0)]), '#ffffff'), x / 2, 1.4))
     }
   }
 

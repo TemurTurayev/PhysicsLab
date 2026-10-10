@@ -10,5 +10,6 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts', 'worker/**/*.test.ts'],
+    setupFiles: ['src/i18n/testSetup.ts'],
   },
 })

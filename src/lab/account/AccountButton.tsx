@@ -1,8 +1,9 @@
+import { tr } from '../../i18n'
 import { useEffect, useRef, useState } from 'react'
 import { useAccount } from './account'
 import { AuthDialog } from './AuthDialog'
 
-const SYNC_TEXT = { idle: 'Прогресс в облаке', saving: 'Сохраняю…', saved: 'Прогресс сохранён', offline: 'Нет связи — сохраню позже' } as const
+const SYNC_TEXT = { idle: tr('Прогресс в облаке'), saving: tr('Сохраняю…'), saved: tr('Прогресс сохранён'), offline: tr('Нет связи — сохраню позже') } as const
 
 /** «Войти» for guests; the name with a small menu (sync status, sign out) for signed-in students. */
 export function AccountButton({ className = '' }: { className?: string }) {
@@ -27,7 +28,8 @@ export function AccountButton({ className = '' }: { className?: string }) {
     return (
       <>
         <button type="button" className={`lab-btn !min-h-[36px] !px-3 ${className}`} onClick={() => setDialog(true)}>
-          Войти
+          
+          {tr("Войти")}
         </button>
         {dialog && <AuthDialog onClose={() => setDialog(false)} />}
       </>
@@ -53,7 +55,8 @@ export function AccountButton({ className = '' }: { className?: string }) {
               void signOut()
             }}
           >
-            Выйти
+            
+            {tr("Выйти")}
           </button>
         </div>
       )}

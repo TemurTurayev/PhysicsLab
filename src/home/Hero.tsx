@@ -1,3 +1,4 @@
+import { tr } from '../i18n'
 import { CHAPTERS } from '../lab/levels'
 import type { ProgressSummary } from './progress'
 
@@ -11,7 +12,7 @@ export interface HeroProps {
 /** First screen: what this is in one line, real frames from the scenes behind it, one button to begin. */
 export function Hero({ summary, onContinue }: HeroProps) {
   const next = summary.next
-  const cta = !summary.started ? 'Начать с первой миссии' : next ? `Продолжить · миссия ${next.chapter}-${next.order}` : 'Открыть карту мастерской'
+  const cta = !summary.started ? tr('Начать с первой миссии') : next ? tr(`Продолжить · миссия {0}-{1}`, [next.chapter, next.order]) : tr('Открыть карту мастерской')
   return (
     <section className="home-hero md:min-h-[92vh] flex items-end md:items-center">
       <div className="home-hero-frames" aria-hidden="true">
@@ -24,18 +25,20 @@ export function Hero({ summary, onContinue }: HeroProps) {
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-8 pt-[38vh] pb-10 md:py-24">
         <div className="max-w-[620px] lab-rise">
           <div className="lab-label mb-4" style={{ color: 'var(--lab-accent)' }}>
-            3D-лаборатория физики · Python в браузере
+            
+            {tr("3D-лаборатория физики · Python в браузере")}
           </div>
           <h1 className="home-display text-[44px] sm:text-6xl md:text-[72px]">
-            Рассчитай бросок —<br />
-            <span className="home-accent">и попади.</span>
+            
+            {tr("Рассчитай бросок —")}<br />
+            <span className="home-accent">{tr("и попади.")}</span>
           </h1>
           <svg className="home-arc mt-3 mb-5 w-[220px] h-[34px]" viewBox="0 0 220 34" aria-hidden="true">
             <path d="M4 30 Q 110 -20 216 30" fill="none" stroke="var(--lab-accent)" strokeWidth="3" strokeLinecap="round" />
           </svg>
           <p className="text-[17px] md:text-lg leading-relaxed max-w-[540px]" style={{ color: 'var(--lab-text)', opacity: 0.88 }}>
-            Начинаешь со школьной базы — числовая ось, Пифагор, парабола, первые строки на Python — и шаг за шагом доходишь до
-            настоящего требушета. Каждый расчёт проверяешь выстрелом, а промах объясняет, что пошло не так.
+            
+            {tr("Начинаешь со школьной базы — числовая ось, Пифагор, парабола, первые строки на Python — и шаг за шагом доходишь до настоящего требушета. Каждый расчёт проверяешь выстрелом, а промах объясняет, что пошло не так.")}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mt-8">
@@ -43,20 +46,22 @@ export function Hero({ summary, onContinue }: HeroProps) {
               {cta} <span aria-hidden>→</span>
             </button>
             <a href="#workshop" className="lab-btn !min-h-[52px] !px-5 !text-base !rounded-xl">
-              Выбрать главу
+              
+              {tr("Выбрать главу")}
             </a>
           </div>
           {summary.started && next && (
             <p className="text-sm mt-3" style={{ color: 'var(--lab-dim)' }}>
-              Дальше: «{next.title}»
+              
+              {tr("Дальше: «")}{next.title}»
             </p>
           )}
 
           <dl className="flex flex-wrap gap-x-8 gap-y-3 mt-10 lab-mono text-sm">
-            <Stat value={String(summary.total)} label="миссий" />
-            <Stat value={String(CHAPTERS.length)} label="глав" />
-            <Stat value="2" label="вселенные" />
-            {summary.started && <Stat value={`${summary.stars}/${summary.maxStars}`} label="звёзд" accent />}
+            <Stat value={String(summary.total)} label={tr("миссий")} />
+            <Stat value={String(CHAPTERS.length)} label={tr("глав")} />
+            <Stat value="2" label={tr("вселенные")} />
+            {summary.started && <Stat value={`${summary.stars}/${summary.maxStars}`} label={tr("звёзд")} accent />}
           </dl>
         </div>
       </div>

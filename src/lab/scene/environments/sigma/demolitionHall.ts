@@ -1,3 +1,4 @@
+import { tr } from '../../../../i18n'
 import * as THREE from 'three'
 import type { Target } from '../../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from '../types'
@@ -241,7 +242,7 @@ export const createDemolitionHall: EnvironmentFactory = (opts: EnvironmentOption
   addMesh(group, track(new THREE.BoxGeometry(1.0, 3.6, 0.2)), endConc, [-15, 1.8, -17])
   const gaugeMat = track(new THREE.MeshBasicMaterial({ map: track(makeGaugeTexture()) }))
   addMesh(group, track(new THREE.PlaneGeometry(0.8, 3.2)), gaugeMat, [-15, 1.8, -16.89], undefined, false, false)
-  const signBackMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture('СЕКТОР Р · РАЗРУШАЮЩИЕ ИСПЫТАНИЯ', '#dcd8ce', '#1b1b1b', 512, 64)) }))
+  const signBackMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr('СЕКТОР Р · РАЗРУШАЮЩИЕ ИСПЫТАНИЯ'), '#dcd8ce', '#1b1b1b', 512, 64)) }))
   addMesh(group, track(new THREE.PlaneGeometry(12, 1.8)), signBackMat, [hallMinX + 0.2, 14, 4], [0, Math.PI / 2, 0], false, false)
 
   // Stacks of Spare Concrete Test Blocks & Debris Pile
@@ -286,7 +287,7 @@ export const createDemolitionHall: EnvironmentFactory = (opts: EnvironmentOption
     const tGroup = new THREE.Group(); tGroup.position.set(t.x, 0, 0)
 
     if (t.h !== undefined && t.h > 0) {
-      const h = t.h, isGate = t.label?.includes('Ворота') ?? false, isTower = t.label?.includes('Башня') ?? false
+      const h = t.h, isGate = t.label?.includes(tr('Ворота')) ?? false, isTower = t.label?.includes(tr('Башня')) ?? false
 
       const crater = addMesh(tGroup, track(new THREE.CircleGeometry(0.85, 16)), track(new THREE.MeshLambertMaterial({ color: 0x141416 })), [-0.02, h * 0.5, 0], [0, -Math.PI / 2, 0], false, false)
       crater.visible = false

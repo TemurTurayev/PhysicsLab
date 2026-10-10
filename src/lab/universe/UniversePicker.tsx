@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useLabProgress } from '../state/labProgress'
 import { UNIVERSES } from './index'
 import type { UniverseId } from './types'
@@ -5,12 +6,12 @@ import type { UniverseId } from './types'
 const PREVIEW: Record<UniverseId, { background: string; badge: string }> = {
   classic: {
     background: "url('/previews/classic-1.webp') center 60% / cover no-repeat, linear-gradient(160deg, #6f9fd0 0%, #f3cf98 48%, #86a052 49%, #5d6b38 100%)",
-    badge: 'Дерево · камень · закат',
+    badge: tr('Дерево · камень · закат'),
   },
   sigma: {
     background:
       "repeating-linear-gradient(-45deg, rgba(242,196,0,0.9) 0 12px, rgba(27,27,27,0.9) 12px 24px) bottom / 100% 14px no-repeat, url('/previews/sigma-1.webp') center 60% / cover no-repeat, linear-gradient(180deg, #1a1e20 0%, #3a3d3c 55%, #8a877c 100%)",
-    badge: 'Бетон · сталь · протоколы',
+    badge: tr('Бетон · сталь · протоколы'),
   },
 }
 
@@ -25,10 +26,11 @@ export function UniversePicker({ onChosen }: { onChosen?: (id: UniverseId) => vo
   return (
     <div className="lab-root min-h-screen px-4 py-10 md:py-16">
       <div className="max-w-5xl mx-auto">
-        <div className="lab-label mb-2">Мастерская · Требушет</div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">Где будем учиться?</h1>
+        <div className="lab-label mb-2">{tr("Мастерская · Требушет")}</div>
+        <h1 className="text-3xl md:text-4xl font-bold mb-3">{tr("Где будем учиться?")}</h1>
         <p className="mb-8 max-w-2xl" style={{ color: 'var(--lab-dim)' }}>
-          Физика, задачи и прогресс одни и те же — меняется атмосфера. Вселенную можно сменить в любой момент на карте мира.
+          
+          {tr("Физика, задачи и прогресс одни и те же — меняется атмосфера. Вселенную можно сменить в любой момент на карте мира.")}
         </p>
         <div className="grid md:grid-cols-2 gap-5">
           {UNIVERSES.map((u) => {
@@ -63,7 +65,7 @@ export function UniversePicker({ onChosen }: { onChosen?: (id: UniverseId) => vo
                       </li>
                     ))}
                   </ol>
-                  <span className="lab-btn lab-btn-primary w-full">{selected ? 'Выбрано — продолжить' : 'Выбрать'}</span>
+                  <span className="lab-btn lab-btn-primary w-full">{selected ? tr('Выбрано — продолжить') : tr('Выбрать')}</span>
                 </div>
               </button>
             )

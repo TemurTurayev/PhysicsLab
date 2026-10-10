@@ -1,3 +1,4 @@
+import { tr } from '../../../i18n'
 import * as THREE from 'three'
 import { addBoulders, addPines } from './natureDressing'
 import { addGroundDetail } from '../textures/groundDetail'
@@ -181,7 +182,7 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const signpost = new THREE.Group(); signpost.position.set(-5.2, 0, -5.5)
   addMesh(signpost, track(new THREE.BoxGeometry(0.1, 1.5, 0.1)), woodMat, [0, 0.75, 0])
   addMesh(signpost, track(new THREE.BoxGeometry(1.2, 0.36, 0.05)), woodMat, [0, 1.25, 0])
-  const sMat = track(new THREE.MeshLambertMaterial({ map: track(createSignTexture('ПЕРЕВАЛ · 2 340 м')), side: THREE.DoubleSide }))
+  const sMat = track(new THREE.MeshLambertMaterial({ map: track(createSignTexture(tr('ПЕРЕВАЛ · 2 340 м'))), side: THREE.DoubleSide }))
   addMesh(signpost, track(new THREE.PlaneGeometry(1.16, 0.32)), sMat, [0, 1.25, 0.03], undefined, false); group.add(signpost)
 
   // Decorative rope bridge across gorge on south slope

@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { isMuted, playSfx, setMuted } from '../audio/sfx'
@@ -38,14 +39,14 @@ import { useUniverse } from '../universe/useUniverse'
 type Phase = 'idle' | 'flying' | 'landed'
 
 const COACH: CoachStep[] = [
-  { target: 'goal', title: 'Цель и жизни', text: 'Здесь то, во что нужно попасть. Промах отнимает жизнь, поэтому сначала считай, потом стреляй. Подсказки — тут же.' },
-  { target: 'calc', title: 'Числа для расчёта', text: 'Скорость, угол и точка вылета для текущей настройки, формулы и проверка твоего расчёта. Двинул слайдер — числа пересчитались.' },
-  { target: 'fire', title: 'Настройка и выстрел', text: 'Двигай слайдер или впиши точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камеру можно крутить мышью.' },
+  { target: 'goal', title: tr('Цель и жизни'), text: tr('Здесь то, во что нужно попасть. Промах отнимает жизнь, поэтому сначала считай, потом стреляй. Подсказки — тут же.') },
+  { target: 'calc', title: tr('Числа для расчёта'), text: tr('Скорость, угол и точка вылета для текущей настройки, формулы и проверка твоего расчёта. Двинул слайдер — числа пересчитались.') },
+  { target: 'fire', title: tr('Настройка и выстрел'), text: tr('Двигай слайдер или впиши точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камеру можно крутить мышью.') },
 ]
 const COACH_FORMAL: CoachStep[] = [
-  { target: 'goal', title: 'Задание и допуски', text: 'Здесь цель испытания. Неудачный пуск списывает допуск, поэтому сначала расчёт, потом пуск. Подсказки — тут же.' },
-  { target: 'calc', title: 'Данные для расчёта', text: 'Скорость, угол и точка схода для текущей настройки, формулы и проверка вашего расчёта. Меняете настройку — данные пересчитываются.' },
-  { target: 'fire', title: 'Настройка и пуск', text: 'Слайдер или точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камера вращается мышью.' },
+  { target: 'goal', title: tr('Задание и допуски'), text: tr('Здесь цель испытания. Неудачный пуск списывает допуск, поэтому сначала расчёт, потом пуск. Подсказки — тут же.') },
+  { target: 'calc', title: tr('Данные для расчёта'), text: tr('Скорость, угол и точка схода для текущей настройки, формулы и проверка вашего расчёта. Меняете настройку — данные пересчитываются.') },
+  { target: 'fire', title: tr('Настройка и пуск'), text: tr('Слайдер или точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камера вращается мышью.') },
 ]
 
 export function LabPage() {
@@ -242,7 +243,7 @@ function MissionView({ mission }: { mission: Mission }) {
 
   const next = nextMission(mission.id)
   const showCode = act === 'build' && mission.code
-  const fireLabel = mission.code ? 'Огонь (с твоим кодом)' : 'Огонь'
+  const fireLabel = mission.code ? tr('Огонь (с твоим кодом)') : tr('Огонь')
 
   const desktop = useIsDesktop()
   const short = useIsShort()
@@ -287,7 +288,7 @@ function MissionView({ mission }: { mission: Mission }) {
     <Placard
       shot={run.last?.shot ?? null}
       releaseDeg={releaseDeg}
-      idleLine={mission.base.launcher ? (sigma ? 'Пусковая установка заряжена. Огонь — по готовности расчёта.' : 'Камень лежит в лотке. Посчитай — и жми «Огонь».') : undefined}
+      idleLine={mission.base.launcher ? (sigma ? tr('Пусковая установка заряжена. Огонь — по готовности расчёта.') : tr('Камень лежит в лотке. Посчитай — и жми «Огонь».')) : undefined}
       beamLimit={mission.base.trebuchet.beamStrength}
       movingLabel={universe.terms.movingTarget}
       tell={(line) => tellLine(line, universe)}
@@ -330,7 +331,7 @@ function MissionView({ mission }: { mission: Mission }) {
         {/* Story column: what just happened, the task, the theory. Fades while the stone flies. */}
         <div
           className={`w-[min(340px,100%)] md:absolute md:left-3 md:top-[72px] flex flex-col gap-2 overflow-y-auto transition-opacity duration-300 ${
-            feedback ? 'max-h-[62vh]' : showCode ? 'max-h-[22vh]' : 'max-h-[38vh]'
+            feedback ? 'max-h-[62vh]' : showCode ? 'max-h-[20vh]' : 'max-h-[38vh]'
           } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
         >
           {feedback}
@@ -347,7 +348,7 @@ function MissionView({ mission }: { mission: Mission }) {
         } transition-opacity duration-300 ${phase === 'flying' ? 'md:opacity-35 md:hover:opacity-100' : ''}`}
       >
         {showCode ? (
-          <div className="w-full h-[38vh] md:h-full">
+          <div className="w-full h-[34vh] md:h-full">
             <CodeDrawer
               code={code}
               onChange={setCode}
@@ -357,7 +358,7 @@ function MissionView({ mission }: { mission: Mission }) {
               error={run.codeError}
               stdout={run.stdout}
               pythonReady={pythonReady}
-              runLabel={mission.base.launcher ? '▶ Запустить' : undefined}
+              runLabel={mission.base.launcher ? tr('▶ Запустить') : undefined}
             />
           </div>
         ) : (
@@ -378,7 +379,7 @@ function MissionView({ mission }: { mission: Mission }) {
             </div>
           </>
         )}
-        {chipsInDock && <div className="self-end">{chips}</div>}
+        {chipsInDock && <div className="self-end max-w-full min-w-0">{chips}</div>}
         <div className="w-full md:hidden">{placard}</div>
       </div>
 
@@ -399,7 +400,8 @@ function MissionView({ mission }: { mission: Mission }) {
 
       {journalOpen && <IncidentJournal found={progress.incidents} onClose={() => setJournalOpen(false)} />}
       <Link to="/trebuchet" className="sr-only">
-        К карте мира
+        
+        {tr("К карте мира")}
       </Link>
     </div>
   )

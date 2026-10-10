@@ -1,5 +1,7 @@
+import { tr } from '../../i18n'
 import Editor, { type OnMount } from '@monaco-editor/react'
 import { useEffect, useRef } from 'react'
+import { localizePythonError } from '../../i18n/foreign'
 import { explainError } from '../python/explain'
 import type { StudentError } from '../python/protocol'
 
@@ -38,9 +40,9 @@ export function CodeDrawer(p: CodeDrawerProps) {
   return (
     <div className="lab-panel flex flex-col h-full overflow-hidden">
       <div className="shrink-0 flex items-center justify-between gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--lab-line)' }}>
-        <span className="lab-label">Движок · Python</span>
+        <span className="lab-label">{tr("Движок · Python")}</span>
         <span className="text-xs" style={{ color: p.pythonReady ? 'var(--lab-good)' : 'var(--lab-dim)' }}>
-          {p.pythonReady ? '● Python готов' : '○ Python загружается…'}
+          {p.pythonReady ? tr('● Python готов') : tr('○ Python загружается…')}
         </span>
       </div>
       <div className="flex-1 min-h-[96px]">
@@ -62,15 +64,15 @@ export function CodeDrawer(p: CodeDrawerProps) {
           className="shrink-0 lab-mono text-xs px-3 py-2 max-h-28 overflow-auto whitespace-pre-wrap border-t"
           style={{ borderColor: 'var(--lab-line)', color: p.error ? 'var(--lab-bad)' : 'var(--lab-dim)' }}
         >
-          {p.error ? `${p.error.line ? `Строка ${p.error.line}: ` : ''}${p.error.message}` : p.stdout}
+          {p.error ? `${p.error.line ? tr(`Строка {0}: `, [p.error.line]) : ''}${localizePythonError(p.error.message)}` : p.stdout}
           {p.error && explainError(p.error.message) && <span style={{ color: 'var(--lab-text)' }}>{`\n${explainError(p.error.message)}`}</span>}
         </pre>
       )}
       <div className="shrink-0 flex gap-2 p-3 border-t" style={{ borderColor: 'var(--lab-line)' }}>
         <button type="button" className="lab-btn lab-btn-primary flex-1" disabled={p.busy} onClick={p.onRun}>
-          {p.busy ? 'Выполняю…' : (p.runLabel ?? '▶ Запустить на требушете')}
+          {p.busy ? tr('Выполняю…') : (p.runLabel ?? tr('▶ Запустить на требушете'))}
         </button>
-        <button type="button" className="lab-btn" onClick={p.onReset} title="Вернуть исходный код" aria-label="Вернуть исходный код">
+        <button type="button" className="lab-btn" onClick={p.onReset} title={tr("Вернуть исходный код")} aria-label={tr("Вернуть исходный код")}>
           ↺
         </button>
       </div>

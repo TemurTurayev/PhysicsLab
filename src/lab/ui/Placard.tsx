@@ -1,3 +1,4 @@
+import { localeTag, tr } from '../../i18n'
 import type { JSX } from 'react'
 import type { ShotResult } from '../sim/types'
 
@@ -15,7 +16,7 @@ export interface PlacardProps {
 }
 
 const fmt1 = (v: number): string =>
-  v.toLocaleString('ru-RU', {
+  v.toLocaleString(localeTag(), {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   })
@@ -26,50 +27,50 @@ function getStory(
   releaseDeg: number,
 ): string {
   if (phase === 'idle') {
-    const degStr = releaseDeg.toLocaleString('ru-RU', { maximumFractionDigits: 1 })
-    return `Праща раскроется, когда рука опустится до ${degStr}°. Жми «Огонь».`
+    const degStr = releaseDeg.toLocaleString(localeTag(), { maximumFractionDigits: 1 })
+    return tr(`Праща раскроется, когда рука опустится до {0}°. Жми «Огонь».`, [degStr])
   }
 
   if (phase === 'flying') {
     if (!shot || !shot.released || !shot.launch) {
-      return 'Праща не раскрылась'
+      return tr('Праща не раскрылась')
     }
-    return `Камень ушёл со скоростью ${fmt1(shot.launch.speed)} м/с под углом ${fmt1(shot.launch.angleDeg)}° к горизонту.`
+    return tr(`Камень ушёл со скоростью {0} м/с под углом {1}° к горизонту.`, [fmt1(shot.launch.speed), fmt1(shot.launch.angleDeg)])
   }
 
   // phase === 'landed'
   if (!shot || !shot.released) {
-    return 'Праща не раскрылась'
+    return tr('Праща не раскрылась')
   }
   if (!shot.landing) {
-    return 'Камень так и не упал'
+    return tr('Камень так и не упал')
   }
 
   const flightTime = Math.max(0, shot.landing.t - (shot.releaseT ?? 0))
-  const apexText = shot.apex ? ` Наивысшая точка ${fmt1(shot.apex.y)} м.` : ''
-  return `Упал в ${fmt1(shot.landing.x)} м через ${fmt1(flightTime)} с полёта.${apexText}`
+  const apexText = shot.apex ? tr(` Наивысшая точка {0} м.`, [fmt1(shot.apex.y)]) : ''
+  return tr(`Упал в {0} м через {1} с полёта.{2}`, [fmt1(shot.landing.x), fmt1(flightTime), apexText])
 }
 
-export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit, movingLabel = 'Тележка проедет', tell = (s) => s, idleLine }: PlacardProps): JSX.Element {
+export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit, movingLabel = tr('Тележка проедет'), tell = (s) => s, idleLine }: PlacardProps): JSX.Element {
   const story = phase === 'idle' && idleLine ? idleLine : tell(getStory(phase, shot, releaseDeg))
 
   const isFlyingOrLanded = phase === 'flying' || phase === 'landed'
-  const speedVal = isFlyingOrLanded && shot?.launch ? `${fmt1(shot.launch.speed)} м/с` : '—'
+  const speedVal = isFlyingOrLanded && shot?.launch ? tr(`{0} м/с`, [fmt1(shot.launch.speed)]) : '—'
   const angleVal = isFlyingOrLanded && shot?.launch ? `${fmt1(shot.launch.angleDeg)}°` : '—'
 
   const flightTime = shot?.landing ? Math.max(0, shot.landing.t - (shot.releaseT ?? 0)) : null
-  const rangeVal = phase === 'landed' && shot?.landing ? `${fmt1(shot.landing.x)} м` : '—'
-  const timeVal = phase === 'landed' && flightTime !== null ? `${fmt1(flightTime)} с` : '—'
+  const rangeVal = phase === 'landed' && shot?.landing ? tr(`{0} м`, [fmt1(shot.landing.x)]) : '—'
+  const timeVal = phase === 'landed' && flightTime !== null ? tr(`{0} с`, [fmt1(flightTime)]) : '—'
   const cartVal =
     phase === 'landed' && flightTime !== null && movingTargetSpeed !== undefined
-      ? `${fmt1(movingTargetSpeed * flightTime)} м`
+      ? tr(`{0} м`, [fmt1(movingTargetSpeed * flightTime)])
       : '—'
 
   const readouts: Array<{ label: string; short?: string; value: string }> = [
-    { label: 'Скорость', short: 'v₀', value: speedVal },
-    { label: 'Угол вылета', short: 'α', value: angleVal },
-    { label: 'Дальность', short: 'R', value: rangeVal },
-    { label: 'Время полёта', short: 't', value: timeVal },
+    { label: tr('Скорость'), short: 'v₀', value: speedVal },
+    { label: tr('Угол вылета'), short: 'α', value: angleVal },
+    { label: tr('Дальность'), short: 'R', value: rangeVal },
+    { label: tr('Время полёта'), short: 't', value: timeVal },
   ]
 
   if (movingTargetSpeed !== undefined) {
@@ -77,7 +78,7 @@ export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit,
   }
   if (beamLimit !== undefined) {
     const load = shot && isFlyingOrLanded ? Math.round((shot.peakMoment / beamLimit) * 100) : null
-    readouts.push({ label: 'Нагрузка балки', short: 'балка', value: load === null ? '—' : `${load}%` })
+    readouts.push({ label: tr('Нагрузка балки'), short: tr('балка'), value: load === null ? '—' : `${load}%` })
   }
 
   return (

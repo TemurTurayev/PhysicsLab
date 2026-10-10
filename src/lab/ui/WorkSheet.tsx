@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useState } from 'react'
 import { checkValue, type Verdict } from '../calc/check'
 import { vacuumFlight, type LaunchSheet } from '../calc/launchSheet'
@@ -11,9 +12,9 @@ interface Slot {
 }
 
 const MARK: Record<Verdict, { sign: string; say: string; color: string }> = {
-  ok: { sign: '✓', say: 'верно', color: 'var(--lab-good)' },
-  close: { sign: '≈', say: 'близко: проверь округление и g', color: '#f2c94c' },
-  wrong: { sign: '✗', say: 'не сходится', color: 'var(--lab-bad)' },
+  ok: { sign: '✓', say: tr('верно'), color: 'var(--lab-good)' },
+  close: { sign: '≈', say: tr('близко: проверь округление и g'), color: '#f2c94c' },
+  wrong: { sign: '✗', say: tr('не сходится'), color: 'var(--lab-bad)' },
 }
 
 function slotsFor(sheet: LaunchSheet, showVelocity: boolean): Slot[] {
@@ -21,13 +22,13 @@ function slotsFor(sheet: LaunchSheet, showVelocity: boolean): Slot[] {
   return [
     ...(showVelocity
       ? [
-          { key: 'vx', label: 'vx = v₀·cos α', unit: 'м/с', truth: sheet.vx },
-          { key: 'vy', label: 'vy = v₀·sin α', unit: 'м/с', truth: sheet.vy },
+          { key: 'vx', label: 'vx = v₀·cos α', unit: tr('м/с'), truth: sheet.vx },
+          { key: 'vy', label: 'vy = v₀·sin α', unit: tr('м/с'), truth: sheet.vy },
         ]
       : []),
-    { key: 't', label: 't пол', unit: 'с', truth: f.tFlight },
-    { key: 'h', label: 'h max', unit: 'м', truth: f.apexY },
-    { key: 'R', label: 'R', unit: 'м', truth: f.range },
+    { key: 't', label: tr('t пол'), unit: tr('с'), truth: f.tFlight },
+    { key: 'h', label: 'h max', unit: tr('м'), truth: f.apexY },
+    { key: 'R', label: 'R', unit: tr('м'), truth: f.range },
   ]
 }
 
@@ -43,13 +44,13 @@ export function WorkSheet({ sheet, showVelocity, vacuumNote, hidden, only }: { s
   return (
     <div className="flex flex-col gap-1">
       <div className="lab-label mt-2">
-        {formal ? 'Проверка расчёта' : 'Проверь свой расчёт'}
-        {vacuumNote ? ' (без воздуха)' : ''}
+        {formal ? tr('Проверка расчёта') : tr('Проверь свой расчёт')}
+        {vacuumNote ? tr(' (без воздуха)') : ''}
       </div>
       <p className="text-[11px]" style={{ color: 'var(--lab-dim)' }}>
         {formal
-          ? 'Рассчитайте вручную для текущей настройки и внесите значения — проверка не расходует допуски.'
-          : 'Посчитай на бумаге для текущей настройки и впиши — проверка бесплатная, жизни не тратит.'}
+          ? tr('Рассчитайте вручную для текущей настройки и внесите значения — проверка не расходует допуски.')
+          : tr('Посчитай на бумаге для текущей настройки и впиши — проверка бесплатная, жизни не тратит.')}
       </p>
       {slots.map((s) => {
         const raw = entries[s.key] ?? ''

@@ -1,6 +1,8 @@
+import { tr } from '../i18n'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AccountButton } from '../lab/account/AccountButton'
+import { LanguageSwitch } from '../i18n/LanguageSwitch'
 import { MusicToggle } from '../lab/audio/MusicToggle'
 import { useLabProgress } from '../lab/state/labProgress'
 import type { UniverseId } from '../lab/universe/types'
@@ -31,22 +33,25 @@ export function HomePage() {
     <div className="lab-root min-h-screen">
       <header className="fixed top-0 inset-x-0 z-20 backdrop-blur-md" style={{ background: 'rgba(14,12,10,0.55)', borderBottom: '1px solid var(--lab-line)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-14 flex items-center gap-3">
-          <a href="/" className="flex items-center gap-2.5" aria-label="PhysicsLab — на главную">
+          <a href="/" className="flex items-center gap-2.5" aria-label={tr("PhysicsLab — на главную")}>
             <Logo size={30} />
-            <span className="lab-title text-lg">PhysicsLab</span>
+            <span className="lab-title text-lg hidden min-[400px]:inline">PhysicsLab</span>
           </a>
           <nav className="ml-auto flex items-center gap-1">
             {/* Wrappers carry the breakpoints: .lab-btn sets its own display and would beat `hidden`. */}
             <span className="hidden sm:contents">
               <a href="#workshop" className="lab-btn !min-h-[36px] !px-3 !bg-transparent !border-transparent">
-                Главы
+                
+                {tr("Главы")}
               </a>
             </span>
             <span className="hidden min-[420px]:contents">
               <button type="button" onClick={() => enter('/trebuchet')} className="lab-btn !min-h-[36px] !px-3">
-                Карта миссий
+                
+                {tr("Карта миссий")}
               </button>
             </span>
+            <LanguageSwitch />
             <MusicToggle />
             <AccountButton />
           </nav>
@@ -63,7 +68,7 @@ export function HomePage() {
           <span className="flex items-center gap-2">
             <Logo size={20} /> PhysicsLab
           </span>
-          <span className="sm:ml-auto">Работает в браузере на компьютере, планшете и телефоне. Python запускается прямо на странице — ничего устанавливать не нужно.</span>
+          <span className="sm:ml-auto">{tr("Работает в браузере на компьютере, планшете и телефоне. Python запускается прямо на странице — ничего устанавливать не нужно.")}</span>
         </div>
       </footer>
     </div>

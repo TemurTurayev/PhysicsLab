@@ -1,14 +1,15 @@
+import { tr } from '../../i18n'
 import { useEffect, useRef } from 'react'
 import { chapterLabel } from '../levels'
 import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
 
 const KIND: Record<Mission['kind'], string> = {
-  tune: 'Настрой и попади',
-  predict: 'Предскажи',
-  write: 'Напиши код',
-  fix: 'Найди ошибку',
-  challenge: 'Испытание',
+  tune: tr('Настрой и попади'),
+  predict: tr('Предскажи'),
+  write: tr('Напиши код'),
+  fix: tr('Найди ошибку'),
+  challenge: tr('Испытание'),
 }
 
 /**
@@ -23,7 +24,7 @@ export function MissionIntro({ mission, formal, onStart }: { mission: Mission; f
       <div className="lab-panel lab-rise w-[min(560px,100%)] p-5 md:p-7 flex flex-col gap-4 max-h-[92vh] overflow-y-auto">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="lab-label">
-            {chapterLabel(mission.chapter)} · {mission.subject ? `${mission.subject} · шаг` : 'миссия'} {mission.order}
+            {chapterLabel(mission.chapter)} · {mission.subject ? tr(`{0} · шаг`, [mission.subject]) : tr('миссия')} {mission.order}
           </span>
           <span className="lab-mono text-[11px] px-2 py-0.5 rounded-full" style={{ background: 'var(--lab-accent-soft)', color: 'var(--lab-accent)' }}>
             {KIND[mission.kind]}
@@ -36,20 +37,20 @@ export function MissionIntro({ mission, formal, onStart }: { mission: Mission; f
           {mission.brief}
         </p>
         <div className="rounded-xl px-4 py-3 border-l-4" style={{ background: 'var(--lab-accent-soft)', borderColor: 'var(--lab-accent)' }}>
-          <div className="lab-label mb-1">{formal ? 'Задание' : 'Цель'}</div>
+          <div className="lab-label mb-1">{formal ? tr('Задание') : tr('Цель')}</div>
           <div className="lab-title text-lg" style={{ color: 'var(--lab-accent)' }}>
             {mission.goal}
           </div>
         </div>
         <ul className="text-sm flex flex-col gap-1.5" style={{ color: 'var(--lab-dim)' }}>
           <li>
-            {mission.practice ? (formal ? '🎓 Учебное испытание: допуски не расходуются.' : '🎓 Разминка: жизни не тратятся, пробуй сколько нужно.') : `${'❤️'.repeat(MAX_LIVES)} — ${formal ? 'три допуска: неудачный пуск списывает один.' : 'три жизни: промах отнимает одну.'}`}
+            {mission.practice ? (formal ? tr('🎓 Учебное испытание: допуски не расходуются.') : tr('🎓 Разминка: жизни не тратятся, пробуй сколько нужно.')) : `${'❤️'.repeat(MAX_LIVES)} — ${formal ? tr('три допуска: неудачный пуск списывает один.') : tr('три жизни: промах отнимает одну.')}`}
           </li>
-          <li>📐 {formal ? 'Все числа для расчёта — в панели справа. Проверка расчёта допусков не тратит.' : 'Все числа для расчёта — в панели справа. Проверка расчёта жизни не тратит.'}</li>
-          <li>💡 {formal ? 'Подсказки открываются по одной после каждого пуска.' : 'Подсказки открываются по одной после каждого выстрела.'}</li>
+          <li>📐 {formal ? tr('Все числа для расчёта — в панели справа. Проверка расчёта допусков не тратит.') : tr('Все числа для расчёта — в панели справа. Проверка расчёта жизни не тратит.')}</li>
+          <li>💡 {formal ? tr('Подсказки открываются по одной после каждого пуска.') : tr('Подсказки открываются по одной после каждого выстрела.')}</li>
         </ul>
         <button ref={start} type="button" className="lab-btn lab-btn-primary self-start !min-h-[46px] !px-6 text-base" onClick={onStart}>
-          {formal ? 'Приступить к испытанию' : 'Начать'} <span className="lab-kbd">Enter</span>
+          {formal ? tr('Приступить к испытанию') : tr('Начать')} <span className="lab-kbd">Enter</span>
         </button>
       </div>
     </div>

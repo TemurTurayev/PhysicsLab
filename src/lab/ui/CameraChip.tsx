@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useEffect, useState } from 'react'
 
 const LEARNED_KEY = 'physicslab-camera-learned'
@@ -32,13 +33,13 @@ export function CameraChip({ free, onAuto, slow, onSlow, compact = false }: Came
     }
   }, [free])
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <button type="button" className={`lab-btn lab-btn-float text-sm ${slow ? 'lab-btn-primary' : ''}`} onClick={onSlow} aria-pressed={slow} title="Полёт в 3 раза медленнее">
-        🐢<span className="hidden md:inline">{slow ? 'Замедление вкл.' : 'Замедлить'}</span>
+    <div className="flex items-center gap-2 flex-nowrap min-w-0 max-w-full">
+      <button type="button" className={`lab-btn lab-btn-float text-sm ${slow ? 'lab-btn-primary' : ''}`} onClick={onSlow} aria-pressed={slow} title={tr("Полёт в 3 раза медленнее")}>
+        🐢<span className="hidden md:inline">{slow ? tr('Замедление вкл.') : tr('Замедлить')}</span>
       </button>
       {free ? (
-        <button type="button" className="lab-btn lab-btn-primary text-sm" onClick={onAuto} title="Вернуть автоматическую камеру">
-          🎥<span className="hidden md:inline">Авто-камера</span>
+        <button type="button" className="lab-btn lab-btn-primary text-sm" onClick={onAuto} title={tr("Вернуть автоматическую камеру")}>
+          🎥<span className="hidden md:inline">{tr("Авто-камера")}</span>
         </button>
       ) : (
         !learned && !compact && <CameraHelp />
@@ -49,9 +50,9 @@ export function CameraChip({ free, onAuto, slow, onSlow, compact = false }: Came
 
 function CameraHelp() {
   return (
-    <div className="lab-panel px-3 py-1.5 text-xs pointer-events-none" style={{ color: 'var(--lab-dim)' }}>
-      <span className="hidden md:inline">Мышь — вращать · колесо — зум · правая кнопка — сдвиг</span>
-      <span className="md:hidden">Палец — вращать · два пальца — зум</span>
+    <div className="lab-panel px-3 py-1.5 text-xs pointer-events-none min-w-0 truncate" style={{ color: 'var(--lab-dim)' }}>
+      <span className="hidden md:inline">{tr("Мышь — вращать · колесо — зум · правая кнопка — сдвиг")}</span>
+      <span className="md:hidden">{tr("Палец — вращать · два пальца — зум")}</span>
     </div>
   )
 }

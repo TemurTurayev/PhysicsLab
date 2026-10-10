@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useEffect, type JSX } from 'react'
 import type { FailureId } from '../failures/types'
 import { tellFailure } from '../universe/failureCopy'
@@ -48,18 +49,20 @@ export function IncidentJournal({ found, onClose }: IncidentJournalProps): JSX.E
                 {universe.terms.journal}
               </h2>
               <p className="text-xs md:text-sm mt-0.5 leading-snug" style={{ color: 'var(--lab-dim)' }}>
-                Найдено{' '}
+                
+                {tr("Найдено")}{' '}
                 <span className="lab-mono font-semibold" style={{ color: 'var(--lab-accent)' }}>
                   {discoveredCount}
                 </span>{' '}
-                из <span className="lab-mono font-semibold">{total}</span>. Ошибки здесь — находки, а не штрафы.
+                
+                {tr("из") + ' '}<span className="lab-mono font-semibold">{total}</span>{tr(". Ошибки здесь — находки, а не штрафы.")}
               </p>
             </div>
             <button
               type="button"
               className="lab-btn !min-h-[36px] !px-3 shrink-0"
               onClick={onClose}
-              aria-label="Закрыть журнал"
+              aria-label={tr("Закрыть журнал")}
             >
               ✕
             </button>
@@ -126,7 +129,8 @@ export function IncidentJournal({ found, onClose }: IncidentJournalProps): JSX.E
                     </h3>
                   </div>
                   <p className="text-xs italic leading-relaxed" style={{ color: 'var(--lab-dim)' }}>
-                    Ещё не случалось
+                    
+                    {tr("Ещё не случалось")}
                   </p>
                 </div>
               )

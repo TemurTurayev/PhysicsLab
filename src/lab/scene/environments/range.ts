@@ -1,3 +1,4 @@
+import { tr } from '../../../i18n'
 import * as THREE from 'three'
 import { createSky } from '../sky'
 import { addGroundDetail } from '../textures/groundDetail'
@@ -153,7 +154,7 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   for (let x = 25; x <= opts.maxX; x += 25) {
     const post = new THREE.Mesh(signPostGeo, woodMat); post.position.set(x, 0.55, -6); post.castShadow = true
     const back = new THREE.Mesh(signBackGeo, woodMat); back.position.set(x, 0.95, -6); back.castShadow = true
-    const sMat = track(new THREE.MeshLambertMaterial({ map: track(createSignTexture(`${x} м`)), side: THREE.DoubleSide }))
+    const sMat = track(new THREE.MeshLambertMaterial({ map: track(createSignTexture(tr(`{0} м`, [x]))), side: THREE.DoubleSide }))
     const face = new THREE.Mesh(signFaceGeo, sMat); face.position.set(x, 0.95, -5.97)
     group.add(post, back, face)
 

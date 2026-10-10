@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useEffect, useState, type JSX } from 'react'
 import type { FailureEvent } from '../failures/types'
 import { tellFailure } from '../universe/failureCopy'
@@ -13,14 +14,14 @@ export interface IncidentCardProps {
 }
 
 const LAUNCHER_WHY = {
-  plain: 'Расчёт и выстрел разошлись. Сравни свою формулу с данными в панели и подставь числа ещё раз — разница в метрах подскажет, где ошибка.',
-  formal: 'Расчёт и результат пуска расходятся. Сверьте формулу с данными в панели и повторите подстановку — величина промаха укажет на ошибку.',
+  plain: tr('Расчёт и выстрел разошлись. Сравни свою формулу с данными в панели и подставь числа ещё раз — разница в метрах подскажет, где ошибка.'),
+  formal: tr('Расчёт и результат пуска расходятся. Сверьте формулу с данными в панели и повторите подстановку — величина промаха укажет на ошибку.'),
 }
 
 /** Stable, plausible-looking protocol number for this failure, e.g. 0317-Б. */
 function protocolNumber(id: string, t: number): string {
   const n = [...id].reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) % 9000, 7) + 1000
-  const letters = 'АБВГДЕЖИК'
+  const letters = tr('АБВГДЕЖИК')
   return `${String(n).padStart(4, '0')}-${letters[Math.floor(t * 10) % letters.length]}`
 }
 
@@ -96,21 +97,21 @@ export function IncidentCard({ event, isNew, onReplaySlow, onClose, fixedLaunch 
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="lab-label">Что произошло</span>
+        <span className="lab-label">{tr("Что произошло")}</span>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--lab-text)' }}>
           {entry.what(event.numbers)}
         </p>
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="lab-label">Почему</span>
+        <span className="lab-label">{tr("Почему")}</span>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--lab-text)' }}>
           {fixedLaunch && (event.id === 'short' || event.id === 'long') ? LAUNCHER_WHY[universe.id === 'sigma' ? 'formal' : 'plain'] : entry.why}
         </p>
       </div>
 
       <details className="flex flex-col gap-1">
-        <summary className="lab-label cursor-pointer select-none">Как в жизни</summary>
+        <summary className="lab-label cursor-pointer select-none">{tr("Как в жизни")}</summary>
         <p className="text-xs italic leading-relaxed mt-1" style={{ color: 'var(--lab-dim)' }}>
           {entry.realLife}
         </p>
@@ -122,14 +123,16 @@ export function IncidentCard({ event, isNew, onReplaySlow, onClose, fixedLaunch 
           className="lab-btn flex-1 text-sm whitespace-nowrap"
           onClick={onReplaySlow}
         >
-          Повтор в замедлении
+          
+          {tr("Повтор в замедлении")}
         </button>
         <button
           type="button"
           className="lab-btn lab-btn-primary flex-1 text-sm whitespace-nowrap"
           onClick={onClose}
         >
-          Понятно
+          
+          {tr("Понятно")}
         </button>
       </div>
     </div>

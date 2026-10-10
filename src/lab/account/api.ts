@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import type { ProgressData } from '../state/mergeProgress'
 
 /** The API lives on the Cloudflare copy of the site; other hosts (Vercel) call it there. Dev proxies /api. */
@@ -22,9 +23,9 @@ async function call<T>(path: string, init: RequestInit & { token?: string } = {}
     })
     const body = (await res.json().catch(() => null)) as { success?: boolean; data?: T; error?: string } | null
     if (res.ok && body?.success) return { success: true, data: body.data as T }
-    return { success: false, status: res.status, error: body?.error ?? 'Сервер не ответил как надо. Попробуй ещё раз.' }
+    return { success: false, status: res.status, error: body?.error ?? tr('Сервер не ответил как надо. Попробуй ещё раз.') }
   } catch {
-    return { success: false, status: 0, error: 'Нет связи с сервером. Проверь интернет.' }
+    return { success: false, status: 0, error: tr('Нет связи с сервером. Проверь интернет.') }
   } finally {
     clearTimeout(timer)
   }

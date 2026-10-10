@@ -1,3 +1,4 @@
+import { localeTag, tr } from '../../i18n'
 import { useCallback, useMemo, useState } from 'react'
 import { detectFailures } from '../failures/detect'
 import type { FailureEvent } from '../failures/types'
@@ -97,12 +98,12 @@ async function computeShot(m: Mission, values: SliderValues, code: string): Prom
 /** Basics Python: the student's number becomes a launcher setting; the ghost is the right setting. */
 async function valueShot(m: Mission, params: SimParams, code: string): Promise<Compute> {
   const spec = m.code!
-  if (!params.launcher || !spec.name || !spec.sets) throw new Error('value-миссии нужна пусковая установка, имя и поле')
+  if (!params.launcher || !spec.name || !spec.sets) throw new Error(tr('value-миссии нужна пусковая установка, имя и поле'))
   const res = await runStudent(code, { kind: 'value', name: spec.name, args: spec.args ?? null })
   if (!res.ok) return res
   if (res.kind !== 'value') throw new Error('unexpected worker reply')
   const shot = simulateShot({ ...params, launcher: { ...params.launcher, [spec.sets]: res.value } })
-  const shown = res.value.toLocaleString('ru-RU', { maximumFractionDigits: 3 })
+  const shown = res.value.toLocaleString(localeTag(), { maximumFractionDigits: 3 })
   return { ok: true, stdout: `${spec.name} = ${shown}\n${res.stdout}`, value: { shot, studentFlight: false, angleLooksLikeDegrees: false } }
 }
 
@@ -116,7 +117,7 @@ async function momentShot(params: SimParams, code: string): Promise<Compute> {
   const safeMc = pickCounterweight(SAFETY_MASSES, truth, limit)
   const shot = simulateShot({ ...params, trebuchet: { ...params.trebuchet, mc } })
   const ghost = simulateShot({ ...params, trebuchet: { ...params.trebuchet, mc: safeMc } }).flight
-  const note = `Мастер поставил противовес ${mc} кг: по твоей формуле это ${Math.round(res.moments[SAFETY_MASSES.indexOf(mc)])} Н·м — не больше предела ${limit} Н·м.`
+  const note = tr(`Мастер поставил противовес {0} кг: по твоей формуле это {1} Н·м — не больше предела {2} Н·м.`, [mc, Math.round(res.moments[SAFETY_MASSES.indexOf(mc)]), limit])
   return { ok: true, stdout: `${note}\n${res.stdout}`, value: { shot, ghost, studentFlight: false, angleLooksLikeDegrees: false } }
 }
 

@@ -1,28 +1,29 @@
+import { tr } from '../../i18n'
 import { FAILURES, type FailureEntry } from '../failures/catalog'
 import type { FailureId } from '../failures/types'
 import type { Universe } from './types'
 
 const STONE_TO_PROJECTILE: Array<[RegExp, string]> = [
-  [/Камень/g, 'Снаряд'],
-  [/камень/g, 'снаряд'],
-  [/камня/g, 'снаряда'],
-  [/камнем/g, 'снарядом'],
-  [/камню/g, 'снаряду'],
+  [/Камень/g, tr('Снаряд')],
+  [/камень/g, tr('снаряд')],
+  [/камня/g, tr('снаряда')],
+  [/камнем/g, tr('снарядом')],
+  [/камню/g, tr('снаряду')],
 ]
 
 // The complex speaks to its intern formally, like the briefs do.
 const FORMAL: Array<[RegExp, string]> = [
-  [/В твоём коде/g, 'В вашем коде'],
-  [/в твоём коде/g, 'в вашем коде'],
-  [/Ты делаешь то же самое/g, 'Вы делаете то же самое'],
-  [/Убавь одно из двух/g, 'Убавьте одно из двух'],
+  [/В твоём коде/g, tr('В вашем коде')],
+  [/в твоём коде/g, tr('в вашем коде')],
+  [/Ты делаешь то же самое/g, tr('Вы делаете то же самое')],
+  [/Убавь одно из двух/g, tr('Убавьте одно из двух')],
 ]
 
 // The steel machine has a cable on a hook, not a sling that opens.
 const MACHINE: Array<[RegExp, string]> = [
-  [/Праща раскроется, когда рука опустится до/g, 'Трос сойдёт с крюка, когда балка опустится до'],
-  [/Праща не раскрылась/g, 'Трос не сошёл с крюка'],
-  [/Жми «Огонь»/g, 'Нажмите «Огонь»'],
+  [/Праща раскроется, когда рука опустится до/g, tr('Трос сойдёт с крюка, когда балка опустится до')],
+  [/Праща не раскрылась/g, tr('Трос не сошёл с крюка')],
+  [/Жми «Огонь»/g, tr('Нажмите «Огонь»')],
 ]
 
 const renameStone = (text: string) => [...STONE_TO_PROJECTILE, ...FORMAL, ...MACHINE].reduce((t, [re, to]) => t.replace(re, to), text)

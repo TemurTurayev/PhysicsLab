@@ -1,3 +1,4 @@
+import { tr } from '../../../i18n'
 import * as THREE from 'three'
 import { addBoulders, addDomeHills, addFlowers, addGrass, addPines, addRoundTrees, applyHeight, rollingHeight } from './natureDressing'
 import { addGroundDetail } from '../textures/groundDetail'
@@ -201,7 +202,7 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   }
 
   // Flanking curtain walls (Instanced blocks ~1.0 x 0.6 x 0.6 m)
-  const hasGate = opts.targets.some((t) => t.h && t.label?.includes('Ворота'))
+  const hasGate = opts.targets.some((t) => t.h && t.label?.includes(tr('Ворота')))
   const wingZStart = hasGate ? 3 : 6
   const wallBlockGeo = track(new THREE.BoxGeometry(0.58, 0.58, 0.98))
   const maxInstances = 850
@@ -254,8 +255,8 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     tGroup.position.set(t.x, 0, 0)
 
     if (t.h !== undefined && t.h > 0) {
-      const isGateTarget = t.label?.includes('Ворота') ?? false
-      const isTowerTarget = t.label?.includes('Башня') ?? false
+      const isGateTarget = t.label?.includes(tr('Ворота')) ?? false
+      const isTowerTarget = t.label?.includes(tr('Башня')) ?? false
 
       const craterGeo = track(new THREE.CircleGeometry(0.75, 12))
       craterGeo.rotateY(-Math.PI / 2)

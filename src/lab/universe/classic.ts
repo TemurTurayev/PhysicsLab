@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { createMoon } from '../scene/environments/moon'
 import { createPass } from '../scene/environments/pass'
 import { createRange } from '../scene/environments/range'
@@ -14,6 +15,6 @@ export const CLASSIC: Universe = {
   envFor: (chapter) => ENVS[chapter] ?? null,
   copy: {},
   machine: 'wood',
-  terms: { journal: 'Журнал инцидентов', incident: 'Инцидент', incidentNew: 'Новая запись в журнале', movingTarget: 'Тележка проедет' },
+  terms: { journal: tr('Журнал инцидентов'), incident: tr('Инцидент'), incidentNew: tr('Новая запись в журнале'), movingTarget: tr('Тележка проедет') },
   retroByDefault: false,
 }

@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useAccount } from './account'
@@ -38,19 +39,20 @@ export function AuthDialog({ onClose }: { onClose: () => void }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={mode === 'login' ? 'Вход' : 'Регистрация'}
+        aria-label={mode === 'login' ? tr('Вход') : tr('Регистрация')}
         className="lab-panel lab-rise w-full max-w-[380px] p-5 flex flex-col gap-4 my-auto"
         style={{ background: 'var(--lab-panel-solid)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="lab-title text-xl">{mode === 'login' ? 'С возвращением' : 'Сохрани прогресс'}</div>
+            <div className="lab-title text-xl">{mode === 'login' ? tr('С возвращением') : tr('Сохрани прогресс')}</div>
             <p className="text-sm mt-1" style={{ color: 'var(--lab-dim)' }}>
-              Звёзды и журнал будут ждать тебя на любом устройстве.
+              
+              {tr("Звёзды и журнал будут ждать тебя на любом устройстве.")}
             </p>
           </div>
-          <button type="button" className="lab-btn !min-h-[36px] !px-3" onClick={onClose} aria-label="Закрыть">
+          <button type="button" className="lab-btn !min-h-[36px] !px-3" onClick={onClose} aria-label={tr("Закрыть")}>
             ✕
           </button>
         </div>
@@ -69,14 +71,14 @@ export function AuthDialog({ onClose }: { onClose: () => void }) {
               className="min-h-[36px] rounded-[8px] text-sm font-semibold"
               style={mode === m ? { background: 'var(--lab-accent)', color: '#1a1206' } : { color: 'var(--lab-dim)' }}
             >
-              {m === 'register' ? 'Новый аккаунт' : 'Уже есть'}
+              {m === 'register' ? tr('Новый аккаунт') : tr('Уже есть')}
             </button>
           ))}
         </div>
 
         <form className="flex flex-col gap-3" onSubmit={submit}>
           <label className="flex flex-col gap-1.5">
-            <span className="lab-label">Имя</span>
+            <span className="lab-label">{tr("Имя")}</span>
             <input
               ref={first}
               className={field}
@@ -87,12 +89,12 @@ export function AuthDialog({ onClose }: { onClose: () => void }) {
               maxLength={24}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="например, temur_7"
+              placeholder={tr("например, temur_7")}
               required
             />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="lab-label">Пароль</span>
+            <span className="lab-label">{tr("Пароль")}</span>
             <input
               className={field}
               style={{ border: '1px solid var(--lab-line)', color: 'var(--lab-text)' }}
@@ -102,7 +104,7 @@ export function AuthDialog({ onClose }: { onClose: () => void }) {
               maxLength={128}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="не короче 6 символов"
+              placeholder={tr("не короче 6 символов")}
               required
             />
           </label>
@@ -112,12 +114,12 @@ export function AuthDialog({ onClose }: { onClose: () => void }) {
             </p>
           )}
           <button type="submit" className="lab-btn lab-btn-primary !min-h-[46px]" disabled={busy}>
-            {busy ? 'Секунду…' : mode === 'login' ? 'Войти' : 'Создать аккаунт'}
+            {busy ? tr('Секунду…') : mode === 'login' ? tr('Войти') : tr('Создать аккаунт')}
           </button>
         </form>
         <p className="text-xs leading-relaxed" style={{ color: 'var(--lab-dim)' }}>
-          Почта не нужна. Пароль хранится только в зашифрованном виде, восстановить его нельзя — запиши. Прогресс из этого браузера не пропадёт: он
-          объединится с аккаунтом.
+          
+          {tr("Почта не нужна. Пароль хранится только в зашифрованном виде, восстановить его нельзя — запиши. Прогресс из этого браузера не пропадёт: он объединится с аккаунтом.")}
         </p>
       </div>
     </div>,

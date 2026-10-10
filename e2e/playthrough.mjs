@@ -7,6 +7,8 @@ const universe = process.argv[2] || 'classic'
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', args: ['--use-angle=metal'] })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
 page.on('pageerror', (e) => console.error('PAGEERROR', e.message))
+// The driver finds buttons by their Russian names.
+await page.addInitScript(() => localStorage.setItem('physicslab-locale', JSON.stringify({ state: { locale: 'ru' }, version: 0 })))
 await page.goto((process.env.BASE_URL || 'http://localhost:5180') + '/trebuchet')
 await page.evaluate(async (u) => { localStorage.clear(); localStorage.setItem('physicslab-coach-done', '1'); (await import('/src/lab/state/labProgress.ts')).useLabProgress.getState().setUniverse(u); await import('/e2e/drv.js') }, universe)
 const result = await page.evaluate(async () => {

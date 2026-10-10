@@ -1,3 +1,4 @@
+import { tr } from '../../../../i18n'
 import * as THREE from 'three'
 import type { Target } from '../../../levels/types'
 import type { Environment, EnvironmentFactory, EnvironmentOptions } from '../types'
@@ -37,7 +38,7 @@ function makeCRTScreenTexture(): THREE.CanvasTexture {
       if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
     }
     ctx.stroke(); ctx.fillStyle = '#7dff8a'; ctx.font = 'bold 11px monospace'
-    ctx.fillText('ТЕЛЕМЕТРИЯ ПОТОКА', 6, 20); ctx.fillText('СИГМА-7 ДАТЧИК-4', 6, 118)
+    ctx.fillText(tr('ТЕЛЕМЕТРИЯ ПОТОКА'), 6, 20); ctx.fillText(tr('СИГМА-7 ДАТЧИК-4'), 6, 118)
   }
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
@@ -51,14 +52,14 @@ function makeWindDisplayTexture(wind: number): THREE.CanvasTexture {
   if (ctx) {
     ctx.fillStyle = '#101416'; ctx.fillRect(0, 0, 512, 256)
     ctx.strokeStyle = '#2b3338'; ctx.lineWidth = 6; ctx.strokeRect(4, 4, 504, 248)
-    ctx.fillStyle = '#f2c400'; ctx.font = 'bold 26px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('СКОРОСТЬ ПОТОКА', 256, 46)
+    ctx.fillStyle = '#f2c400'; ctx.font = 'bold 26px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(tr('СКОРОСТЬ ПОТОКА'), 256, 46)
     ctx.fillStyle = '#081a10'; ctx.fillRect(40, 68, 432, 120)
     ctx.strokeStyle = '#1b4a28'; ctx.lineWidth = 3; ctx.strokeRect(40, 68, 432, 120)
     const sign = wind < 0 ? '\u2212' : (wind > 0 ? '+' : '')
-    ctx.fillStyle = '#55ff77'; ctx.font = 'bold 64px monospace'; ctx.fillText(`${sign}${Math.abs(wind)} м/с`, 256, 150)
+    ctx.fillStyle = '#55ff77'; ctx.font = 'bold 64px monospace'; ctx.fillText(tr(`{0}{1} м/с`, [sign, Math.abs(wind)]), 256, 150)
     ctx.fillStyle = '#8a9992'; ctx.font = '16px monospace'
-    const status = wind < 0 ? 'НАПРАВЛЕНИЕ: ВСТРЕЧНЫЙ' : (wind > 0 ? 'НАПРАВЛЕНИЕ: ПОПУТНЫЙ' : 'РЕЖИМ: ШТИЛЬ')
-    ctx.fillText(`АЭРОДИНАМИЧЕСКИЙ ЗАЛ · ${status}`, 256, 224)
+    const status = wind < 0 ? tr('НАПРАВЛЕНИЕ: ВСТРЕЧНЫЙ') : (wind > 0 ? tr('НАПРАВЛЕНИЕ: ПОПУТНЫЙ') : tr('РЕЖИМ: ШТИЛЬ'))
+    ctx.fillText(tr(`АЭРОДИНАМИЧЕСКИЙ ЗАЛ · {0}`, [status]), 256, 224)
   }
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.LinearFilter
@@ -298,9 +299,9 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
   for (const sx of [-26.5, -23.5]) { addMesh(group, bodyGeo, coatMat, [sx, 1.2, -13.3]); addMesh(group, headGeo, headMat, [sx, 1.9, -13.3]) }
 
   // Signs & Warning Beacons
-  const signHallMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture('АЭРОДИНАМИЧЕСКИЙ ЗАЛ · СЕКТОР В', '#cfd3cc', '#1b1b1b', 512, 64)) }))
+  const signHallMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr('АЭРОДИНАМИЧЕСКИЙ ЗАЛ · СЕКТОР В'), '#cfd3cc', '#1b1b1b', 512, 64)) }))
   addMesh(group, track(new THREE.PlaneGeometry(6.0, 0.8)), signHallMat, [-25, 5.5, -13.98], undefined, false, false)
-  const warnTex = track(signTexture('ОСТОРОЖНО: ПОТОК ВОЗДУХА', '#f2c400', '#1b1b1b', 384, 64))
+  const warnTex = track(signTexture(tr('ОСТОРОЖНО: ПОТОК ВОЗДУХА'), '#f2c400', '#1b1b1b', 384, 64))
   addMesh(group, track(new THREE.PlaneGeometry(1.8, 0.4)), track(new THREE.MeshLambertMaterial({ map: warnTex, side: THREE.DoubleSide })), [-8, 1.2, 5.5], undefined, false, false)
 
   const coneGeo = track(new THREE.ConeGeometry(0.18, 0.38, 8)); coneGeo.rotateX(Math.PI / 2)

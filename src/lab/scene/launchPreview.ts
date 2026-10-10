@@ -1,3 +1,4 @@
+import { localeTag, tr } from '../../i18n'
 import * as THREE from 'three'
 import type { LaunchSheet } from '../calc/launchSheet'
 import type { SheetPart } from '../levels/types'
@@ -5,7 +6,7 @@ import { arrow, label, line } from './annotations'
 
 export type PreviewPart = SheetPart
 
-const ru = (v: number) => v.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+const ru = (v: number) => v.toLocaleString(localeTag(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const SCALE = 0.35 // m of arrow per m/s, same as the shot annotations
 const DIM = 0.35
 
@@ -46,12 +47,12 @@ export class LaunchPreview {
       Array.from({ length: 25 }, (_, i) => new THREE.Vector3(p0.x + r * Math.cos((a * i) / 24), p0.y + r * Math.sin((a * i) / 24), 0)),
       '#ffd166',
     )
-    this.add('v0', arrow(p0, tip, '#ffd166'), label(`v₀ = ${ru(sheet.v0)} м/с`, '#ffd166'), tip.x, tip.y + 1.1)
+    this.add('v0', arrow(p0, tip, '#ffd166'), label(tr(`v₀ = {0} м/с`, [ru(sheet.v0)]), '#ffd166'), tip.x, tip.y + 1.1)
     this.add('alpha', arc, label(`α = ${ru(sheet.alphaDeg)}°`, '#ffd166'), p0.x + r + 1.2, p0.y + 0.6)
-    this.add('vx', arrow(p0, p0.clone().add(new THREE.Vector3(vx, 0, 0)), '#ff8fa3'), label(`vx = ${ru(sheet.vx)} м/с`, '#ff8fa3'), p0.x + vx / 2, p0.y - 0.9)
-    this.add('vy', arrow(p0, p0.clone().add(new THREE.Vector3(0, vy, 0)), '#7ee08a'), label(`vy = ${ru(sheet.vy)} м/с`, '#7ee08a'), p0.x - 2.4, p0.y + vy / 2)
-    this.add('y0', line([new THREE.Vector3(p0.x, 0, 0), p0], '#9fd3ff', true), label(`y₀ = ${ru(sheet.y0)} м`, '#9fd3ff'), p0.x - 1.6, p0.y / 2)
-    this.add('x0', line([new THREE.Vector3(0, 0.05, 0), new THREE.Vector3(p0.x, 0.05, 0)], '#9fd3ff'), label(`x₀ = ${ru(sheet.x0)} м`, '#9fd3ff'), p0.x / 2, 0.7)
+    this.add('vx', arrow(p0, p0.clone().add(new THREE.Vector3(vx, 0, 0)), '#ff8fa3'), label(tr(`vx = {0} м/с`, [ru(sheet.vx)]), '#ff8fa3'), p0.x + vx / 2, p0.y - 0.9)
+    this.add('vy', arrow(p0, p0.clone().add(new THREE.Vector3(0, vy, 0)), '#7ee08a'), label(tr(`vy = {0} м/с`, [ru(sheet.vy)]), '#7ee08a'), p0.x - 2.4, p0.y + vy / 2)
+    this.add('y0', line([new THREE.Vector3(p0.x, 0, 0), p0], '#9fd3ff', true), label(tr(`y₀ = {0} м`, [ru(sheet.y0)]), '#9fd3ff'), p0.x - 1.6, p0.y / 2)
+    this.add('x0', line([new THREE.Vector3(0, 0.05, 0), new THREE.Vector3(p0.x, 0.05, 0)], '#9fd3ff'), label(tr(`x₀ = {0} м`, [ru(sheet.x0)]), '#9fd3ff'), p0.x / 2, 0.7)
     this.highlight(this.lit)
   }
 

@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { create } from 'zustand'
 import { CHAPTERS, isUnlocked } from '../levels'
 import { useLabProgress } from '../state/labProgress'
@@ -29,7 +30,7 @@ const MAX_LINES = 200
 
 export const useConsole = create<ConsoleState>()((set, get) => ({
   open: false,
-  lines: ['PhysicsLab console. help — список команд.'],
+  lines: [tr('PhysicsLab console. help — список команд.')],
   history: [],
   cvars: DEFAULT_CVARS,
   cheated: new Set(),

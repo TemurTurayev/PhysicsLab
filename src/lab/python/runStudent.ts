@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import type { StudentError, StudentJob, WorkerResponse } from './protocol'
 
 const TIMEOUT_MS = 3000
@@ -31,8 +32,8 @@ const timeoutResult = (loading: boolean): StudentResult => ({
   ok: false,
   stdout: '',
   error: loading
-    ? { kind: 'load', line: null, message: 'Python не загрузился за минуту. Проверь интернет и попробуй ещё раз.' }
-    : { kind: 'timeout', line: null, message: 'Код не закончил работу за 3 секунды — возможно, бесконечный цикл.' },
+    ? { kind: 'load', line: null, message: tr('Python не загрузился за минуту. Проверь интернет и попробуй ещё раз.') }
+    : { kind: 'timeout', line: null, message: tr('Код не закончил работу за 3 секунды — возможно, бесконечный цикл.') },
 })
 
 /**

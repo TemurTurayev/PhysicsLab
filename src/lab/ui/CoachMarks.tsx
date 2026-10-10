@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { placeBubble } from './coachPlace'
 import { markCoachDone } from './coachStore'
@@ -67,7 +68,7 @@ export function CoachMarks({ steps, onDone }: { steps: CoachStep[]; onDone: () =
 
   const pad = 6
   return (
-    <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Знакомство с лабораторией">
+    <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label={tr("Знакомство с лабораторией")}>
       {rect && rect.width > 0 && (
         <div
           className="absolute rounded-[16px] transition-all duration-300 pointer-events-none"
@@ -87,7 +88,7 @@ export function CoachMarks({ steps, onDone }: { steps: CoachStep[]; onDone: () =
         style={{ width: 'min(320px, calc(100vw - 24px))', left: pos?.left ?? 12, top: pos?.top ?? 12, visibility: pos ? 'visible' : 'hidden', background: 'var(--lab-panel-solid)' }}
       >
         <div className="lab-label">
-          {i + 1} из {steps.length}
+          {i + 1} {' ' + tr("из") + ' '}{steps.length}
         </div>
         <div className="lab-title text-lg">{step.title}</div>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--lab-dim)' }}>
@@ -95,10 +96,11 @@ export function CoachMarks({ steps, onDone }: { steps: CoachStep[]; onDone: () =
         </p>
         <div className="flex flex-wrap items-center gap-2 mt-1">
           <button ref={nextRef} type="button" className="lab-btn lab-btn-primary" onClick={next}>
-            {last ? 'Понятно, стреляю' : 'Дальше'} <span className="lab-kbd">Enter</span>
+            {last ? tr('Понятно, стреляю') : tr('Дальше')} <span className="lab-kbd">Enter</span>
           </button>
           <button type="button" className="lab-btn" onClick={finish}>
-            Пропустить
+            
+            {tr("Пропустить")}
           </button>
         </div>
       </div>

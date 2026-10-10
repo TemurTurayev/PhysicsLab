@@ -1,3 +1,4 @@
+import { tr } from '../../../../i18n'
 import * as THREE from 'three'
 import { addRegolithField, earthTexture, placeEarth } from '../moonDressing'
 import { addGroundDetail } from '../../textures/groundDetail'
@@ -170,7 +171,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
   const ringTGeo = track(new THREE.TorusGeometry(0.85, 0.06, 6, 12)); ringTGeo.rotateY(Math.PI / 2)
   for (let tx = -3; tx <= 2; tx += 1.2) addMesh(group, ringTGeo, orangeStripeMat, [tx, 1.8, -18])
 
-  addMesh(group, track(new THREE.PlaneGeometry(6.4, 0.8)), track(new THREE.MeshLambertMaterial({ map: track(signTexture('СТАНЦИЯ СИГМА-Л · ИСПЫТАТЕЛЬНЫЙ ПОЛИГОН', '#ff6a13', '#0e1112', 512, 64)) })), [-8, 4.4, -15.96], undefined, false, false)
+  addMesh(group, track(new THREE.PlaneGeometry(6.4, 0.8)), track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr('СТАНЦИЯ СИГМА-Л · ИСПЫТАТЕЛЬНЫЙ ПОЛИГОН'), '#ff6a13', '#0e1112', 512, 64)) })), [-8, 4.4, -15.96], undefined, false, false)
 
   const coneGeo = track(new THREE.ConeGeometry(0.18, 0.38, 8)); coneGeo.rotateX(-Math.PI / 2)
   const beaconMat = track(new THREE.MeshStandardMaterial({ color: 0xff6a13, emissive: 0xff4400, emissiveIntensity: 3.0, toneMapped: false }))
@@ -216,7 +217,7 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
   const signPostGeo = track(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 6)), signPlateGeo = track(new THREE.PlaneGeometry(0.7, 0.4))
   for (let x = 20; x <= opts.maxX; x += 20) {
     addMesh(group, signPostGeo, steelMat, [x, 0.45, -4.5])
-    const sMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(`${x} м`, '#ff6a13', '#0e1112', 128, 64)), side: THREE.DoubleSide }))
+    const sMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr(`{0} м`, [x]), '#ff6a13', '#0e1112', 128, 64)), side: THREE.DoubleSide }))
     addMesh(group, signPlateGeo, sMat, [x, 0.72, -4.48], undefined, false, false)
   }
 

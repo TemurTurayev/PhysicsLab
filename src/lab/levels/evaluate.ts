@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { loadsOf, summarizeFlight } from '../sim/shot'
 import { simulateFlight } from '../sim/flight'
 import { simulateArm } from '../sim/trebuchet'
@@ -53,7 +54,7 @@ export function withSliders(m: Mission, values: SliderValues): SimParams {
 /** The machine part of a code mission: arm motion and the moment the stone leaves the sling. */
 export function armForCode(params: SimParams) {
   const run = simulateArm(params.trebuchet, params.world.g)
-  if (!run.release) throw new Error('В миссии с кодом требушет обязан отпускать камень')
+  if (!run.release) throw new Error(tr('В миссии с кодом требушет обязан отпускать камень'))
   const { vx, vy } = run.release
   return {
     run,

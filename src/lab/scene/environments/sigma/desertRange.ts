@@ -1,3 +1,4 @@
+import { tr } from '../../../../i18n'
 import * as THREE from 'three'
 import { addGroundDetail } from '../../textures/groundDetail'
 import type { Target } from '../../../levels/types'
@@ -121,7 +122,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
     if (is50) {
       addMesh(group, signPostGeo, industrialMaterial('steelPanel'), [x, 0.35, -3.4])
       addMesh(group, signBackGeo, industrialMaterial('steelPanel'), [x, 0.7, -3.4])
-      const sMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(`${x} м`, '#f2c400', '#1b1b1b', 128, 64)), side: THREE.DoubleSide }))
+      const sMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr(`{0} м`, [x]), '#f2c400', '#1b1b1b', 128, 64)), side: THREE.DoubleSide }))
       addMesh(group, signFaceGeo, sMat, [x, 0.7, -3.37], undefined, false, false)
     }
   }
@@ -187,7 +188,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
     const bz = -5.4 + i * 1.8
     addMesh(group, barBaseGeo, barMat, [-16, 0.2, bz]); addMesh(group, barTopGeo, barMat, [-16, 0.775, bz])
   }
-  const blastSignMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture('УКРЫТИЕ РАСЧЕТА', '#f2c400', '#1b1b1b', 256, 64)), side: THREE.DoubleSide }))
+  const blastSignMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr('УКРЫТИЕ РАСЧЕТА'), '#f2c400', '#1b1b1b', 256, 64)), side: THREE.DoubleSide }))
   addMesh(group, track(new THREE.PlaneGeometry(1.6, 0.4)), blastSignMat, [-15.82, 0.85, 0], [0, Math.PI / 2, 0], false, false)
 
   // Elevated steel observation tower at (-14, 0, -14)
@@ -209,7 +210,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
   addMesh(hangar, track(new THREE.BoxGeometry(7.0, 4.4, 0.8)), industrialMaterial('concreteDark'), [0, 2.2, 1.2])
   addMesh(hangar, track(new THREE.BoxGeometry(5.0, 3.6, 0.2)), industrialMaterial('steelPanel', [3, 2]), [0, 1.8, 1.3])
   addMesh(hangar, track(new THREE.BoxGeometry(5.6, 0.25, 0.25)), industrialMaterial('hazard', [6, 1]), [0, 3.75, 1.45])
-  const hSignMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture('ЛИФТ В КОМПЛЕКС · СЕКТОР Н', '#e6e2d8', '#1b1b1b', 512, 64)) }))
+  const hSignMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr('ЛИФТ В КОМПЛЕКС · СЕКТОР Н'), '#e6e2d8', '#1b1b1b', 512, 64)) }))
   addMesh(hangar, track(new THREE.PlaneGeometry(4.8, 0.6)), hSignMat, [0, 4.15, 1.62], undefined, false, false)
   group.add(hangar)
 
@@ -239,7 +240,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
     addMesh(group, railGeo, steelMat, [fenceMidX, 2.15, fz]); addMesh(group, railGeo, steelMat, [fenceMidX, 0.15, fz])
     addMesh(group, wireGeo, grateMat, [fenceMidX, 1.15, fz], undefined, false, false)
   }
-  const warnMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture('ПОЛИГОН. ВХОД ПО ПРОПУСКАМ', '#f2c400', '#1b1b1b', 384, 64)), side: THREE.DoubleSide }))
+  const warnMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(tr('ПОЛИГОН. ВХОД ПО ПРОПУСКАМ'), '#f2c400', '#1b1b1b', 384, 64)), side: THREE.DoubleSide }))
   const warnGeo = track(new THREE.PlaneGeometry(1.8, 0.35))
   for (const wx of [-10, 20, 60]) {
     if (wx <= opts.maxX + 10) {

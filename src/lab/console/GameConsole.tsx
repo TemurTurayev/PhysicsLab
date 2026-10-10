@@ -1,3 +1,4 @@
+import { tr } from '../../i18n'
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { complete } from './commands'
@@ -67,11 +68,11 @@ export function GameConsole() {
   }
 
   return (
-    <div className="game-console" role="dialog" aria-label="Консоль" onKeyDown={(e) => e.stopPropagation()}>
+    <div className="game-console" role="dialog" aria-label={tr("Консоль")} onKeyDown={(e) => e.stopPropagation()}>
       <div className="game-console-title">
-        <span>Консоль</span>
+        <span>{tr("Консоль")}</span>
         {cvars.sv_cheats && <span className="game-console-cheats">sv_cheats 1</span>}
-        <button type="button" className="game-console-x" onClick={() => toggle(false)} aria-label="Закрыть консоль">
+        <button type="button" className="game-console-x" onClick={() => toggle(false)} aria-label={tr("Закрыть консоль")}>
           ✕
         </button>
       </div>
@@ -89,10 +90,11 @@ export function GameConsole() {
           spellCheck={false}
           autoComplete="off"
           autoCapitalize="none"
-          aria-label="Команда"
+          aria-label={tr("Команда")}
         />
         <button type="button" onClick={send}>
-          Ввод
+          
+          {tr("Ввод")}
         </button>
       </div>
     </div>
