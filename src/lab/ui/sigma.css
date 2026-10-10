@@ -1,0 +1,76 @@
+/* НИИ «Сигма-7» — terminal skin over the same panels. Only tokens and a few overlays change. */
+@import '@fontsource/share-tech-mono/400.css';
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/700.css';
+
+.lab-root[data-universe='sigma'] {
+  --lab-bg: #0f1112;
+  --lab-panel: rgba(8, 14, 11, 0.86);
+  --lab-panel-solid: #0b120e;
+  --lab-line: rgba(125, 255, 138, 0.18);
+  --lab-text: #c9f5cf;
+  --lab-dim: #7fa889;
+  --lab-accent: #ff6a13;
+  --lab-accent-soft: rgba(255, 106, 19, 0.16);
+  --lab-good: #7dff8a;
+  --lab-bad: #ff4d3d;
+  --lab-info: #6fd3ff;
+  --lab-radius: 4px;
+  --lab-mono: 'Share Tech Mono', ui-monospace, Menlo, monospace;
+  --lab-sans: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --lab-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --lab-raise: rgba(125, 255, 138, 0.05);
+  letter-spacing: 0.01em;
+}
+
+/* Phosphor glow on text and faint scanlines on every panel. */
+.lab-root[data-universe='sigma'] .lab-panel {
+  position: relative;
+  text-shadow: 0 0 6px rgba(125, 255, 138, 0.25);
+  box-shadow: 0 0 0 1px rgba(125, 255, 138, 0.08), 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+.lab-root[data-universe='sigma'] .lab-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.18) 2px 3px);
+}
+.lab-root[data-universe='sigma'] .lab-label {
+  font-family: var(--lab-mono);
+  letter-spacing: 0.14em;
+}
+.lab-root[data-universe='sigma'] .lab-btn {
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--lab-sans);
+  font-size: 15px;
+}
+.lab-root[data-universe='sigma'] .lab-btn-primary {
+  color: #160800;
+  text-shadow: none;
+  background: repeating-linear-gradient(-45deg, #ff6a13 0 14px, #ff7d2e 14px 28px);
+}
+.lab-root[data-universe='sigma'] .lab-btn-primary:hover {
+  background: #ff8a3d;
+}
+/* Hazard tape along the top of incident protocols. */
+.lab-root[data-universe='sigma'] [role='dialog'] {
+  border-top: 6px solid transparent;
+  border-image: repeating-linear-gradient(-45deg, #f2c400 0 10px, #1b1b1b 10px 20px) 6;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lab-root[data-universe='sigma'] .lab-panel::after {
+    animation: sigma-flicker 7s steps(1) infinite;
+  }
+}
+@keyframes sigma-flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: 0.6; }
+  98% { opacity: 1; }
+  99% { opacity: 0.75; }
+}
+
+.lab-root[data-universe='sigma'] .lab-title { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }

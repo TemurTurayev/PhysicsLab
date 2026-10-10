@@ -1,0 +1,75 @@
+/* Home page: the lab's notebook tokens (lab.css) over a cinematic strip of real scene frames. */
+
+.home-hero { position: relative; isolation: isolate; overflow: hidden; }
+.home-hero-frames { position: absolute; inset: 0; z-index: -2; }
+.home-hero-frames > div {
+  position: absolute; inset: 0; background-size: cover; background-position: center 55%;
+  opacity: 0; animation: home-frame 30s infinite; will-change: opacity, transform;
+}
+/* Five frames, 6 s each: fade in, drift slowly, fade out while the next one fades in. */
+@keyframes home-frame {
+  0% { opacity: 0; transform: scale(1.04); }
+  4% { opacity: 1; }
+  20% { opacity: 1; }
+  24% { opacity: 0; transform: scale(1.12); }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+.home-hero-shade {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(14, 12, 10, 0.94) 0%, rgba(14, 12, 10, 0.78) 38%, rgba(14, 12, 10, 0.2) 75%, rgba(14, 12, 10, 0.05) 100%),
+    linear-gradient(0deg, var(--lab-bg) 0%, rgba(14, 12, 10, 0) 28%);
+}
+@media (max-width: 767px) {
+  .home-hero-shade {
+    background: linear-gradient(180deg, rgba(14, 12, 10, 0.25) 0%, rgba(14, 12, 10, 0.05) 18%, rgba(14, 12, 10, 0.2) 30%, var(--lab-bg) 44%);
+  }
+  .home-hero-frames { bottom: auto; height: 50%; }
+}
+
+.home-display { font-family: var(--lab-display); font-weight: 700; letter-spacing: -0.02em; line-height: 1.04; }
+.home-accent { color: var(--lab-accent); font-style: italic; }
+
+/* A dashed parabola drawn under the headline, like the logo's throw. */
+.home-arc path { stroke-dasharray: 2 9; animation: home-dash 1.6s linear infinite; }
+@keyframes home-dash { to { stroke-dashoffset: -22; } }
+
+.home-card { transition: transform 0.25s ease, border-color 0.2s ease, box-shadow 0.25s ease; }
+.home-card:hover { transform: translateY(-3px); border-color: rgba(236, 166, 75, 0.55); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45); }
+.home-card:focus-visible { outline: 2px solid var(--lab-accent); outline-offset: 3px; }
+.home-card .home-shot { transition: transform 0.6s ease; }
+.home-card:hover .home-shot { transform: scale(1.05); }
+
+.home-bar { height: 4px; border-radius: 99px; background: rgba(255, 236, 200, 0.1); overflow: hidden; }
+.home-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--lab-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-frames > div { animation: none; }
+  .home-hero-frames > div:first-child { opacity: 1; }
+  .home-arc path { animation: none; }
+  .home-card, .home-card .home-shot { transition: none; }
+}
+
+/* Hero frames: sharp 2560-px renders on wide screens, light 1200-px ones on phones. */
+.home-hero-frames > div { background-image: var(--lg); }
+@media (max-width: 767px) { .home-hero-frames > div { background-image: var(--sm); } }
+
+/* World choice cards on first visit. */
+.world-card { border-radius: 18px; background: var(--lab-panel-solid); border: 2px solid var(--lab-line); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+.world-card:hover, .world-card:focus-visible { transform: translateY(-4px); border-color: var(--lab-accent); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); outline: none; }
+.world-card-sigma { background: #2f3629; border-color: #5d6a54; font-family: Tahoma, Verdana, sans-serif; border-radius: 2px; }
+.world-card-sigma:hover, .world-card-sigma:focus-visible { border-color: #c4b550; }
+.world-card-title { font-family: var(--lab-display); font-weight: 700; font-size: 28px; }
+.world-card-sigma .world-card-title { font-family: 'Barlow Condensed', Impact, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: #c4b550; }
+.world-card-cta { margin-top: 6px; font-weight: 700; color: var(--lab-accent); }
+.world-card-sigma .world-card-cta { color: #c4b550; }
+.world-card-shot { transition: transform 0.6s; }
+.world-card:hover .world-card-shot { transform: scale(1.05); }
+
+/* Nodir greets from the hero frame (wide screens). */
+.home-hero-guide { position: absolute; right: max(24px, 4vw); bottom: 0; z-index: 0; flex-direction: column; align-items: flex-end; gap: 6px; pointer-events: none; }
+.home-hero-portrait { width: clamp(180px, 18vw, 280px); filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.6)); }
+.home-hero-bubble {
+  max-width: 300px; padding: 12px 14px; border-radius: 14px 14px 4px 14px; font-size: 14px; line-height: 1.45;
+  background: rgba(23, 20, 15, 0.92); border: 1px solid var(--lab-line); color: var(--lab-text); margin-right: 40px;
+}

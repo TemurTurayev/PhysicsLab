@@ -1,0 +1,114 @@
+/* PhysicsLab — "engineer's field notebook" over living 3D scenes: book serif titles,
+   instrument numerals, one brass accent per world. The complex re-skins the same tokens. */
+@import '@fontsource/literata/600.css';
+@import '@fontsource/literata/700.css';
+@import '@fontsource/golos-text/400.css';
+@import '@fontsource/golos-text/500.css';
+@import '@fontsource/golos-text/600.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+.lab-root {
+  --lab-bg: #0e0c0a;
+  --lab-panel: rgba(21, 18, 14, 0.84);
+  --lab-panel-solid: #17140f;
+  --lab-raise: rgba(255, 240, 214, 0.05);
+  --lab-line: rgba(255, 236, 200, 0.11);
+  --lab-text: #f1e9d8;
+  --lab-dim: #aaa08d;
+  --lab-accent: #eca64b;
+  --lab-accent-soft: rgba(236, 166, 75, 0.16);
+  --lab-good: #8fdc96;
+  --lab-bad: #ff8270;
+  --lab-info: #7cb8ff;
+  --lab-radius: 14px;
+  --lab-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --lab-sans: 'Golos Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lab-display: 'Literata', Georgia, 'Times New Roman', serif;
+  color: var(--lab-text);
+  font-family: var(--lab-sans);
+  background: var(--lab-bg);
+  -webkit-font-smoothing: antialiased;
+}
+.lab-title { font-family: var(--lab-display); font-weight: 600; letter-spacing: -0.01em; }
+.lab-kbd {
+  font-family: var(--lab-mono); font-size: 10px; padding: 1px 5px; border-radius: 4px;
+  border: 1px solid currentColor; opacity: 0.6;
+}
+@keyframes lab-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes lab-pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); } }
+.lab-rise { animation: lab-rise 0.32s ease-out both; }
+.lab-pop { display: inline-block; animation: lab-pop 0.45s cubic-bezier(.2,.9,.3,1.4) both; }
+@media (prefers-reduced-motion: reduce) { .lab-rise, .lab-pop { animation: none; } }
+.lab-panel {
+  background: var(--lab-panel);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+.lab-mono { font-family: var(--lab-mono); font-variant-numeric: tabular-nums; }
+.lab-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lab-dim); }
+.lab-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--lab-line);
+  background: rgba(255, 255, 255, 0.05); color: var(--lab-text); font-weight: 600; font-size: 14px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.lab-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.lab-btn:active { transform: translateY(1px); }
+.lab-btn:focus-visible, .lab-root input:focus-visible { outline: 2px solid var(--lab-accent); outline-offset: 2px; }
+.lab-btn-primary { background: var(--lab-accent); border-color: var(--lab-accent); color: #1a1206; }
+.lab-btn-primary:hover { background: #ffb85a; }
+.lab-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.lab-range { width: 100%; accent-color: var(--lab-accent); }
+@media (prefers-reduced-motion: reduce) {
+  .lab-root * { transition: none !important; animation: none !important; }
+}
+
+/* Compact display formulas in the side panels. */
+.lab-root .katex-display { margin: 0.25em 0; }
+
+.lab-num:focus { outline: 2px solid var(--lab-accent); outline-offset: 1px; }
+.lab-num.ok { border-color: var(--lab-good) !important; }
+.lab-num.close { border-color: #f2c94c !important; }
+.lab-num.wrong { border-color: var(--lab-bad) !important; }
+
+/* Buttons floating over the 3D scene need a solid plate to stay readable on bright floors. */
+.lab-btn-float:not(.lab-btn-primary) { background: var(--lab-panel-solid); }
+
+/* Mission map: open steps must read at a glance — bright and outlined; locked ones fade back. */
+.map-card { transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s; }
+.map-card[data-state='open'], .map-card[data-state='done'] {
+  border-color: color-mix(in srgb, var(--lab-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--lab-accent) 7%, var(--lab-panel));
+}
+.map-card[data-state='open'] h3, .map-card[data-state='done'] h3, .map-card[data-state='next'] h3 { color: var(--lab-text); }
+.map-card[data-state='open']:hover, .map-card[data-state='done']:hover, .map-card[data-state='next']:hover {
+  transform: translateY(-2px); border-color: var(--lab-accent);
+}
+.map-card[data-state='next'] {
+  border: 2px solid var(--lab-accent);
+  background: color-mix(in srgb, var(--lab-accent) 14%, var(--lab-panel));
+  animation: map-glow 2.2s ease-in-out infinite;
+}
+.map-card[data-state='locked'] { opacity: 0.38; filter: grayscale(0.7); cursor: not-allowed; }
+@keyframes map-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--lab-accent) 0%, transparent), 0 10px 40px rgba(0, 0, 0, 0.35); }
+  50% { box-shadow: 0 0 26px 4px color-mix(in srgb, var(--lab-accent) 55%, transparent), 0 10px 40px rgba(0, 0, 0, 0.35); }
+}
+.map-cta { box-shadow: 0 0 0 0 transparent; animation: map-glow 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .map-card, .map-cta { animation: none !important; } }
+
+/* Solution desk: the working surface of a mission. Big by default; the field is one tap away. */
+.desk { display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--lab-panel-solid); }
+.desk-top { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--lab-line); }
+.desk-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 18px; }
+.desk-story { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: start; }
+.desk-portrait { width: 84px; border-radius: 14px; background: var(--lab-raise); }
+.desk-bubble { position: relative; margin: 0; padding: 10px 12px; border-radius: 4px 14px 14px 14px; background: var(--lab-raise); border: 1px solid var(--lab-line); font-size: 14px; line-height: 1.5; }
+.desk-task { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; border-left: 4px solid var(--lab-accent); background: var(--lab-accent-soft); }
+.desk-h { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lab-accent); font-weight: 700; margin: 0; padding-top: 6px; border-top: 1px solid var(--lab-line); }
+.desk-answer { padding: 10px 14px 12px; border-top: 1px solid var(--lab-line); background: var(--lab-panel-solid); display: flex; flex-direction: column; gap: 8px; max-height: 55%; overflow-y: auto; }
+.desk-answer .lab-panel { background: transparent; border: 0; box-shadow: none; padding: 0; backdrop-filter: none; }
+@media (max-width: 767px) { .desk-story { grid-template-columns: 64px 1fr; } .desk-portrait { width: 64px; } }
