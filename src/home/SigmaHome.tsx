@@ -9,7 +9,7 @@ import { SOUNDFONT_CREDIT } from '../lab/audio/samples'
 import { useConsole } from '../lab/console/store'
 import { useLabProgress } from '../lab/state/labProgress'
 import { applyCopy, getUniverse } from '../lab/universe'
-import { Portrait } from './Portrait'
+import { Notices, PersonnelCard } from './PersonnelCard'
 import type { ProgressSummary } from './progress'
 import './sigmaHome.css'
 
@@ -54,8 +54,9 @@ export function SigmaHome({ summary }: { summary: ProgressSummary }) {
         <div className="cs-logo-sub">{tr('НИИ «СИГМА-7» · ОТДЕЛ ПРИКЛАДНОЙ МЕХАНИКИ')}</div>
       </div>
 
-      <div className="cs-hero" aria-hidden>
-        <Portrait world="sigma" />
+      <Notices />
+      <div className="cs-hero">
+        <PersonnelCard clearance={1 + summary.chapters.filter((c) => c.done === c.total).length} />
       </div>
 
       <nav className="cs-menu" aria-label={tr('Главное меню')}>

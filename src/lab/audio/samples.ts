@@ -20,6 +20,15 @@ export type Instrument =
   | 'electric_piano_1'
   | 'electric_bass_finger'
   | 'pad_2_warm'
+  | 'celesta'
+  | 'contrabass'
+  | 'cello'
+  | 'pad_8_sweep'
+  | 'synth_bass_1'
+  | 'tubular_bells'
+  | 'choir_aahs'
+  | 'tremolo_strings'
+  | 'string_ensemble_2'
 
 const noteName = (midi: number) => `${NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`
 

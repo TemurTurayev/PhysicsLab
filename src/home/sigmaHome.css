@@ -1,3 +1,6 @@
+@import '@fontsource/share-tech-mono/400.css';
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/700.css';
 /* The complex's main menu: an early-2000s shooter menu — cinematic backdrop, game title, text items, bevelled windows. */
 .cs-home {
   position: relative; min-height: 100vh; overflow: hidden; isolation: isolate;
@@ -6,7 +9,7 @@
 .cs-backdrop { position: absolute; inset: 0; z-index: -2; }
 .cs-backdrop > div {
   position: absolute; inset: 0; background-image: var(--lg); background-size: cover; background-position: center 55%;
-  opacity: 0; animation: cs-frame 35s infinite; filter: saturate(0.75) contrast(1.05);
+  opacity: 0; animation: cs-frame 35s infinite; filter: saturate(0.45) brightness(0.72) contrast(1.15);
 }
 @media (max-width: 767px) { .cs-backdrop > div { background-image: var(--sm); } }
 @keyframes cs-frame {
@@ -74,3 +77,28 @@
 }
 @media (prefers-reduced-motion: reduce) { .cs-backdrop > div { animation: none; } .cs-backdrop > div:first-child { opacity: 1; } .cs-item-hot { animation: none; } }
 .cs-credit { margin-top: 2px; font-size: 10px; opacity: 0.7; }
+
+/* Clearance pass: a laminated corporate ID. */
+.cs-hero { width: clamp(240px, 24vw, 330px); bottom: clamp(70px, 14vh, 150px); filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.75)); transform: rotate(-2deg); }
+.pass { background: #e9ebe6; color: #1b1e1c; border-radius: 6px; overflow: hidden; font-family: Tahoma, Verdana, sans-serif; border: 1px solid #b8bdb6; }
+.pass-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #8f1d16; color: #f4efe6; font-weight: 700; font-size: 12px; letter-spacing: 0.12em; }
+.pass-no { font-family: 'Share Tech Mono', ui-monospace, monospace; letter-spacing: 0.05em; opacity: 0.85; }
+.pass-body { display: grid; grid-template-columns: 38% 1fr; gap: 10px; padding: 10px; }
+.pass-photo { background: #b9bfba; border: 1px solid #8a908a; filter: grayscale(0.55) contrast(1.1); }
+.pass-photo svg { display: block; width: 100%; }
+.pass-fields { margin: 0; font-size: 11px; line-height: 1.25; }
+.pass-fields dt { color: #6a706b; text-transform: uppercase; letter-spacing: 0.08em; font-size: 9px; margin-top: 4px; }
+.pass-fields dd { margin: 0; font-weight: 700; }
+.pass-level { color: #8f1d16; }
+.pass-foot { display: flex; align-items: center; gap: 10px; padding: 6px 10px 8px; font-size: 9px; color: #6a706b; border-top: 1px dashed #b8bdb6; }
+.pass-bars { width: 70px; height: 18px; background: repeating-linear-gradient(90deg, #111 0 2px, transparent 2px 3px, #111 3px 4px, transparent 4px 7px, #111 7px 10px, transparent 10px 11px); }
+
+/* Public-address notices, top right. */
+.cs-notice { position: absolute; top: 18px; right: 18px; max-width: min(520px, 50vw); display: flex; gap: 10px; align-items: baseline; font-family: 'Share Tech Mono', ui-monospace, monospace; font-size: 12px; color: #c9c2a4; }
+.cs-notice-tag { color: #b3261e; font-weight: 700; letter-spacing: 0.15em; flex-shrink: 0; animation: cs-blink 2s steps(2) infinite; }
+.cs-notice-text { animation: cs-type 0.6s ease-out both; }
+@keyframes cs-blink { 50% { opacity: 0.35; } }
+@keyframes cs-type { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (max-width: 760px) { .cs-notice { left: 16px; right: 16px; max-width: none; top: auto; bottom: 46px; font-size: 11px; } .cs-hero { display: none; } }
+@media (max-height: 520px) { .cs-notice { display: none; } }
+@media (prefers-reduced-motion: reduce) { .cs-notice-tag, .cs-notice-text { animation: none; } }

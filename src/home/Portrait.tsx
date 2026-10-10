@@ -76,38 +76,59 @@ function Nodir({ mood, className }: { mood: Mood; className: string }) {
 }
 
 function Intern({ mood, className }: { mood: Mood; className: string }) {
+  // Serious by default: the complex does not smile at its interns. Hard top light, muted palette.
+  const look = mood === 'smile' ? 'serious' : mood
   return (
-    <svg viewBox="0 0 200 240" className={className} role="img" aria-label="Daniil">
-      {/* white lab coat over a blue shirt and a dark tie */}
-      <path d="M18 240 q8 -60 82 -68 q74 8 82 68z" fill="#f2f4f3" />
-      <path d="M76 176 l24 34 l24 -34 q-24 -8 -48 0z" fill="#7aa3c7" />
-      <path d="M96 184 h8 l4 40 l-8 10 l-8 -10z" fill="#24303d" />
-      <path d="M58 240 q4 -40 24 -62 l18 32 l18 -32 q20 22 24 62" fill="none" stroke="#c9cfcc" strokeWidth="3" />
-      <rect x="128" y="206" width="26" height="18" rx="2" fill="#dfe5e2" stroke="#9aa3a0" strokeWidth="1.5" />
-      <rect x="131" y="209" width="20" height="5" fill="#d9a441" />
-      <text x="141" y="221" fontSize="6" textAnchor="middle" fill="#333" fontFamily="monospace">Σ-7</text>
-      <path d="M58 206 v18" stroke="#2f6fb2" strokeWidth="3" strokeLinecap="round" />
-      {/* neck and head */}
-      <path d="M87 148 h26 v30 q-13 8 -26 0z" fill="#e8b996" />
-      <ellipse cx="100" cy="108" rx="44" ry="51" fill="#f1c7a6" />
-      <ellipse cx="56" cy="114" rx="7" ry="10" fill="#e9bb98" />
-      <ellipse cx="144" cy="114" rx="7" ry="10" fill="#e9bb98" />
-      {/* short brown hair with a side part */}
-      <path d="M56 100 q-2 -46 46 -48 q42 0 44 44 q-8 -18 -30 -22 q-24 -2 -38 10 q-12 4 -22 16z" fill="#6a4630" />
-      <path d="M86 58 q-10 10 -12 22" stroke="#4e3322" strokeWidth="3" fill="none" />
-      {/* glasses */}
-      <g fill="rgba(200,230,255,0.25)" stroke="#2a2f36" strokeWidth="3">
-        <rect x="66" y="102" width="28" height="22" rx="6" />
-        <rect x="106" y="102" width="28" height="22" rx="6" />
+    <svg viewBox="0 0 200 240" className={className} role="img" aria-label="Daniil Orlov">
+      <defs>
+        <linearGradient id="int-coat" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#d9ddd9" />
+          <stop offset="1" stopColor="#8f9792" />
+        </linearGradient>
+        <linearGradient id="int-skin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#d9b39a" />
+          <stop offset="1" stopColor="#a8846f" />
+        </linearGradient>
+      </defs>
+      {/* lab coat with folds, grey shirt, dark tie */}
+      <path d="M16 240 q8 -62 84 -70 q76 8 84 70z" fill="url(#int-coat)" />
+      <path d="M76 174 l24 36 l24 -36 q-24 -8 -48 0z" fill="#59636b" />
+      <path d="M96 182 h8 l4 44 l-8 10 l-8 -10z" fill="#1b1f24" />
+      <path d="M56 240 q4 -42 26 -64 l18 34 l18 -34 q22 22 26 64" fill="none" stroke="#6f7772" strokeWidth="3" />
+      <path d="M40 240 q6 -30 20 -44" stroke="#7d847f" strokeWidth="2" fill="none" />
+      {/* clearance pass on the pocket */}
+      <rect x="126" y="200" width="30" height="22" rx="2" fill="#e8ebe6" stroke="#4a524c" strokeWidth="1.5" />
+      <rect x="126" y="200" width="30" height="6" fill="#b3261e" />
+      <rect x="129" y="209" width="9" height="10" fill="#7b8580" />
+      {[141, 144, 146, 149, 151, 153].map((x) => (
+        <rect key={x} x={x} y="210" width="1.2" height="8" fill="#222" />
+      ))}
+      {/* neck and head, lit from above */}
+      <path d="M87 146 h26 v32 q-13 8 -26 0z" fill="#9c7a66" />
+      <ellipse cx="100" cy="106" rx="42" ry="50" fill="url(#int-skin)" />
+      <ellipse cx="58" cy="112" rx="6" ry="9" fill="#a8846f" />
+      <ellipse cx="142" cy="112" rx="6" ry="9" fill="#a8846f" />
+      {/* short dark hair, neat */}
+      <path d="M58 96 q-4 -46 44 -48 q44 2 42 46 q-6 -20 -28 -26 q-28 -4 -44 8 q-10 8 -14 20z" fill="#24201d" />
+      {/* brow shadow and cheek hollows */}
+      <path d="M64 100 q36 -10 72 0 v8 q-36 -8 -72 0z" fill="#000" opacity="0.12" />
+      <path d="M66 128 q6 14 16 18" stroke="#8c6b58" strokeWidth="2" fill="none" opacity="0.6" />
+      <path d="M134 128 q-6 14 -16 18" stroke="#8c6b58" strokeWidth="2" fill="none" opacity="0.6" />
+      {/* thin rectangular glasses */}
+      <g fill="rgba(170,200,220,0.18)" stroke="#15181b" strokeWidth="2.5">
+        <rect x="66" y="104" width="28" height="16" rx="2" />
+        <rect x="106" y="104" width="28" height="16" rx="2" />
       </g>
-      <path d="M94 112 h12" stroke="#2a2f36" strokeWidth="3" />
-      <Brows mood={mood} lx={80} rx={120} y={94} color="#5a3b28" />
-      <ellipse cx="80" cy="113" rx="5" ry="6" fill="#2a2a2a" />
-      <ellipse cx="120" cy="113" rx="5" ry="6" fill="#2a2a2a" />
-      <circle cx="82" cy="111" r="1.8" fill="#fff" />
-      <circle cx="122" cy="111" r="1.8" fill="#fff" />
-      <path d="M100 120 q-4 10 2 12" stroke="#d89f7c" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <Mouth mood={mood} x={100} y={140} />
+      <path d="M94 110 h12" stroke="#15181b" strokeWidth="2.5" />
+      {/* level brows, steady eyes */}
+      <g stroke="#1e1a17" strokeWidth="4" strokeLinecap="round">
+        <path d={look === 'wow' ? 'M70 92 l20 -2' : 'M70 98 l20 1'} />
+        <path d={look === 'wow' ? 'M110 90 l20 2' : look === 'think' ? 'M110 97 l20 -3' : 'M110 99 l20 -1'} />
+      </g>
+      <ellipse cx="80" cy="112" rx="4" ry="4.5" fill="#1a1a1a" />
+      <ellipse cx="120" cy="112" rx="4" ry="4.5" fill="#1a1a1a" />
+      <path d="M100 116 q-3 10 1 13" stroke="#8c6b58" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      {look === 'wow' ? <ellipse cx="100" cy="141" rx="4" ry="5" fill="#4a2e26" /> : <path d={look === 'think' ? 'M90 141 q10 -3 20 1' : 'M90 140 h20'} stroke="#4a2e26" strokeWidth="3" fill="none" strokeLinecap="round" />}
     </svg>
   )
 }
