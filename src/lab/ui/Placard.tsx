@@ -13,6 +13,8 @@ export interface PlacardProps {
   tell?: (line: string) => string
   /** What to say before the shot when the machine is not a sling (the basics launcher). */
   idleLine?: string
+  /** A prediction's quantity: never shown until it is predicted right, or reading it off would replace the maths. */
+  secret?: 'landingX' | 'apexY' | 'flightTime' | null
 }
 
 const fmt1 = (v: number): string =>
@@ -51,16 +53,21 @@ function getStory(
   return tr(`Упал в {0} м через {1} с полёта.{2}`, [fmt1(shot.landing.x), fmt1(flightTime), apexText])
 }
 
-export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit, movingLabel = tr('Тележка проедет'), tell = (s) => s, idleLine }: PlacardProps): JSX.Element {
-  const story = phase === 'idle' && idleLine ? idleLine : tell(getStory(phase, shot, releaseDeg))
+export function Placard({ shot, releaseDeg, phase, movingTargetSpeed, beamLimit, movingLabel = tr('Тележка проедет'), tell = (s) => s, idleLine, secret = null }: PlacardProps): JSX.Element {
+  const story =
+    phase === 'idle' && idleLine
+      ? idleLine
+      : secret && phase === 'landed'
+        ? tr('Выстрел сделан. Точное значение откроется, когда прогноз совпадёт — проверь расчёт.')
+        : tell(getStory(phase, shot, releaseDeg))
 
   const isFlyingOrLanded = phase === 'flying' || phase === 'landed'
   const speedVal = isFlyingOrLanded && shot?.launch ? tr(`{0} м/с`, [fmt1(shot.launch.speed)]) : '—'
   const angleVal = isFlyingOrLanded && shot?.launch ? `${fmt1(shot.launch.angleDeg)}°` : '—'
 
   const flightTime = shot?.landing ? Math.max(0, shot.landing.t - (shot.releaseT ?? 0)) : null
-  const rangeVal = phase === 'landed' && shot?.landing ? tr(`{0} м`, [fmt1(shot.landing.x)]) : '—'
-  const timeVal = phase === 'landed' && flightTime !== null ? tr(`{0} с`, [fmt1(flightTime)]) : '—'
+  const rangeVal = secret === 'landingX' && phase === 'landed' ? '?' : phase === 'landed' && shot?.landing ? tr(`{0} м`, [fmt1(shot.landing.x)]) : '—'
+  const timeVal = secret === 'flightTime' && phase === 'landed' ? '?' : phase === 'landed' && flightTime !== null ? tr(`{0} с`, [fmt1(flightTime)]) : '—'
   const cartVal =
     phase === 'landed' && flightTime !== null && movingTargetSpeed !== undefined
       ? tr(`{0} м`, [fmt1(movingTargetSpeed * flightTime)])

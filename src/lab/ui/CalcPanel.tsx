@@ -47,7 +47,7 @@ function Row({ k, v }: { k: string; v: string }) {
   )
 }
 
-function ShotTable({ log }: { log: ShotLogRow[] }) {
+function ShotTable({ log, secret }: { log: ShotLogRow[]; secret?: string | null }) {
   const cell = (v: number | null, unit = '') => (v === null ? '—' : `${n(v)}${unit}`)
   return (
     <table className="lab-mono text-[11px] w-full">
@@ -67,9 +67,9 @@ function ShotTable({ log }: { log: ShotLogRow[] }) {
             <td>{Object.values(r.values).map((v) => v.toLocaleString(localeTag())).join('/') || '—'}</td>
             <td className="text-right">{cell(r.v0)}</td>
             <td className="text-right">{cell(r.alphaDeg, '°')}</td>
-            <td className="text-right">{cell(r.range)}</td>
-            <td className="text-right">{cell(r.time)}</td>
-            <td className="text-right">{cell(r.apex)}</td>
+            <td className="text-right">{secret === 'landingX' ? '?' : cell(r.range)}</td>
+            <td className="text-right">{secret === 'flightTime' ? '?' : cell(r.time)}</td>
+            <td className="text-right">{secret === 'apexY' ? '?' : cell(r.apex)}</td>
           </tr>
         ))}
       </tbody>
@@ -105,7 +105,7 @@ function Tile({ k, v, unit, part, onHighlight }: { k: string; v: string; unit: s
 }
 
 /** All the numbers and formulas needed to compute the throw instead of guessing it, one tab at a time. */
-export function CalcPanel({ mission, values, log, onHighlight }: { mission: Mission; values: SliderValues; log: ShotLogRow[]; onHighlight?: (p: PreviewPart | null) => void }) {
+export function CalcPanel({ mission, values, log, onHighlight, secret = null, stacked = false, theory = [] }: { mission: Mission; values: SliderValues; log: ShotLogRow[]; onHighlight?: (p: PreviewPart | null) => void; secret?: string | null; stacked?: boolean; theory?: string[] }) {
   const [open, setOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 768)
   const [tab, setTab] = useState<Tab>('launch')
   const params = useMemo(() => withSliders(mission, values), [mission, values])
@@ -125,17 +125,22 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
     ['shots', tr(`Выстрелы{0}`, [log.length ? ` · ${log.length}` : ''])],
   ]
 
+  // On the solution desk every section stands in order (no tabs): given → formulas → check → shots.
+  const shows = (t: Tab) => stacked || tab === t
+  const heading = (text: string) => (stacked ? <h3 className="desk-h">{text}</h3> : null)
   return (
-    <div className="lab-panel p-3 flex flex-col gap-2.5 text-sm" data-coach="calc">
+    <div className={stacked ? 'flex flex-col gap-3 text-sm' : 'lab-panel p-3 flex flex-col gap-2.5 text-sm'} data-coach="calc">
+      {!stacked && (
       <button type="button" className="flex items-center justify-between text-left min-h-[32px] -my-1" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className="lab-label">{tr("📐 Данные для расчёта")}</span>
         <span aria-hidden style={{ color: 'var(--lab-dim)' }}>
           {open ? '▴' : '▾'}
         </span>
       </button>
-      {open && (
+      )}
+      {(stacked || open) && (
         <>
-          <div role="tablist" aria-label={tr("Расчёт")} className="grid gap-1 rounded-[10px] p-0.5" style={{ background: 'var(--lab-raise)', gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
+          {!stacked && <div role="tablist" aria-label={tr("Расчёт")} className="grid gap-1 rounded-[10px] p-0.5" style={{ background: 'var(--lab-raise)', gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
             {tabs.map(([id, label]) => (
               <button
                 key={id}
@@ -149,10 +154,11 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
                 {label}
               </button>
             ))}
-          </div>
+          </div>}
 
-          {tab === 'launch' && (
+          {shows('launch') && (
             <div className="flex flex-col gap-2.5 lab-rise">
+              {heading(tr('Дано'))}
               <div className="lab-label">{tr("Пуск при") + ' '}{setting || tr('заданной настройке')}</div>
               <p className="text-[11px] -mt-1" style={{ color: 'var(--lab-dim)' }}>
                 
@@ -207,15 +213,17 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
             </div>
           )}
 
-          {tab === 'formulas' && (
+          {shows('formulas') && (
             <div className="lab-rise">
-              {formulas.map((f) => (
+              {heading(tr('Формулы'))}
+              {[...formulas, ...theory.filter((f) => !formulas.includes(f))].map((f) => (
                 <Formula key={f} tex={f} className="overflow-x-auto text-[13px]" />
               ))}
             </div>
           )}
 
-          {tab === 'check' &&
+          {shows('check') && tabs.some(([id]) => id === 'check') && heading(tr('Реши и проверь по шагам'))}
+          {shows('check') && tabs.some(([id]) => id === 'check') &&
             (sheet ? (
               <WorkSheet key={setting} sheet={sheet} showVelocity={!hideVelocity} vacuumNote={w.drag} hidden={PREDICTED_SLOT[mission.predict?.quantity ?? ''] ?? null} only={mission.panel?.check} />
             ) : (
@@ -225,9 +233,10 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
               </p>
             ))}
 
-          {tab === 'shots' &&
+          {shows('shots') && heading(tr('Выстрелы'))}
+          {shows('shots') &&
             (log.length > 0 ? (
-              <ShotTable log={log} />
+              <ShotTable log={log} secret={secret} />
             ) : (
               <p className="text-xs" style={{ color: 'var(--lab-dim)' }}>
                 

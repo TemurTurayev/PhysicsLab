@@ -132,7 +132,7 @@ for (const [w, h] of ONLY) {
 
   await page.goto(`${BASE}/`)
   await check('home')
-  if (await click(re('Войти'), 'login')) {
+  if (await click(UNIVERSE === 'sigma' ? re('Войти в профиль') : re('Войти'), 'login')) {
     await sleep(400)
     await check('login dialog')
     await page.keyboard.press('Escape')
@@ -149,10 +149,10 @@ for (const [w, h] of ONLY) {
   await check('intro')
   await page.keyboard.press('Enter')
   await sleep(500)
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 6; i++) {
     const tour = page.locator(`[aria-label="${L('Знакомство с лабораторией')}"]`)
     if (!(await tour.count())) {
-      report.push(`${vp} [tour] tour closed early at step ${i + 1}`)
+      if (i < 4) report.push(`${vp} [tour] tour closed early at step ${i + 1}`)
       break
     }
     await check(`tour ${i + 1}`)

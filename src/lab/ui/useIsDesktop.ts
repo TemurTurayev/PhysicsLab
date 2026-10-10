@@ -24,3 +24,8 @@ export function useIsDesktop(): boolean {
 export function useIsShort(): boolean {
   return useMedia(SHORT, false)
 }
+
+/** Wide enough for the solution desk and the 3D field side by side. */
+export function useIsWide(): boolean {
+  return useMedia('(min-width: 1024px) and (min-height: 521px)', true)
+}

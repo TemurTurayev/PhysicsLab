@@ -61,7 +61,7 @@ export function WorkSheet({ sheet, showVelocity, vacuumNote, hidden, only }: { s
             <span style={{ color: 'var(--lab-dim)' }}>{s.label}</span>
             <span className="flex items-baseline gap-1">
               <input
-                className={`lab-num lab-mono w-[7ch] text-right bg-transparent rounded-md px-1 py-0.5 ${verdict ?? ''}`}
+                className={`lab-num lab-mono w-[8ch] min-h-[32px] text-right bg-transparent rounded-md px-1.5 py-1 ${verdict ?? ''}`}
                 style={{ border: '1px solid var(--lab-line)', color: 'var(--lab-text)' }}
                 inputMode="decimal"
                 placeholder="?"

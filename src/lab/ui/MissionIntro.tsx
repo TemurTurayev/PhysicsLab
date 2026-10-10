@@ -3,6 +3,8 @@ import { useEffect, useRef } from 'react'
 import { chapterLabel } from '../levels'
 import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
+import { Portrait } from '../../home/Portrait'
+import type { UniverseId } from '../universe/types'
 
 const KIND: Record<Mission['kind'], string> = {
   tune: tr('Настрой и попади'),
@@ -16,7 +18,7 @@ const KIND: Record<Mission['kind'], string> = {
  * The briefing before a mission: one screen to read the story and the goal, then it gets out of the
  * way and the goal stays pinned as a single line. Enter or the button starts.
  */
-export function MissionIntro({ mission, formal, onStart }: { mission: Mission; formal: boolean; onStart: () => void }) {
+export function MissionIntro({ mission, formal, onStart, world, story }: { mission: Mission; formal: boolean; onStart: () => void; world: UniverseId; story: string | null }) {
   const start = useRef<HTMLButtonElement>(null)
   useEffect(() => start.current?.focus(), [])
   return (
@@ -33,6 +35,12 @@ export function MissionIntro({ mission, formal, onStart }: { mission: Mission; f
         <h2 id="intro-title" className="lab-title text-2xl md:text-[30px] leading-tight">
           {mission.title}
         </h2>
+        {story && (
+          <div className="grid grid-cols-[72px_1fr] gap-3 items-start">
+            <Portrait world={world} className="w-[72px] rounded-xl" />
+            <p className="desk-bubble">{story}</p>
+          </div>
+        )}
         <p className="text-[15px] leading-relaxed" style={{ color: 'var(--lab-dim)' }}>
           {mission.brief}
         </p>
@@ -44,13 +52,13 @@ export function MissionIntro({ mission, formal, onStart }: { mission: Mission; f
         </div>
         <ul className="text-sm flex flex-col gap-1.5" style={{ color: 'var(--lab-dim)' }}>
           <li>
-            {mission.practice ? (formal ? tr('🎓 Учебное испытание: допуски не расходуются.') : tr('🎓 Разминка: жизни не тратятся, пробуй сколько нужно.')) : `${'❤️'.repeat(MAX_LIVES)} — ${formal ? tr('три допуска: неудачный пуск списывает один.') : tr('три жизни: промах отнимает одну.')}`}
+            {mission.practice && !mission.predict ? (formal ? tr('🎓 Учебное испытание: допуски не расходуются.') : tr('🎓 Разминка: жизни не тратятся, пробуй сколько нужно.')) : `${'❤️'.repeat(MAX_LIVES)} — ${formal ? tr('три допуска: неудачный пуск списывает один.') : tr('три жизни: промах отнимает одну.')}`}
           </li>
-          <li>📐 {formal ? tr('Все числа для расчёта — в панели справа. Проверка расчёта допусков не тратит.') : tr('Все числа для расчёта — в панели справа. Проверка расчёта жизни не тратит.')}</li>
+          <li>📐 {formal ? tr('Данные, формулы и проверка расчёта — на столе решений. Проверка допусков не тратит.') : tr('Данные, формулы и проверка расчёта — на столе решений. Проверка жизни не тратит.')}</li>
           <li>💡 {formal ? tr('Подсказки открываются по одной после каждого пуска.') : tr('Подсказки открываются по одной после каждого выстрела.')}</li>
         </ul>
         <button ref={start} type="button" className="lab-btn lab-btn-primary self-start !min-h-[46px] !px-6 text-base" onClick={onStart}>
-          {formal ? tr('Приступить к испытанию') : tr('Начать')} <span className="lab-kbd">Enter</span>
+          {formal ? tr('К расчёту') : tr('К столу решений')} <span className="lab-kbd">Enter</span>
         </button>
       </div>
     </div>

@@ -51,9 +51,10 @@ describe('chapter 0: each step is solved by its school formula, and only by it',
     expect(hitsAtSpeed(m('0-9'), 28 / Math.sqrt((2 * 12) / 9.81))).toBe(true)
     expect(hitsAtSpeed(m('0-9'), 28 / ((2 * 12) / 9.81))).toBe(false) // forgot the root
   })
-  it('the first three steps are practice: a miss costs no life; later ones do', () => {
+  it('practice forgives misses in aiming steps, never in predictions (a shot would reveal the answer)', () => {
     const miss = { hits: [], predictionError: 5 }
-    expect(['0-1', '0-2', '0-3'].map((id) => costsLife(m(id), miss, ''))).toEqual([false, false, false])
+    expect(['0-1', '0-2'].map((id) => costsLife(m(id), miss, ''))).toEqual([false, false])
+    expect(costsLife(m('0-3'), miss, '')).toBe(true)
     expect(costsLife(m('0-4'), miss, '')).toBe(true)
   })
   it('every step trains one named school subject', () => {

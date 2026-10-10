@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { simulateArm } from '../sim/trebuchet'
 import type { ArmSample, FlightSample, LauncherParams, ShotResult, TrebuchetParams } from '../sim/types'
 import type { Target } from '../levels/types'
-import { ShotAnnotations } from './annotations'
+import { ShotAnnotations, type Secret } from './annotations'
 import { LaunchPreview, type PreviewPart } from './launchPreview'
 import type { LaunchSheet } from '../calc/launchSheet'
 import { cameraAt, launchCloseup, type CameraShot } from './camera'
@@ -24,6 +24,7 @@ export interface ShotView {
   ghost?: FlightSample[] // reference flight drawn as a dashed line
   crewScatterAt?: number | null
   hitIndex?: number | null
+  secret?: Secret
 }
 
 const TAIL_AFTER_LANDING = 3 // seconds the scene keeps running after impact
@@ -206,7 +207,7 @@ export class LabScene {
     this.burst.trigger(landing?.x ?? 0, landing ? landing.t : null)
     const snapped = view?.shot.breakage?.kind === 'beam' ? view.shot.breakage.t : null
     this.splinters.trigger(0, snapped, this.pivotY)
-    this.notes.set(view?.shot ?? null)
+    this.notes.set(view?.shot ?? null, view?.secret ?? null)
     if (view) this.previewFresh = false
     const hitAt = view?.hitIndex !== null && view?.shot.landing ? view.shot.landing.t : null
     const breakAt = view?.shot.breakage?.t ?? null

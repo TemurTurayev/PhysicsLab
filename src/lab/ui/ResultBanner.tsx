@@ -20,16 +20,14 @@ function verdict(m: Mission, r: ShotRecord, formal: boolean): { text: string; go
   if (m.predict && r.predictionError !== null) {
     const ok = Math.abs(r.predictionError) <= m.predict.tolerance
     if (Math.abs(r.predictionError) < (m.predict.unit === tr('с') ? 0.01 : 0.05)) return { good: true, text: tr('Прогноз сбылся: точно в цель.') }
+    // A miss never says by how much: that would hand over the answer. Recompute instead.
+    if (!ok) return { good: false, text: formal ? tr('Прогноз не подтвердился. Перепроверьте расчёт по шагам.') : tr('Прогноз мимо. Перепроверь расчёт по шагам — где ошибка?') }
     const v = { d: fmt(r.predictionError, m.predict.unit === tr('с') ? 2 : 1), u: m.predict.unit ?? tr('м') }
     // Whole sentences per case, so every language can build its own grammar.
     const over = r.predictionError > 0
-    const text = ok
-      ? over
-        ? formal ? tr('Прогноз сбылся: ваш ответ на {d} {u} больше настоящего.', v) : tr('Прогноз сбылся: твой ответ на {d} {u} больше настоящего.', v)
-        : formal ? tr('Прогноз сбылся: ваш ответ на {d} {u} меньше настоящего.', v) : tr('Прогноз сбылся: твой ответ на {d} {u} меньше настоящего.', v)
-      : over
-        ? formal ? tr('Прогноз мимо: ваш ответ на {d} {u} больше настоящего.', v) : tr('Прогноз мимо: твой ответ на {d} {u} больше настоящего.', v)
-        : formal ? tr('Прогноз мимо: ваш ответ на {d} {u} меньше настоящего.', v) : tr('Прогноз мимо: твой ответ на {d} {u} меньше настоящего.', v)
+    const text = over
+      ? formal ? tr('Прогноз сбылся: ваш ответ на {d} {u} больше настоящего.', v) : tr('Прогноз сбылся: твой ответ на {d} {u} больше настоящего.', v)
+      : formal ? tr('Прогноз сбылся: ваш ответ на {d} {u} меньше настоящего.', v) : tr('Прогноз сбылся: твой ответ на {d} {u} меньше настоящего.', v)
     return { good: ok, text }
   }
   if (r.hits.length > 0) return { good: true, text: tr('Попадание!') }

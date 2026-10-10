@@ -23,7 +23,7 @@ const result = await page.evaluate(async () => {
   ]
   const out = []; let cur = null
   for (const [id, values, pred, code] of steps) {
-    if (id !== cur) { D.go('/trebuchet/' + id); await D.sleep(2200); [...document.querySelectorAll('button')].find((b) => /^(Начать|Приступить)/.test(b.textContent))?.click(); await D.sleep(300); cur = id }
+    if (id !== cur) { D.go('/trebuchet/' + id); await D.sleep(2200); [...document.querySelectorAll('button')].find((b) => /^(Начать|Приступить|К столу решений|К расчёту)/.test(b.textContent))?.click(); await D.sleep(300); cur = id }
     const r = await D.shoot(M(id), values ?? undefined, pred, code ? M(id).code.reference : undefined)
     out.push(id + ': ' + r.at(-1).slice(0, 60))
   }

@@ -64,11 +64,15 @@ interface Timed {
  * and the launch angle, the apex height, and a ruler from the machine to the landing point.
  * Each piece appears when the stone gets there.
  */
+/** A predicted quantity hidden from every display until the prediction is right. */
+export type Secret = 'landingX' | 'apexY' | 'flightTime' | null
+
 export class ShotAnnotations {
   readonly group = new THREE.Group()
   private items: Timed[] = []
 
-  set(shot: ShotResult | null): void {
+  /** `secret`: the quantity a prediction asks for — shown as «?» until the student gets it right. */
+  set(shot: ShotResult | null, secret: Secret = null): void {
     this.clear()
     if (!shot?.launch || shot.releaseT === null) return
     const start = shot.flight[0]
@@ -95,13 +99,13 @@ export class ShotAnnotations {
       const a = shot.apex
       const tApex = shot.flight.reduce((best, s) => (s.y > best.y ? s : best), start).t
       this.add(tApex, line([new THREE.Vector3(a.x, 0, 0), new THREE.Vector3(a.x, a.y, 0)], '#c3a6ff', true))
-      this.add(tApex, this.at(label(tr(`h = {0} м  (x = {1} м)`, [ru(a.y), ru(a.x)]), '#c3a6ff'), a.x, a.y + 1.6))
+      this.add(tApex, this.at(label(tr(`h = {0} м  (x = {1} м)`, [secret === 'apexY' ? '?' : ru(a.y), secret === 'landingX' ? '?' : ru(a.x)]), '#c3a6ff'), a.x, a.y + 1.6))
     }
 
     if (shot.landing) {
       const { x, t } = shot.landing
       this.add(t, this.ruler(x))
-      this.add(t, this.at(label(tr(`R = {0} м · t = {1} с`, [ru(x), ru(t - t0)]), '#ffffff'), x / 2, 1.4))
+      this.add(t, this.at(label(tr(`R = {0} м · t = {1} с`, [secret === 'landingX' ? '?' : ru(x), secret === 'flightTime' ? '?' : ru(t - t0)]), '#ffffff'), x / 2, 1.4))
     }
   }
 

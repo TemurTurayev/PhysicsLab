@@ -8,18 +8,18 @@ import { useAudioSettings } from '../audio/engine'
 import { useConsole } from '../console/store'
 import type { FxQuality } from '../scene/postFx'
 
-export type Act = 'see' | 'understand' | 'build'
+/** Where the student is looking: the solution desk (task, data, maths) or the field (the 3D shot). */
+export type View = 'desk' | 'field'
 
-const ACTS: Array<{ id: Act; label: string; hint: string }> = [
-  { id: 'see', label: tr('Увидь'), hint: tr('Стреляй и смотри') },
-  { id: 'understand', label: tr('Пойми'), hint: tr('Силы, векторы и формулы на сцене') },
-  { id: 'build', label: tr('Собери'), hint: tr('Свой движок на Python') },
+const VIEWS: Array<{ id: View; label: string; hint: string }> = [
+  { id: 'desk', label: tr('📐 Стол решений'), hint: tr('Задача, данные, формулы и расчёт') },
+  { id: 'field', label: tr('🎯 Поле'), hint: tr('Смотреть на выстрел и вращать камеру') },
 ]
 
 export interface ActBarProps {
   mission: Mission
-  act: Act
-  onAct: (a: Act) => void
+  view: View
+  onView: (v: View) => void
   incidents: number
   onJournal: () => void
   muted: boolean
@@ -66,31 +66,22 @@ export function ActBar(p: ActBarProps) {
         <div className="lab-title text-[17px] md:text-lg leading-tight truncate">{p.mission.title}</div>
       </div>
 
-      <div role="tablist" aria-label={tr("Режим")} className="order-last w-full md:order-none md:w-auto flex items-center gap-1">
-        {ACTS.map((a, i) => {
-          const disabled = a.id === 'build' && !p.mission.code
-          const active = p.act === a.id
+      <div role="tablist" aria-label={tr("Режим")} className="order-last w-full md:order-none md:w-auto flex items-center gap-1" data-coach="view">
+        {VIEWS.map((v) => {
+          const active = p.view === v.id
           return (
-            <div key={a.id} className="flex items-center gap-1 flex-1 md:flex-none">
-              {i > 0 && (
-                <span aria-hidden className="hidden md:inline text-xs" style={{ color: 'var(--lab-dim)' }}>
-                  →
-                </span>
-              )}
-              <button
-                type="button"
-                role="tab"
-                aria-selected={active}
-                disabled={disabled}
-                title={disabled ? tr('В этой миссии код не нужен') : a.hint}
-                onClick={() => p.onAct(a.id)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 min-h-[36px] rounded-[9px] text-sm font-semibold transition-colors disabled:opacity-30"
-                style={active ? { background: 'var(--lab-accent)', color: '#1a1206' } : { background: 'var(--lab-raise)', color: 'var(--lab-text)' }}
-              >
-                <span className="lab-mono text-[11px] opacity-70">{i + 1}</span>
-                {a.label}
-              </button>
-            </div>
+            <button
+              key={v.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              title={v.hint}
+              onClick={() => p.onView(v.id)}
+              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 min-h-[36px] rounded-[9px] text-sm font-semibold transition-colors"
+              style={active ? { background: 'var(--lab-accent)', color: '#1a1206' } : { background: 'var(--lab-raise)', color: 'var(--lab-text)' }}
+            >
+              {v.label}
+            </button>
           )
         })}
       </div>
@@ -139,7 +130,7 @@ export function ActBar(p: ActBarProps) {
               
               {tr("Консоль") + ' '}<span className="lab-kbd">~</span>
             </button>
-            <div className="lab-label px-1 pt-2">Language · Язык · Til</div>
+            <div className="lab-label px-1 pt-2">{tr("Language · Язык · Til")}</div>
             <LanguageSwitch className="self-start" />
             <div className="lab-label px-1 pt-2">{tr("Графика")}</div>
             <div className="grid grid-cols-3 gap-1">

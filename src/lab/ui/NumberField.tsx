@@ -30,7 +30,7 @@ export function NumberField({ value, min, max, step, unit, label, onCommit }: Nu
   return (
     <span className="flex items-baseline gap-1">
       <input
-        className="lab-num lab-mono text-lg text-right w-[5.5ch] bg-transparent rounded-md px-1"
+        className="lab-num lab-mono text-lg text-right w-[5.5ch] min-h-[36px] bg-transparent rounded-md px-1"
         style={{ color: 'var(--lab-accent)', border: '1px solid var(--lab-line)' }}
         inputMode="decimal"
         aria-label={label}

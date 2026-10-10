@@ -99,3 +99,16 @@
 }
 .map-cta { box-shadow: 0 0 0 0 transparent; animation: map-glow 2.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .map-card, .map-cta { animation: none !important; } }
+
+/* Solution desk: the working surface of a mission. Big by default; the field is one tap away. */
+.desk { display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--lab-panel-solid); }
+.desk-top { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--lab-line); }
+.desk-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 18px; }
+.desk-story { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: start; }
+.desk-portrait { width: 84px; border-radius: 14px; background: var(--lab-raise); }
+.desk-bubble { position: relative; margin: 0; padding: 10px 12px; border-radius: 4px 14px 14px 14px; background: var(--lab-raise); border: 1px solid var(--lab-line); font-size: 14px; line-height: 1.5; }
+.desk-task { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; border-left: 4px solid var(--lab-accent); background: var(--lab-accent-soft); }
+.desk-h { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lab-accent); font-weight: 700; margin: 0; padding-top: 6px; border-top: 1px solid var(--lab-line); }
+.desk-answer { padding: 10px 14px 12px; border-top: 1px solid var(--lab-line); background: var(--lab-panel-solid); display: flex; flex-direction: column; gap: 8px; max-height: 55%; overflow-y: auto; }
+.desk-answer .lab-panel { background: transparent; border: 0; box-shadow: none; padding: 0; backdrop-filter: none; }
+@media (max-width: 767px) { .desk-story { grid-template-columns: 64px 1fr; } .desk-portrait { width: 64px; } }

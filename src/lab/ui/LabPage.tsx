@@ -8,7 +8,7 @@ import type { Mission, SliderValues } from '../levels/types'
 import { isPythonReady, warmUpPython } from '../python/runStudent'
 import { LabScene } from '../scene/LabScene'
 import { useLabProgress } from '../state/labProgress'
-import { ActBar, type Act } from './ActBar'
+import { ActBar, type View } from './ActBar'
 import { CalcPanel, type ShotLogRow } from './CalcPanel'
 import { CameraChip } from './CameraChip'
 import { OutOfLives } from './OutOfLives'
@@ -17,7 +17,7 @@ import { withSliders } from '../levels/evaluate'
 import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
-import { useIsDesktop, useIsShort } from './useIsDesktop'
+import { useIsDesktop, useIsShort, useIsWide } from './useIsDesktop'
 import { useConsoleMission, useMissionBridge } from '../console/useConsoleMission'
 import { defaultQuality, saveQuality, type FxQuality } from '../scene/postFx'
 import { CodeDrawer } from './CodeDrawer'
@@ -27,7 +27,8 @@ import { IncidentJournal } from './IncidentJournal'
 import { MissionBrief } from './MissionBrief'
 import { Placard } from './Placard'
 import { ResultBanner } from './ResultBanner'
-import { TheoryPanel } from './TheoryPanel'
+import { SolutionDesk } from './SolutionDesk'
+import { storyFor } from '../levels/story'
 import { useMissionRun, type ShotRecord } from './useMissionRun'
 import './lab.css'
 import './sigma.css'
@@ -39,14 +40,17 @@ import { useUniverse } from '../universe/useUniverse'
 type Phase = 'idle' | 'flying' | 'landed'
 
 const COACH: CoachStep[] = [
-  { target: 'goal', title: tr('Цель и жизни'), text: tr('Здесь то, во что нужно попасть. Промах отнимает жизнь, поэтому сначала считай, потом стреляй. Подсказки — тут же.') },
-  { target: 'calc', title: tr('Числа для расчёта'), text: tr('Скорость, угол и точка вылета для текущей настройки, формулы и проверка твоего расчёта. Двинул слайдер — числа пересчитались.') },
-  { target: 'fire', title: tr('Настройка и выстрел'), text: tr('Двигай слайдер или впиши точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камеру можно крутить мышью.') },
+  { target: 'goal', title: tr('Герой и задание'), text: tr('Здесь история и коротко — что сделать. Промах отнимает жизнь, поэтому сначала считай, потом стреляй.') },
+  { target: 'calc', title: tr('Дано, формулы, расчёт'), text: tr('Все числа для расчёта, нужные формулы и пошаговая проверка твоих вычислений. Проверка жизни не тратит.') },
+  { target: 'fire', title: tr('Ответ и выстрел'), text: tr('Впиши свой ответ или настройку и жми «Огонь» (или пробел), когда расчёт сходится.') },
+  { target: 'view', title: tr('Стол и поле'), text: tr('Переключайся между столом решений и полем, чтобы посмотреть на выстрел и покрутить камеру.') },
 ]
+
 const COACH_FORMAL: CoachStep[] = [
-  { target: 'goal', title: tr('Задание и допуски'), text: tr('Здесь цель испытания. Неудачный пуск списывает допуск, поэтому сначала расчёт, потом пуск. Подсказки — тут же.') },
-  { target: 'calc', title: tr('Данные для расчёта'), text: tr('Скорость, угол и точка схода для текущей настройки, формулы и проверка вашего расчёта. Меняете настройку — данные пересчитываются.') },
-  { target: 'fire', title: tr('Настройка и пуск'), text: tr('Слайдер или точное число. Когда расчёт сходится с целью — «Огонь» (или пробел). Камера вращается мышью.') },
+  { target: 'goal', title: tr('Распоряжение и задание'), text: tr('Здесь распоряжение отдела и краткое задание. Неудачный пуск списывает допуск: сначала расчёт, потом пуск.') },
+  { target: 'calc', title: tr('Исходные данные и расчёт'), text: tr('Исходные данные, формулы и пошаговая проверка вашего расчёта. Проверка допусков не тратит.') },
+  { target: 'fire', title: tr('Ответ и пуск'), text: tr('Введите ответ или настройку и дайте команду «Огонь» (или пробел), когда расчёт сходится.') },
+  { target: 'view', title: tr('Стол и полигон'), text: tr('Переключайтесь между столом решений и полигоном, чтобы наблюдать пуск.') },
 ]
 
 export function LabPage() {
@@ -97,7 +101,8 @@ function MissionView({ mission }: { mission: Mission }) {
   const [values, setValues] = useState<SliderValues>(() => Object.fromEntries(mission.sliders.map((s) => [s.key, s.start])))
   const releaseDeg = values.releaseDeg ?? mission.base.trebuchet.releaseDeg
   const [prediction, setPrediction] = useState<number | null>(null)
-  const [act, setAct] = useState<Act>(mission.code ? 'build' : 'see')
+  // Every mission opens on the solution desk; the field is for watching the shot.
+  const [view, setView] = useState<View>('desk')
   const [code, setCode] = useState(mission.code?.starter ?? '')
   const [phase, setPhase] = useState<Phase>('idle')
   const [incidents, setIncidents] = useState<Array<{ event: FailureEvent; isNew: boolean }>>([])
@@ -127,7 +132,7 @@ function MissionView({ mission }: { mission: Mission }) {
     return () => clearInterval(id)
   }, [mission.code])
 
-  useEffect(() => sceneRef.current?.setXray(act === 'understand'), [act, sceneRef])
+  useEffect(() => sceneRef.current?.setXray(true), [sceneRef, universe])
 
   useEffect(() => {
     const scene = sceneRef.current
@@ -157,6 +162,8 @@ function MissionView({ mission }: { mission: Mission }) {
     const scene = sceneRef.current
     if (!scene) return
     setIncidents([])
+    // On a phone the desk covers the scene: switch to the field to watch the shot.
+    if (!window.matchMedia('(min-width: 1024px) and (min-height: 521px)').matches) setView('field')
     const record = await run.fire({ values, code, prediction })
     if (!record) return
     const { shot } = record
@@ -172,8 +179,11 @@ function MissionView({ mission }: { mission: Mission }) {
       },
     ])
     const selfHit = record.failures.find((f) => f.id === 'self_hit')
+    // This shot's labels hide the predicted value unless this very prediction was right (or the mission is won).
+    const predictedRight = record.predictionError !== null && mission.predict !== undefined && Math.abs(record.predictionError) <= mission.predict.tolerance
+    const shotSecret = mission.predict && !predictedRight && !run.won ? mission.predict.quantity : null
     cues.current = { whoosh: false, thud: false }
-    scene.setShot({ shot, ghost: record.ghost, crewScatterAt: selfHit ? selfHit.t : null, hitIndex: record.hits[0] ?? null })
+    scene.setShot({ shot, ghost: record.ghost, crewScatterAt: selfHit ? selfHit.t : null, hitIndex: record.hits[0] ?? null, secret: shotSecret })
     setPhase('flying')
     if (sigma) playSigma('hydraulic')
     else playSfx('creak')
@@ -192,7 +202,7 @@ function MissionView({ mission }: { mission: Mission }) {
         finishShot(record)
       }
     })
-  }, [sceneRef, run, values, code, prediction, finishShot, sigma])
+  }, [sceneRef, run, values, code, prediction, finishShot, sigma, mission.predict])
 
   useEffect(() => {
     // A win under console cheats is not saved.
@@ -205,6 +215,8 @@ function MissionView({ mission }: { mission: Mission }) {
   // Space fires, unless the student is typing a number or code.
   const fireRef = useRef(fire)
   fireRef.current = fire
+  // What a prediction asks for stays hidden everywhere until it is predicted right.
+  const secret = mission.predict && !run.won ? mission.predict.quantity : null
   const canFire = phase !== 'flying' && (run.lives > 0 || run.won) && (!mission.predict || prediction !== null)
   useMissionBridge({
     current: { id: mission.id, title: told.title, g: mission.base.world.g, lives: run.lives, shots: run.shots },
@@ -219,7 +231,9 @@ function MissionView({ mission }: { mission: Mission }) {
     },
   })
   useEffect(() => sceneRef.current?.setTimescale(cvars.host_timescale), [cvars.host_timescale, sceneRef, universe])
-  useEffect(() => sceneRef.current?.setMarksVisible(cvars.r_drawmarks), [cvars.r_drawmarks, sceneRef, universe])
+  // `?clean` (for capturing backdrop frames) hides the distance marks whatever the console says.
+  const clean = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('clean')
+  useEffect(() => sceneRef.current?.setMarksVisible(cvars.r_drawmarks && !clean), [cvars.r_drawmarks, clean, sceneRef, universe])
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null
@@ -242,15 +256,17 @@ function MissionView({ mission }: { mission: Mission }) {
   }
 
   const next = nextMission(mission.id)
-  const showCode = act === 'build' && mission.code
+  const showCode = Boolean(mission.code)
   const fireLabel = mission.code ? tr('Огонь (с твоим кодом)') : tr('Огонь')
 
   const desktop = useIsDesktop()
   const short = useIsShort()
+  // Desk and field side by side only on wide screens; elsewhere the desk takes the screen and the field is a tap away.
+  const deskWide = useIsWide()
   // On a low landscape phone the right dock has room only for the controls; the numbers scroll on the left.
   const calcInDock = desktop && !showCode && !short
   const chipsInDock = !desktop
-  const calc = <CalcPanel mission={played} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />
+  const calc = <CalcPanel secret={secret} mission={played} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />
   const restart = () => {
     run.reset()
     setLog([])
@@ -288,12 +304,57 @@ function MissionView({ mission }: { mission: Mission }) {
     <Placard
       shot={run.last?.shot ?? null}
       releaseDeg={releaseDeg}
+      secret={secret}
       idleLine={mission.base.launcher ? (sigma ? tr('Пусковая установка заряжена. Огонь — по готовности расчёта.') : tr('Камень лежит в лотке. Посчитай — и жми «Огонь».')) : undefined}
       beamLimit={mission.base.trebuchet.beamStrength}
       movingLabel={universe.terms.movingTarget}
       tell={(line) => tellLine(line, universe)}
       phase={phase}
       movingTargetSpeed={mission.targets.find((t) => t.moving)?.moving?.speed}
+    />
+  )
+
+  const deskOpen = view === 'desk'
+  const answer = showCode ? (
+    <div className="h-[460px] max-h-[70vh] shrink-0">
+      <CodeDrawer
+        code={code}
+        onChange={setCode}
+        onRun={fire}
+        onReset={() => setCode(mission.code!.starter)}
+        busy={run.busy || phase === 'flying'}
+        error={run.codeError}
+        stdout={run.stdout}
+        pythonReady={pythonReady}
+        runLabel={mission.base.launcher ? tr('▶ Запустить') : undefined}
+      />
+    </div>
+  ) : (
+    <ControlPanel
+      mission={mission}
+      values={values}
+      onValue={(key, v) => setValues((cur) => ({ ...cur, [key]: v }))}
+      prediction={prediction}
+      onPrediction={setPrediction}
+      canFire={canFire}
+      busy={run.busy}
+      onFire={fire}
+      fireLabel={fireLabel}
+    />
+  )
+  const desk = (
+    <SolutionDesk
+      mission={told}
+      world={universe.id}
+      story={storyFor(mission.id, universe.id)}
+      lives={run.lives}
+      shots={run.shots}
+      feedback={feedback}
+      calc={<CalcPanel stacked theory={mission.theory} secret={secret} mission={played} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />}
+      answer={answer}
+      answerInline={showCode}
+      onField={() => setView('field')}
+      onReread={() => setIntro(true)}
     />
   )
 
@@ -306,7 +367,7 @@ function MissionView({ mission }: { mission: Mission }) {
         onPointerUp={placePrediction}
       />
 
-      <div className="absolute top-0 inset-x-0 z-30 p-2 md:p-3 flex flex-col gap-2 pointer-events-none [&>*]:pointer-events-auto">
+      <div className={`absolute top-0 inset-x-0 z-30 p-2 md:p-3 flex flex-col gap-2 pointer-events-none [&>*]:pointer-events-auto ${deskOpen ? 'bottom-0' : ''}`}>
         <ActBar
           mission={told}
           retro={retro}
@@ -317,8 +378,8 @@ function MissionView({ mission }: { mission: Mission }) {
             saveQuality(q)
             sceneRef.current?.setQuality(q)
           }}
-          act={act}
-          onAct={setAct}
+          view={view}
+          onView={setView}
           incidents={progress.incidents.length}
           onJournal={() => setJournalOpen(true)}
           muted={muted}
@@ -328,8 +389,9 @@ function MissionView({ mission }: { mission: Mission }) {
           }}
         />
 
-        {/* Story column: what just happened, the task, the theory. Fades while the stone flies. */}
-        <div
+        {deskOpen && <div className={deskWide ? 'absolute left-3 top-[72px] bottom-3 w-[clamp(380px,44vw,640px)] flex' : 'flex-1 min-h-0 flex'}>{desk}</div>}
+        {/* Story column (field view): what just happened and the task. Fades while the stone flies. */}
+        {!deskOpen && <div
           className={`w-[min(340px,100%)] md:absolute md:left-3 md:top-[72px] flex flex-col gap-2 overflow-y-auto transition-opacity duration-300 ${
             feedback ? 'max-h-[62vh]' : showCode ? 'max-h-[20vh]' : 'max-h-[38vh]'
           } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
@@ -337,12 +399,11 @@ function MissionView({ mission }: { mission: Mission }) {
           {feedback}
           <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} onReread={() => setIntro(true)} />
           {!calcInDock && calc}
-          {act === 'understand' && <TheoryPanel formulas={mission.theory} />}
-        </div>
+        </div>}
       </div>
 
-      {/* Desktop dock: numbers on top, controls under them; never overlapping. */}
-      <div
+      {/* Field view dock: numbers on top, controls under them; never overlapping. */}
+      {!deskOpen && <div
         className={`absolute bottom-0 inset-x-0 p-2 flex flex-col items-end gap-2 pointer-events-none [&>*]:pointer-events-auto md:p-0 md:inset-x-auto md:right-3 md:top-[72px] md:bottom-[96px] ${
           showCode ? 'md:w-[min(460px,calc(100vw-380px))]' : 'md:w-[360px]'
         } transition-opacity duration-300 ${phase === 'flying' ? 'md:opacity-35 md:hover:opacity-100' : ''}`}
@@ -381,15 +442,24 @@ function MissionView({ mission }: { mission: Mission }) {
         )}
         {chipsInDock && <div className="self-end max-w-full min-w-0">{chips}</div>}
         <div className="w-full md:hidden">{placard}</div>
-      </div>
+      </div>}
 
-      {!chipsInDock && <div className={`absolute left-3 bottom-[96px] ${showCode ? 'max-w-[calc(100vw-500px)]' : 'max-w-[calc(100vw-400px)]'}`}>{chips}</div>}
-      <div className="hidden md:block absolute bottom-0 inset-x-0 p-3">{placard}</div>
+      {/* Beside the desk: camera chips stacked over the placard, so a two-line placard never runs into them. */}
+      {deskOpen && deskWide && (
+        <div className="absolute bottom-0 right-0 p-3 left-[calc(clamp(380px,44vw,640px)+12px)] flex flex-col items-start gap-2 pointer-events-none [&>*]:pointer-events-auto">
+          <div className="max-w-full min-w-0">{chips}</div>
+          <div className="w-full">{placard}</div>
+        </div>
+      )}
+      {!deskOpen && !chipsInDock && <div className={`absolute left-3 bottom-[96px] ${showCode ? 'max-w-[calc(100vw-500px)]' : 'max-w-[calc(100vw-400px)]'}`}>{chips}</div>}
+      {!deskOpen && <div className="hidden md:block absolute bottom-0 inset-x-0 p-3">{placard}</div>}
 
       {intro && (
         <MissionIntro
           mission={told}
           formal={sigma}
+          world={universe.id}
+          story={storyFor(mission.id, universe.id)}
           onStart={() => {
             setIntro(false)
             if (!coachDone() && !mission.code) setCoach(true)

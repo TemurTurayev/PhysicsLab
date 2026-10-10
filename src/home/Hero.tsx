@@ -1,8 +1,9 @@
 import { tr } from '../i18n'
 import { CHAPTERS } from '../lab/levels'
+import { Portrait } from './Portrait'
 import type { ProgressSummary } from './progress'
 
-const FRAMES = [1, 3, 2, 4, 5].map((ch) => `/previews/classic-${ch}.webp`)
+const FRAMES = [1, 3, 2, 4, 5]
 
 export interface HeroProps {
   summary: ProgressSummary
@@ -16,11 +17,15 @@ export function Hero({ summary, onContinue }: HeroProps) {
   return (
     <section className="home-hero md:min-h-[92vh] flex items-end md:items-center">
       <div className="home-hero-frames" aria-hidden="true">
-        {FRAMES.map((src, i) => (
-          <div key={src} style={{ backgroundImage: `url('${src}')`, animationDelay: `${i * 6 - 1}s` }} />
+        {FRAMES.map((ch, i) => (
+          <div key={ch} style={{ ['--sm' as string]: `url('/previews/classic-${ch}.webp')`, ['--lg' as string]: `url('/previews/hero-classic-${ch}.webp')`, animationDelay: `${i * 6 - 1}s` }} />
         ))}
       </div>
       <div className="home-hero-shade" aria-hidden="true" />
+      <div className="home-hero-guide hidden lg:flex" aria-hidden="true">
+        <div className="home-hero-bubble">{tr('Привет! Я Нодир. Помоги мне рассчитать бросок — и вся деревня увидит, на что способна физика!')}</div>
+        <Portrait world="classic" className="home-hero-portrait" />
+      </div>
 
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-8 pt-[38vh] pb-10 md:py-24">
         <div className="max-w-[620px] lab-rise">

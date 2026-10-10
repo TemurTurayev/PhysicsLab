@@ -44,8 +44,16 @@ export function playMusic(theme: Theme | null): void {
   const dur16 = 60 / score.bpm / 4
   let n = 0
   let next = ctx.currentTime + 0.15
+  // Instruments load in the background; the music starts when they are ready (or after 12 s with what there is).
+  let loaded = !score.prepare
+  void Promise.race([score.prepare?.(ctx) ?? Promise.resolve(), new Promise((r) => setTimeout(r, 12000))])
+    .catch(() => undefined) // offline: play with whatever loaded
+    .then(() => {
+      loaded = true
+      next = Math.max(next, ctx.currentTime + 0.1)
+    })
   const timer = setInterval(() => {
-    if (ctx.state !== 'running') return
+    if (ctx.state !== 'running' || !loaded) return
     if (next < ctx.currentTime) next = ctx.currentTime + 0.05 // the tab slept: resume, do not burst
     while (next < ctx.currentTime + 0.3) {
       score.step(ctx, gain, next, n, dur16)
@@ -73,6 +81,7 @@ export async function renderTheme(theme: Theme, seconds: number, sampleRate = 44
   out.connect(ctx.destination)
   out.connect(verb).connect(wet).connect(ctx.destination)
   const c = ctx as unknown as AudioContext
+  await score.prepare?.(c)
   score.bed?.(c, out)
   const dur16 = 60 / score.bpm / 4
   for (let n = 0, t = 0.05; t < seconds; n++, t += dur16) score.step(c, out, t, n, dur16)

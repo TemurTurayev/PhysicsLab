@@ -4,20 +4,14 @@ import { UNIVERSE_META as UNIVERSES } from '../lab/universe/meta'
 import type { UniverseId } from '../lab/universe/types'
 import type { ProgressSummary } from './progress'
 
-const MOOD: Record<UniverseId, string> = {
-  classic: tr('Дерево · верёвка · камень'),
-  sigma: tr('Бетон · сталь · протоколы'),
-}
-
 export interface WorkshopProps {
   universe: UniverseId
-  onUniverse: (id: UniverseId) => void
   summary: ProgressSummary
   onOpen: () => void
 }
 
-/** The workshop: pick the world the physics is told in, then a chapter. Progress is shared by both worlds. */
-export function Workshop({ universe, onUniverse, summary, onOpen }: WorkshopProps) {
+/** The workshop: the chapters of the chosen world, with progress. */
+export function Workshop({ universe, summary, onOpen }: WorkshopProps) {
   const u = UNIVERSES.find((x) => x.id === universe) ?? UNIVERSES[0]
   return (
     <section id="workshop" className="max-w-6xl mx-auto px-4 sm:px-8 py-16 md:py-24 scroll-mt-16">
@@ -27,7 +21,7 @@ export function Workshop({ universe, onUniverse, summary, onOpen }: WorkshopProp
           <h2 className="home-display text-4xl md:text-5xl">{tr("Требушет")}</h2>
           <p className="mt-3 max-w-xl leading-relaxed" style={{ color: 'var(--lab-dim)' }}>
             
-            {tr("Шесть глав: от числовой оси и теоремы Пифагора до полёта без воздуха на Луне. Задачи и прогресс общие — вселенная меняет только атмосферу.")}
+            {tr("Шесть глав: от числовой оси и теоремы Пифагора до полёта без воздуха на Луне.")}
           </p>
         </div>
         <button type="button" onClick={onOpen} className="lab-btn self-start md:self-auto">
@@ -36,30 +30,6 @@ export function Workshop({ universe, onUniverse, summary, onOpen }: WorkshopProp
         </button>
       </div>
 
-      <div role="radiogroup" aria-label={tr("Вселенная")} className="grid grid-cols-2 gap-3 mb-6">
-        {UNIVERSES.map((x) => {
-          const on = x.id === universe
-          return (
-            <button
-              key={x.id}
-              type="button"
-              role="radio"
-              aria-checked={on}
-              onClick={() => onUniverse(x.id)}
-              className="text-left rounded-xl border-2 p-2 flex items-center gap-3 transition-colors"
-              style={{ borderColor: on ? 'var(--lab-accent)' : 'var(--lab-line)', background: on ? 'var(--lab-accent-soft)' : 'var(--lab-raise)' }}
-            >
-              <img src={`/previews/${x.id}-1.webp`} alt="" className="w-16 h-11 sm:w-24 sm:h-14 rounded-lg object-cover shrink-0" loading="lazy" />
-              <span className="min-w-0">
-                <span className="block font-semibold text-[15px] sm:text-base">{x.name}</span>
-                <span className="block text-xs truncate" style={{ color: 'var(--lab-dim)' }}>
-                  {MOOD[x.id]}
-                </span>
-              </span>
-            </button>
-          )
-        })}
-      </div>
       <p className="text-sm mb-8 max-w-3xl" style={{ color: 'var(--lab-dim)' }}>
         {u.tagline}
       </p>
