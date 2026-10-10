@@ -72,6 +72,7 @@ export class LabScene {
   private onTime: ((t: number, done: boolean) => void) | null = null
   private readonly resizeObserver: ResizeObserver
   private retro: RetroPass | null = null
+  private retroOn = false
   private fx: PostFx | null = null
 
   private readonly canvas: HTMLCanvasElement
@@ -189,9 +190,17 @@ export class LabScene {
 
   /** Late-90s pixel pass; the canvas keeps its size, only the internal resolution drops. */
   setRetro(on: boolean): void {
-    if (on === (this.retro !== null)) return
+    this.retroOn = on
+    this.fx?.setRetro(on)
+    this.syncFallbackRetro()
+  }
+
+  /** With effects on, the CRT look is the last post pass; with effects off, the old standalone pass. */
+  private syncFallbackRetro(): void {
+    const want = this.retroOn && !this.fx
+    if (want === (this.retro !== null)) return
     this.retro?.dispose()
-    this.retro = on ? new RetroPass() : null
+    this.retro = want ? new RetroPass() : null
     this.resize()
   }
 
@@ -295,8 +304,8 @@ export class LabScene {
     // A short shake on impact or breakage, added for this frame only so it never drifts the camera.
     const jolt = this.joltAt(t)
     this.camera.position.add(jolt)
-    if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
-    else if (this.fx) this.fx.render()
+    if (this.fx) this.fx.render()
+    else if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
     else this.renderer.render(this.scene, this.camera)
     this.camera.position.sub(jolt)
   }
@@ -357,6 +366,8 @@ export class LabScene {
   setQuality(q: FxQuality): void {
     this.fx?.dispose()
     this.fx = q === 'off' ? null : new PostFx(this.renderer, this.scene, this.camera, q)
+    this.fx?.setRetro(this.retroOn)
+    this.syncFallbackRetro()
     if (this.canvas.clientWidth > 0) this.resize()
   }
 
