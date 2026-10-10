@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- PhysicsLab: a trebuchet's throw — frame, parabola, stone at the apex, target -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2318"/>
+      <stop offset="1" stop-color="#110e0a"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd28a"/>
+      <stop offset="1" stop-color="#d98a2b"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- ground -->
+  <path d="M7 53.5H57" stroke="#5a4a33" stroke-width="2" stroke-linecap="round"/>
+  <!-- flight: a dashed parabola -->
+  <path d="M15 31C24 6 41 6 51 46" fill="none" stroke="url(#brass)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="1 5.2"/>
+  <!-- trebuchet A-frame and arm -->
+  <path d="M8 53L14 37L20 53" fill="none" stroke="url(#brass)" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 43L16 31" stroke="url(#brass)" stroke-width="3" stroke-linecap="round"/>
+  <rect x="8.2" y="41.8" width="5.6" height="5.6" rx="1.2" fill="#ffd28a" transform="rotate(-25 11 44.6)"/>
+  <!-- stone at the apex -->
+  <circle cx="32" cy="12.6" r="4.3" fill="#f6efe0"/>
+  <!-- target -->
+  <circle cx="51.5" cy="47" r="6.4" fill="#e04a35"/>
+  <circle cx="51.5" cy="47" r="3.9" fill="#f6efe0"/>
+  <circle cx="51.5" cy="47" r="1.7" fill="#e04a35"/>
+</svg>
