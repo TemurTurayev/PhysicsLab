@@ -50,6 +50,12 @@ function landingShot(x: number, aspect: number): CameraShot {
   return { position: new THREE.Vector3(x + side * p, 6 * p, 15 * p), target: new THREE.Vector3(x, 1, 0) }
 }
 
+/** Side-on close-up centred on the launch arrows (cx, cy = middle of the v₀ arrow). */
+export function launchCloseup(cx: number, cy: number, aspect: number): CameraShot {
+  const p = pullFor(aspect)
+  return { position: new THREE.Vector3(cx - 2.5, cy - 2, 17 * p), target: new THREE.Vector3(cx, cy - 0.5, 0) }
+}
+
 /**
  * Deterministic camera for scene time t: establishing → follow the stone → settle on the landing.
  * Same t always gives the same framing, so replays and screenshots are reproducible.

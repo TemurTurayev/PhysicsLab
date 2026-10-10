@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
+import { useIsDesktop } from './useIsDesktop'
 
 export interface MissionBriefProps {
   mission: Mission
@@ -13,12 +14,33 @@ export interface MissionBriefProps {
 /** The pinned goal: one line to aim at, lives, targets, and the hint ladder on demand. */
 export function MissionBrief({ mission, shots, hitSoFar, lives, onReread }: MissionBriefProps) {
   const [hints, setHints] = useState(0)
+  const [expanded, setExpanded] = useState(false)
+  const desktop = useIsDesktop()
+  // On a phone the goal folds to one line after the first shot, so the scene gets the screen.
+  const folded = !desktop && shots > 0 && !expanded
   // First hint at once, each further one after another attempt: try, then get help.
   const unlocked = Math.min(mission.hints.length, 1 + shots)
+  if (folded) {
+    return (
+      <button type="button" className="lab-panel px-3 py-2 flex items-center gap-2 text-left w-full" onClick={() => setExpanded(true)} data-coach="goal" aria-expanded={false}>
+        <span className="lab-title text-sm truncate flex-1" style={{ color: 'var(--lab-accent)' }}>
+          {mission.goal}
+        </span>
+        <span className="text-xs shrink-0" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`}>
+          {'❤️'.repeat(lives)}
+        </span>
+        <span aria-hidden className="text-xs" style={{ color: 'var(--lab-dim)' }}>
+          ▾
+        </span>
+      </button>
+    )
+  }
   return (
     <div className="lab-panel p-3.5 flex flex-col gap-2.5" data-coach="goal">
       <div className="flex items-center justify-between gap-2">
-        <span className="lab-label">Цель</span>
+        <button type="button" className="lab-label text-left" onClick={() => setExpanded(false)} disabled={desktop || shots === 0}>
+          Цель
+        </button>
         <span className="text-[15px] tracking-tight" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`} title="Жизни: каждый промах отнимает одну">
           {Array.from({ length: MAX_LIVES }, (_, i) => (
             <span key={i} className={i < lives ? '' : 'opacity-25 grayscale'}>

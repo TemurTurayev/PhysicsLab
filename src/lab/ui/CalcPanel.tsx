@@ -4,6 +4,7 @@ import { withSliders } from '../levels/evaluate'
 import type { Mission, SliderValues } from '../levels/types'
 import { dragFactor } from '../sim/flight'
 import { Formula } from './Formula'
+import type { PreviewPart } from '../scene/launchPreview'
 import { WorkSheet } from './WorkSheet'
 
 export interface ShotLogRow {
@@ -76,9 +77,18 @@ function ShotTable({ log }: { log: ShotLogRow[] }) {
 
 type Tab = 'launch' | 'formulas' | 'check' | 'shots'
 
-function Tile({ k, v, unit }: { k: string; v: string; unit: string }) {
+function Tile({ k, v, unit, part, onHighlight }: { k: string; v: string; unit: string; part: PreviewPart; onHighlight?: (p: PreviewPart | null) => void }) {
   return (
-    <div className="rounded-lg px-2.5 py-2" style={{ background: 'var(--lab-raise)' }}>
+    <button
+      type="button"
+      className="text-left rounded-lg px-2.5 py-2 transition-colors hover:ring-1 focus-visible:ring-1"
+      style={{ background: 'var(--lab-raise)', ['--tw-ring-color' as string]: 'var(--lab-accent)' }}
+      onMouseEnter={() => onHighlight?.(part)}
+      onMouseLeave={() => onHighlight?.(null)}
+      onFocus={() => onHighlight?.(part)}
+      onBlur={() => onHighlight?.(null)}
+      title="Показать на сцене"
+    >
       <div className="text-[11px]" style={{ color: 'var(--lab-dim)' }}>
         {k}
       </div>
@@ -88,12 +98,12 @@ function Tile({ k, v, unit }: { k: string; v: string; unit: string }) {
           {unit}
         </span>
       </div>
-    </div>
+    </button>
   )
 }
 
 /** All the numbers and formulas needed to compute the throw instead of guessing it, one tab at a time. */
-export function CalcPanel({ mission, values, log }: { mission: Mission; values: SliderValues; log: ShotLogRow[] }) {
+export function CalcPanel({ mission, values, log, onHighlight }: { mission: Mission; values: SliderValues; log: ShotLogRow[]; onHighlight?: (p: PreviewPart | null) => void }) {
   const [open, setOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 768)
   const [tab, setTab] = useState<Tab>('launch')
   const params = useMemo(() => withSliders(mission, values), [mission, values])
@@ -139,14 +149,17 @@ export function CalcPanel({ mission, values, log }: { mission: Mission; values: 
           {tab === 'launch' && (
             <div className="flex flex-col gap-2.5 lab-rise">
               <div className="lab-label">Пуск при {setting || 'заданной настройке'}</div>
+              <p className="text-[11px] -mt-1" style={{ color: 'var(--lab-dim)' }}>
+                Наведи на число — оно загорится на сцене.
+              </p>
               {sheet ? (
                 <div className="grid grid-cols-2 gap-1.5">
-                  <Tile k="скорость вылета v₀" v={n(sheet.v0)} unit="м/с" />
-                  <Tile k="угол вылета α" v={`${n(sheet.alphaDeg)}°`} unit="" />
-                  <Tile k="точка вылета x₀" v={n(sheet.x0)} unit="м" />
-                  <Tile k="высота вылета y₀" v={n(sheet.y0)} unit="м" />
-                  {!hideVelocity && <Tile k="vx" v={n(sheet.vx)} unit="м/с" />}
-                  {!hideVelocity && <Tile k="vy" v={n(sheet.vy)} unit="м/с" />}
+                  <Tile k="скорость вылета v₀" v={n(sheet.v0)} unit="м/с" part="v0" onHighlight={onHighlight} />
+                  <Tile k="угол вылета α" v={`${n(sheet.alphaDeg)}°`} unit="" part="alpha" onHighlight={onHighlight} />
+                  <Tile k="точка вылета x₀" v={n(sheet.x0)} unit="м" part="x0" onHighlight={onHighlight} />
+                  <Tile k="высота вылета y₀" v={n(sheet.y0)} unit="м" part="y0" onHighlight={onHighlight} />
+                  {!hideVelocity && <Tile k="vx" v={n(sheet.vx)} unit="м/с" part="vx" onHighlight={onHighlight} />}
+                  {!hideVelocity && <Tile k="vy" v={n(sheet.vy)} unit="м/с" part="vy" onHighlight={onHighlight} />}
                 </div>
               ) : (
                 <p className="text-xs" style={{ color: 'var(--lab-bad)' }}>

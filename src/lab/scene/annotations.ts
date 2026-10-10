@@ -4,7 +4,7 @@ import type { ShotResult } from '../sim/types'
 const ru = (v: number, d = 1) => v.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
 const LABEL_H = 0.03 // label size, constant on screen: readable at any zoom
 
-function label(text: string, color: string): THREE.Sprite {
+export function label(text: string, color: string): THREE.Sprite {
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')!
   const font = 'bold 44px ui-monospace, Menlo, monospace'
@@ -27,7 +27,7 @@ function label(text: string, color: string): THREE.Sprite {
   return sprite
 }
 
-function line(points: THREE.Vector3[], color: string, dashed = false): THREE.Line {
+export function line(points: THREE.Vector3[], color: string, dashed = false): THREE.Line {
   const geo = new THREE.BufferGeometry().setFromPoints(points)
   const mat = dashed
     ? new THREE.LineDashedMaterial({ color, dashSize: 0.5, gapSize: 0.35, depthTest: false, toneMapped: false })
@@ -38,7 +38,7 @@ function line(points: THREE.Vector3[], color: string, dashed = false): THREE.Lin
   return l
 }
 
-function arrow(from: THREE.Vector3, to: THREE.Vector3, color: string): THREE.Group {
+export function arrow(from: THREE.Vector3, to: THREE.Vector3, color: string): THREE.Group {
   const g = new THREE.Group()
   const dir = to.clone().sub(from)
   const len = dir.length()

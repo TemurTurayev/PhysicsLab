@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { isMuted, playSfx, setMuted } from '../audio/sfx'
 import type { FailureEvent } from '../failures/types'
@@ -11,6 +11,8 @@ import { ActBar, type Act } from './ActBar'
 import { CalcPanel, type ShotLogRow } from './CalcPanel'
 import { CameraChip } from './CameraChip'
 import { OutOfLives } from './OutOfLives'
+import { launchSheet } from '../calc/launchSheet'
+import { withSliders } from '../levels/evaluate'
 import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
@@ -99,6 +101,9 @@ function MissionView({ mission }: { mission: Mission }) {
   const [pythonReady, setPythonReady] = useState(isPythonReady())
   const cues = useRef({ whoosh: false, thud: false })
   const [log, setLog] = useState<ShotLogRow[]>([])
+  // The launch the current setting will produce, sketched on the machine (not where computing vx, vy is the task).
+  const sheet = useMemo(() => (mission.code?.fn === 'launch_velocity' ? null : launchSheet(withSliders(mission, values))), [mission, values])
+  useEffect(() => sceneRef.current?.setPreview(sheet), [sheet, sceneRef, universe])
   const [intro, setIntro] = useState(true)
   const [coach, setCoach] = useState(false)
   const [slow, setSlow] = useState(false)
@@ -215,7 +220,7 @@ function MissionView({ mission }: { mission: Mission }) {
 
   const desktop = useIsDesktop()
   const calcInDock = desktop && !showCode
-  const calc = <CalcPanel mission={mission} values={values} log={log} />
+  const calc = <CalcPanel mission={mission} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />
   const restart = () => {
     run.reset()
     setLog([])

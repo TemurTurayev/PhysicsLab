@@ -3,7 +3,9 @@ import { simulateArm } from '../sim/trebuchet'
 import type { ArmSample, FlightSample, ShotResult, TrebuchetParams } from '../sim/types'
 import type { Target } from '../levels/types'
 import { ShotAnnotations } from './annotations'
-import { cameraAt } from './camera'
+import { LaunchPreview, type PreviewPart } from './launchPreview'
+import type { LaunchSheet } from '../calc/launchSheet'
+import { cameraAt, launchCloseup, type CameraShot } from './camera'
 import { CameraRig } from './cameraRig'
 import { Cutaway } from './cutaway'
 import { createCrew, type Crew } from './crew'
@@ -49,6 +51,11 @@ export class LabScene {
   private readonly marker = new PredictionMarker()
   private readonly arrows = new ForceArrows()
   private readonly notes = new ShotAnnotations()
+  private readonly preview = new LaunchPreview()
+  private previewFresh = true // the setting changed since the last shot: show what it will launch
+  private previewAt: { x: number; y: number } | null = null
+  private calmCam: CameraShot | null = null // eased camera between shots (hover close-ups glide in and out)
+  private shake: { at: number; amp: number } | null = null
   // The last three throws stay as fading lines, so attempts can be compared by eye.
   private readonly past = [0.38, 0.24, 0.13].map((o) => new PathLine('#ffb4a2', o, false))
   private pastFlights: FlightSample[][] = []
@@ -87,7 +94,7 @@ export class LabScene {
     )
     this.stone.castShadow = true
     this.stone.visible = false
-    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group, this.notes.group, ...this.past.map((p) => p.line))
+    this.scene.add(this.crew.group, this.stone, this.trail.line, this.ghost.line, this.burst.points, this.splinters.points, this.marker.group, this.arrows.group, this.notes.group, this.preview.group, ...this.past.map((p) => p.line))
     this.rig = new CameraRig(this.camera, canvas)
     this.setQuality(defaultQuality())
     this.resizeObserver = new ResizeObserver(() => this.resize())
@@ -164,6 +171,10 @@ export class LabScene {
     const snapped = view?.shot.breakage?.kind === 'beam' ? view.shot.breakage.t : null
     this.splinters.trigger(0, snapped, this.pivotY)
     this.notes.set(view?.shot ?? null)
+    if (view) this.previewFresh = false
+    const hitAt = view?.hitIndex !== null && view?.shot.landing ? view.shot.landing.t : null
+    const breakAt = view?.shot.breakage?.t ?? null
+    this.shake = breakAt !== null ? { at: breakAt, amp: 0.35 } : hitAt !== null ? { at: hitAt, amp: 0.18 } : null
     this.env?.setHit(null)
     this.speed = this.baseSpeed
     this.t = 0
@@ -275,12 +286,49 @@ export class LabScene {
     this.env?.update(performance.now() / 1000)
 
     const landSample = shot?.landing ? (shot.flight.at(-1) ?? null) : null
-    const cam = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX)
+    const cinematic = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX)
+    const cam = this.playing ? cinematic : this.ease(this.preview.highlighted !== null && this.previewAt ? launchCloseup(this.previewAt.x, this.previewAt.y, this.camera.aspect) : cinematic)
+    if (this.playing) this.calmCam = null
     this.rig.apply(cam, stoneNow && !landed ? new THREE.Vector3(stoneNow.x, Math.max(stoneNow.y, 0.15), 0) : null)
     this.cutaway.update(this.env?.indoor ? this.env.group : null, this.camera.position, this.rig.target)
+    this.preview.group.visible = !this.playing && (this.previewFresh || this.preview.highlighted !== null)
+    // A short shake on impact or breakage, added for this frame only so it never drifts the camera.
+    const jolt = this.joltAt(t)
+    this.camera.position.add(jolt)
     if (this.retro) this.retro.render(this.renderer, this.scene, this.camera)
     else if (this.fx) this.fx.render()
     else this.renderer.render(this.scene, this.camera)
+    this.camera.position.sub(jolt)
+  }
+
+  /** Between shots the camera glides toward where it should be instead of jumping. */
+  private ease(goal: CameraShot): CameraShot {
+    const k = 0.12
+    this.calmCam = this.calmCam
+      ? { position: this.calmCam.position.clone().lerp(goal.position, k), target: this.calmCam.target.clone().lerp(goal.target, k) }
+      : { position: goal.position.clone(), target: goal.target.clone() }
+    return this.calmCam
+  }
+
+  private joltAt(t: number): THREE.Vector3 {
+    const s = this.shake
+    const k = s ? (t - s.at) / 0.4 : -1
+    if (!s || k < 0 || k > 1) return new THREE.Vector3()
+    const a = s.amp * (1 - k) * (1 - k)
+    return new THREE.Vector3(Math.sin(t * 91) * a, Math.sin(t * 73 + 1) * a * 0.7, Math.sin(t * 57 + 2) * a * 0.5)
+  }
+
+  /** The launch the current setting will produce, drawn on the machine until the next shot. */
+  setPreview(sheet: LaunchSheet | null): void {
+    this.preview.set(sheet)
+    // Aim at the middle of the v₀ arrow (drawn at 0.35 m per m/s).
+    this.previewAt = sheet ? { x: sheet.x0 + sheet.vx * 0.175, y: sheet.y0 + sheet.vy * 0.175 } : null
+    this.previewFresh = true
+  }
+
+  /** Light one part of the launch geometry (hovered in the data panel); null for none. */
+  highlightPreview(part: PreviewPart | null): void {
+    this.preview.highlight(part)
   }
 
   private moveTargets(t: number): void {
@@ -330,7 +378,7 @@ export class LabScene {
     this.envMap?.dispose()
     this.machine?.dispose()
     this.crew.dispose()
-    ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows, this.notes, ...this.past].forEach((x) => x.dispose())
+    ;[this.trail, this.ghost, this.burst, this.splinters, this.marker, this.arrows, this.notes, this.preview, ...this.past].forEach((x) => x.dispose())
     this.stone.geometry.dispose()
     ;(this.stone.material as THREE.Material).dispose()
     this.retro?.dispose()
