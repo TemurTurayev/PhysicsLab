@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AccountButton } from '../lab/account/AccountButton'
 import { useLabProgress } from '../lab/state/labProgress'
 import type { UniverseId } from '../lab/universe/types'
 import '../lab/ui/lab.css'
@@ -34,12 +35,18 @@ export function HomePage() {
             <span className="lab-title text-lg">PhysicsLab</span>
           </a>
           <nav className="ml-auto flex items-center gap-1">
-            <a href="#workshop" className="lab-btn !min-h-[36px] !px-3 !bg-transparent !border-transparent hidden sm:inline-flex">
-              Главы
-            </a>
-            <button type="button" onClick={() => enter('/trebuchet')} className="lab-btn !min-h-[36px] !px-3">
-              Карта миссий
-            </button>
+            {/* Wrappers carry the breakpoints: .lab-btn sets its own display and would beat `hidden`. */}
+            <span className="hidden sm:contents">
+              <a href="#workshop" className="lab-btn !min-h-[36px] !px-3 !bg-transparent !border-transparent">
+                Главы
+              </a>
+            </span>
+            <span className="hidden min-[420px]:contents">
+              <button type="button" onClick={() => enter('/trebuchet')} className="lab-btn !min-h-[36px] !px-3">
+                Карта миссий
+              </button>
+            </span>
+            <AccountButton />
           </nav>
         </div>
       </header>

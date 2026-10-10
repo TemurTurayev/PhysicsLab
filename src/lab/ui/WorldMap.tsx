@@ -7,6 +7,7 @@ import { FAILURES } from '../failures/catalog'
 import './lab.css'
 import './sigma.css'
 import { applyCopy, UNIVERSES } from '../universe'
+import { AccountButton } from '../account/AccountButton'
 import { UniversePicker } from '../universe/UniversePicker'
 import { useUniverse } from '../universe/useUniverse'
 
@@ -72,9 +73,12 @@ export function WorldMap(): JSX.Element {
             >
               ← Главная
             </button>
-            <div className="lab-mono text-xs px-3 py-1.5 rounded-full border border-[var(--lab-line)] bg-white/5 text-[var(--lab-dim)]">
-              {universe.terms.journal}:{' '}
-              <span className="text-[var(--lab-accent)] font-semibold">{incidents.length}</span> / {totalFailures}
+            <div className="flex items-center gap-2 ml-auto">
+              <AccountButton />
+              <div className="lab-mono text-xs px-3 py-1.5 rounded-full border border-[var(--lab-line)] bg-white/5 text-[var(--lab-dim)]">
+                {universe.terms.journal}:{' '}
+                <span className="text-[var(--lab-accent)] font-semibold">{incidents.length}</span> / {totalFailures}
+              </div>
             </div>
           </div>
           <div>
@@ -125,7 +129,7 @@ export function WorldMap(): JSX.Element {
                   </p>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row items-stretch gap-4 pb-2">
+                <div className="relative grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] items-stretch gap-4 pb-2">
                   {chapter.missions.map((authored) => {
                     const mission = applyCopy(authored, universe)
                     const unlocked = sectorOpen && isUnlocked(mission, completed)
@@ -144,7 +148,7 @@ export function WorldMap(): JSX.Element {
                             ? `${mission.title} — Сначала пройди предыдущую миссию`
                             : `${mission.title}, ${KIND_LABELS[mission.kind]}, ${stars} из 3 звёзд`
                         }
-                        className={`lab-panel relative z-10 flex-1 flex flex-col justify-between p-4 sm:p-5 text-left rounded-[var(--lab-radius)] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--lab-accent)] focus-visible:outline-offset-2 ${
+                        className={`lab-panel relative z-10 flex flex-col justify-between p-4 sm:p-5 text-left rounded-[var(--lab-radius)] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--lab-accent)] focus-visible:outline-offset-2 ${
                           !unlocked
                             ? 'opacity-60 cursor-not-allowed border-[var(--lab-line)]'
                             : isNext

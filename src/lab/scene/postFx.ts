@@ -6,6 +6,27 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 
+/** GTAO hides points and lines from its normal pass but not sprites, which then draw as dark slabs; hide those too. */
+class SpriteSafeGTAOPass extends GTAOPass {
+  private hiddenSprites: THREE.Sprite[] = []
+
+  render(...args: Parameters<GTAOPass['render']>): void {
+    this.scene.traverse((o) => {
+      if ((o as THREE.Sprite).isSprite && o.visible) {
+        o.visible = false
+        this.hiddenSprites.push(o as THREE.Sprite)
+      }
+    })
+    // GTAO's own pass draws AO only; the sprites come back for the beauty render that follows.
+    try {
+      super.render(...args)
+    } finally {
+      this.hiddenSprites.forEach((o) => (o.visible = true))
+      this.hiddenSprites = []
+    }
+  }
+}
+
 export type FxQuality = 'high' | 'low' | 'off'
 
 /** Gentle grade in linear light before tone mapping: a touch of contrast and saturation, a soft vignette. */
@@ -65,7 +86,7 @@ export class PostFx {
     const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 })
     this.composer = new EffectComposer(renderer, target)
     this.composer.addPass(new RenderPass(scene, camera))
-    this.ao = quality === 'high' ? new GTAOPass(scene, camera, 1, 1) : null
+    this.ao = quality === 'high' ? new SpriteSafeGTAOPass(scene, camera, 1, 1) : null
     if (this.ao) {
       this.ao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 12 })
       this.ao.blendIntensity = 0.85

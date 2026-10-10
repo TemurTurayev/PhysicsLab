@@ -8,6 +8,13 @@ export interface IncidentCardProps {
   isNew: boolean
   onReplaySlow: () => void
   onClose: () => void
+  /** The basics launcher has no sling or arm: a miss there is a calculation to recheck, not a release angle. */
+  fixedLaunch?: boolean
+}
+
+const LAUNCHER_WHY = {
+  plain: 'Расчёт и выстрел разошлись. Сравни свою формулу с данными в панели и подставь числа ещё раз — разница в метрах подскажет, где ошибка.',
+  formal: 'Расчёт и результат пуска расходятся. Сверьте формулу с данными в панели и повторите подстановку — величина промаха укажет на ошибку.',
 }
 
 /** Stable, plausible-looking protocol number for this failure, e.g. 0317-Б. */
@@ -17,7 +24,7 @@ function protocolNumber(id: string, t: number): string {
   return `${String(n).padStart(4, '0')}-${letters[Math.floor(t * 10) % letters.length]}`
 }
 
-export function IncidentCard({ event, isNew, onReplaySlow, onClose }: IncidentCardProps): JSX.Element {
+export function IncidentCard({ event, isNew, onReplaySlow, onClose, fixedLaunch }: IncidentCardProps): JSX.Element {
   const universe = useUniverse()
   const [mounted, setMounted] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -98,7 +105,7 @@ export function IncidentCard({ event, isNew, onReplaySlow, onClose }: IncidentCa
       <div className="flex flex-col gap-1">
         <span className="lab-label">Почему</span>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--lab-text)' }}>
-          {entry.why}
+          {fixedLaunch && (event.id === 'short' || event.id === 'long') ? LAUNCHER_WHY[universe.id === 'sigma' ? 'formal' : 'plain'] : entry.why}
         </p>
       </div>
 

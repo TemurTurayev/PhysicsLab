@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { chapterLabel } from '../levels'
 import type { Mission } from '../levels/types'
@@ -35,8 +35,21 @@ const QUALITY: Array<[FxQuality, string]> = [
 /** Where am I (chapter · mission · title), which way of looking at it (three steps), and the few global toggles. */
 export function ActBar(p: ActBarProps) {
   const [menu, setMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  // The settings menu closes on Esc and on any press outside it.
+  useEffect(() => {
+    if (!menu) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenu(false)
+    const onDown = (e: PointerEvent) => !menuRef.current?.contains(e.target as Node) && setMenu(false)
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('pointerdown', onDown)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('pointerdown', onDown)
+    }
+  }, [menu])
   return (
-    <div className="lab-panel flex items-center gap-x-3 gap-y-2 px-2 py-1.5 flex-wrap">
+    <div className="lab-panel relative z-10 flex items-center gap-x-3 gap-y-2 px-2 py-1.5 flex-wrap">
       <Link to="/trebuchet" className="lab-btn !min-h-[38px] !px-3" aria-label="К карте мира" title="К карте мира">
         ←
       </Link>
@@ -79,7 +92,7 @@ export function ActBar(p: ActBarProps) {
       <button type="button" className="lab-btn !min-h-[38px] !px-3" onClick={p.onJournal} title="Журнал провалов: всё, что уже случалось">
         📓 <span className="lab-mono">{p.incidents}</span>
       </button>
-      <div className="relative">
+      <div className="relative" ref={menuRef}>
         <button type="button" className="lab-btn !min-h-[38px] !px-3" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Настройки" title="Настройки">
           ⚙
         </button>

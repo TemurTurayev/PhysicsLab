@@ -12,6 +12,7 @@ export interface CodeDrawerProps {
   error: StudentError | null
   stdout: string
   pythonReady: boolean
+  runLabel?: string
 }
 
 type Monaco = Parameters<OnMount>[1]
@@ -36,13 +37,13 @@ export function CodeDrawer(p: CodeDrawerProps) {
 
   return (
     <div className="lab-panel flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--lab-line)' }}>
+      <div className="shrink-0 flex items-center justify-between gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--lab-line)' }}>
         <span className="lab-label">Движок · Python</span>
         <span className="text-xs" style={{ color: p.pythonReady ? 'var(--lab-good)' : 'var(--lab-dim)' }}>
           {p.pythonReady ? '● Python готов' : '○ Python загружается…'}
         </span>
       </div>
-      <div className="flex-1 min-h-[220px]">
+      <div className="flex-1 min-h-[96px]">
         <Editor
           height="100%"
           defaultLanguage="python"
@@ -58,18 +59,18 @@ export function CodeDrawer(p: CodeDrawerProps) {
       </div>
       {(p.error || p.stdout) && (
         <pre
-          className="lab-mono text-xs px-3 py-2 max-h-28 overflow-auto whitespace-pre-wrap border-t"
+          className="shrink-0 lab-mono text-xs px-3 py-2 max-h-28 overflow-auto whitespace-pre-wrap border-t"
           style={{ borderColor: 'var(--lab-line)', color: p.error ? 'var(--lab-bad)' : 'var(--lab-dim)' }}
         >
           {p.error ? `${p.error.line ? `Строка ${p.error.line}: ` : ''}${p.error.message}` : p.stdout}
           {p.error && explainError(p.error.message) && <span style={{ color: 'var(--lab-text)' }}>{`\n${explainError(p.error.message)}`}</span>}
         </pre>
       )}
-      <div className="flex gap-2 p-3 border-t" style={{ borderColor: 'var(--lab-line)' }}>
+      <div className="shrink-0 flex gap-2 p-3 border-t" style={{ borderColor: 'var(--lab-line)' }}>
         <button type="button" className="lab-btn lab-btn-primary flex-1" disabled={p.busy} onClick={p.onRun}>
-          {p.busy ? 'Выполняю…' : '▶ Запустить на требушете'}
+          {p.busy ? 'Выполняю…' : (p.runLabel ?? '▶ Запустить на требушете')}
         </button>
-        <button type="button" className="lab-btn" onClick={p.onReset} title="Вернуть исходный код">
+        <button type="button" className="lab-btn" onClick={p.onReset} title="Вернуть исходный код" aria-label="Вернуть исходный код">
           ↺
         </button>
       </div>

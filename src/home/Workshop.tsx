@@ -72,7 +72,7 @@ export function Workshop({ universe, onUniverse, summary, onOpen }: WorkshopProp
               onClick={onOpen}
               className="home-card lab-panel !rounded-2xl overflow-hidden text-left flex flex-col"
             >
-              <div className="relative overflow-hidden aspect-[16/9]">
+              <div className="relative overflow-hidden aspect-[16/9] [@media(max-height:520px)]:aspect-[16/6]">
                 <img src={`/previews/${universe}-${c.id}.webp`} alt="" loading="lazy" className="home-shot absolute inset-0 w-full h-full object-cover" />
                 <span className="absolute left-3 top-3 lab-mono text-xs px-2 py-1 rounded-md" style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}>
                   {chapterLabel(c.id)}

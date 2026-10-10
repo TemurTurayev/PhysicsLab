@@ -10,7 +10,8 @@
     "preview": "npm run build && wrangler dev",
     "test": "vitest run",
     "e2e:playthrough": "node e2e/playthrough.mjs",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "e2e:ui": "node e2e/ui-audit.mjs"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.3.0",
@@ -30,7 +31,6 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.63.1",
     "@eslint/js": "^9.39.1",
     "@types/katex": "^0.16.7",
     "@types/node": "^24.10.1",

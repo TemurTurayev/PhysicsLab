@@ -15,10 +15,12 @@ interface CameraChipProps {
   onAuto: () => void
   slow: boolean
   onSlow: () => void
+  /** Low screens: buttons only, no how-to chip. */
+  compact?: boolean
 }
 
 /** Camera help or «back to auto», plus slow motion so there is time to look around the flight. */
-export function CameraChip({ free, onAuto, slow, onSlow }: CameraChipProps) {
+export function CameraChip({ free, onAuto, slow, onSlow, compact = false }: CameraChipProps) {
   // The how-to chip retires for good once the student has turned the camera themselves.
   const [learned] = useState(readLearned)
   useEffect(() => {
@@ -39,7 +41,7 @@ export function CameraChip({ free, onAuto, slow, onSlow }: CameraChipProps) {
           🎥<span className="hidden md:inline">Авто-камера</span>
         </button>
       ) : (
-        !learned && <CameraHelp />
+        !learned && !compact && <CameraHelp />
       )}
     </div>
   )

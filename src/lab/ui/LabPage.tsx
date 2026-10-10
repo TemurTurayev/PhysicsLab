@@ -16,7 +16,7 @@ import { withSliders } from '../levels/evaluate'
 import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
-import { useIsDesktop } from './useIsDesktop'
+import { useIsDesktop, useIsShort } from './useIsDesktop'
 import { defaultQuality, saveQuality, type FxQuality } from '../scene/postFx'
 import { CodeDrawer } from './CodeDrawer'
 import { ControlPanel } from './ControlPanel'
@@ -226,7 +226,10 @@ function MissionView({ mission }: { mission: Mission }) {
   const fireLabel = mission.code ? 'Огонь (с твоим кодом)' : 'Огонь'
 
   const desktop = useIsDesktop()
-  const calcInDock = desktop && !showCode
+  const short = useIsShort()
+  // On a low landscape phone the right dock has room only for the controls; the numbers scroll on the left.
+  const calcInDock = desktop && !showCode && !short
+  const chipsInDock = !desktop
   const calc = <CalcPanel mission={mission} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />
   const restart = () => {
     run.reset()
@@ -239,6 +242,7 @@ function MissionView({ mission }: { mission: Mission }) {
       <IncidentCard
         event={incident.event}
         isNew={incident.isNew}
+        fixedLaunch={mission.base.launcher !== undefined}
         onClose={() => setIncidents((q) => q.slice(1))}
         onReplaySlow={() => {
           setPhase('flying')
@@ -259,7 +263,7 @@ function MissionView({ mission }: { mission: Mission }) {
         formal={sigma}
       />
     )
-  const chips = <CameraChip free={freeCamera} onAuto={() => sceneRef.current?.autoCamera()} slow={slow} onSlow={() => setSlow(!slow)} />
+  const chips = <CameraChip free={freeCamera} onAuto={() => sceneRef.current?.autoCamera()} slow={slow} onSlow={() => setSlow(!slow)} compact={short} />
   const placard = (
     <Placard
       shot={run.last?.shot ?? null}
@@ -282,7 +286,7 @@ function MissionView({ mission }: { mission: Mission }) {
         onPointerUp={placePrediction}
       />
 
-      <div className="absolute top-0 inset-x-0 p-2 md:p-3 flex flex-col gap-2 pointer-events-none [&>*]:pointer-events-auto">
+      <div className="absolute top-0 inset-x-0 z-30 p-2 md:p-3 flex flex-col gap-2 pointer-events-none [&>*]:pointer-events-auto">
         <ActBar
           mission={told}
           retro={retro}
@@ -307,7 +311,7 @@ function MissionView({ mission }: { mission: Mission }) {
         {/* Story column: what just happened, the task, the theory. Fades while the stone flies. */}
         <div
           className={`w-[min(340px,100%)] md:absolute md:left-3 md:top-[72px] flex flex-col gap-2 overflow-y-auto transition-opacity duration-300 ${
-            feedback ? 'max-h-[62vh]' : 'max-h-[38vh]'
+            feedback ? 'max-h-[62vh]' : showCode ? 'max-h-[22vh]' : 'max-h-[38vh]'
           } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
         >
           {feedback}
@@ -320,11 +324,11 @@ function MissionView({ mission }: { mission: Mission }) {
       {/* Desktop dock: numbers on top, controls under them; never overlapping. */}
       <div
         className={`absolute bottom-0 inset-x-0 p-2 flex flex-col items-end gap-2 pointer-events-none [&>*]:pointer-events-auto md:p-0 md:inset-x-auto md:right-3 md:top-[72px] md:bottom-[96px] ${
-          showCode ? 'md:w-[460px]' : 'md:w-[360px]'
+          showCode ? 'md:w-[min(460px,calc(100vw-380px))]' : 'md:w-[360px]'
         } transition-opacity duration-300 ${phase === 'flying' ? 'md:opacity-35 md:hover:opacity-100' : ''}`}
       >
         {showCode ? (
-          <div className="w-full h-[50vh] md:h-full">
+          <div className="w-full h-[38vh] md:h-full">
             <CodeDrawer
               code={code}
               onChange={setCode}
@@ -334,6 +338,7 @@ function MissionView({ mission }: { mission: Mission }) {
               error={run.codeError}
               stdout={run.stdout}
               pythonReady={pythonReady}
+              runLabel={mission.base.launcher ? '▶ Запустить' : undefined}
             />
           </div>
         ) : (
@@ -354,11 +359,11 @@ function MissionView({ mission }: { mission: Mission }) {
             </div>
           </>
         )}
-        <div className="self-end md:hidden">{chips}</div>
+        {chipsInDock && <div className="self-end">{chips}</div>}
         <div className="w-full md:hidden">{placard}</div>
       </div>
 
-      <div className="hidden md:block absolute left-3 bottom-[96px]">{chips}</div>
+      {!chipsInDock && <div className={`absolute left-3 bottom-[96px] ${showCode ? 'max-w-[calc(100vw-500px)]' : 'max-w-[calc(100vw-400px)]'}`}>{chips}</div>}
       <div className="hidden md:block absolute bottom-0 inset-x-0 p-3">{placard}</div>
 
       {intro && (

@@ -15,6 +15,7 @@ import { armAt, flightAt } from './sampling'
 import { skyEnvironment } from './sky'
 import { RetroPass } from './retroPass'
 import { defaultQuality, PostFx, type FxQuality } from './postFx'
+import { createDistanceMarks } from './distanceMarks'
 import { createLauncher } from './launcherModel'
 import { createTrebuchet, type MachineSkin, type TrebuchetModel } from './trebuchetModel'
 
@@ -43,6 +44,7 @@ export class LabScene {
   private machine: TrebuchetModel | null = null
   private idle: ArmSample | null = null
   private launcherMode = false
+  private marks: ReturnType<typeof createDistanceMarks> | null = null
   private crew: Crew
   private readonly stone: THREE.Mesh
   private readonly trail = new PathLine('#ffe2a8', 0.9, false)
@@ -116,6 +118,12 @@ export class LabScene {
     this.noTargets = targets.length === 0
     this.env = factory({ targets, maxX, wind })
     this.scene.add(this.env.group)
+    if (this.marks) {
+      this.scene.remove(this.marks.group)
+      this.marks.dispose()
+    }
+    this.marks = createDistanceMarks(maxX)
+    this.scene.add(this.marks.group)
     this.setSkirt(this.env.skirt ?? null)
     this.scene.fog = this.env.fog
     this.scene.background = this.env.background
@@ -412,6 +420,7 @@ export class LabScene {
     this.rig.dispose()
     this.resizeObserver.disconnect()
     this.env?.dispose()
+    this.marks?.dispose()
     this.setSkirt(null)
     this.envMap?.dispose()
     this.machine?.dispose()

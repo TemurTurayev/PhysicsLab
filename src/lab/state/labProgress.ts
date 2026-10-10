@@ -11,6 +11,8 @@ interface LabProgress {
   complete: (missionId: string, stars: number) => void
   /** Returns true when this failure type is seen for the first time. */
   recordIncident: (id: FailureId) => boolean
+  /** Replace everything with merged progress (after signing in). */
+  load: (p: { completed: Record<string, number>; incidents: string[]; universe: UniverseId | null }) => void
   reset: () => void
 }
 
@@ -28,6 +30,7 @@ export const useLabProgress = create<LabProgress>()(
         set((s) => ({ incidents: [...s.incidents, id] }))
         return true
       },
+      load: (p) => set({ completed: p.completed, incidents: p.incidents as FailureId[], universe: p.universe }),
       reset: () => set({ completed: {}, incidents: [] }),
     }),
     { name: 'physicslab-lab-v1' },

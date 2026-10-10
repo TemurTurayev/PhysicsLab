@@ -126,7 +126,7 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
 
   return (
     <div className="lab-panel p-3 flex flex-col gap-2.5 text-sm" data-coach="calc">
-      <button type="button" className="flex items-center justify-between text-left" onClick={() => setOpen(!open)} aria-expanded={open}>
+      <button type="button" className="flex items-center justify-between text-left min-h-[32px] -my-1" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className="lab-label">📐 Данные для расчёта</span>
         <span aria-hidden style={{ color: 'var(--lab-dim)' }}>
           {open ? '▴' : '▾'}
