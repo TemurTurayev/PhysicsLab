@@ -37,7 +37,7 @@ const SKIRT_RADIUS = 3000 // m, far past every fog distance
 export class LabScene {
   private readonly renderer: THREE.WebGLRenderer
   private readonly scene = new THREE.Scene()
-  private readonly camera = new THREE.PerspectiveCamera(45, 1, 0.1, 3000)
+  private readonly camera = new THREE.PerspectiveCamera(45, 1, 0.3, 3000) // near 0.3 m: 3× the depth precision of 0.1, no flicker on floor markings
   private env: Environment | null = null
   private skirt: THREE.Mesh | null = null
   private envMap: THREE.WebGLRenderTarget | null = null
@@ -64,6 +64,7 @@ export class LabScene {
   private readonly past = [0.38, 0.24, 0.13].map((o) => new PathLine('#ffb4a2', o, false))
   private pastFlights: FlightSample[][] = []
   private baseSpeed = 1
+  private timescale = 1
   private view: ShotView | null = null
   private targets: Target[] = []
   private focusX = 60
@@ -259,6 +260,15 @@ export class LabScene {
     this.speed = this.baseSpeed
   }
 
+  /** Console host_timescale: every shot runs this much faster or slower (on top of slow motion). */
+  setTimescale(x: number): void {
+    this.timescale = x
+  }
+
+  setMarksVisible(on: boolean): void {
+    if (this.marks) this.marks.group.visible = on
+  }
+
   replay(speed = this.baseSpeed): void {
     this.speed = speed
     this.t = 0
@@ -295,7 +305,7 @@ export class LabScene {
     const dt = this.lastFrame ? Math.min(0.05, (now - this.lastFrame) / 1000) : 0
     this.lastFrame = now
     if (this.playing) {
-      this.t += dt * this.speed
+      this.t += dt * this.speed * this.timescale
       const end = this.endTime()
       if (this.t >= end) {
         this.t = end

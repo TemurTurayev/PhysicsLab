@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { chapterLabel } from '../levels'
 import type { Mission } from '../levels/types'
+import { useAudioSettings } from '../audio/engine'
+import { useConsole } from '../console/store'
 import type { FxQuality } from '../scene/postFx'
 
 export type Act = 'see' | 'understand' | 'build'
@@ -36,6 +38,8 @@ const QUALITY: Array<[FxQuality, string]> = [
 export function ActBar(p: ActBarProps) {
   const [menu, setMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const audio = useAudioSettings()
+  const openConsole = useConsole((s) => s.toggle)
   // The settings menu closes on Esc and on any press outside it.
   useEffect(() => {
     if (!menu) return
@@ -101,8 +105,31 @@ export function ActBar(p: ActBarProps) {
             <button type="button" role="menuitemcheckbox" aria-checked={!p.muted} className="lab-btn justify-between w-full" onClick={p.onMute}>
               Звук <span>{p.muted ? '🔇 выкл' : '🔊 вкл'}</span>
             </button>
+            <button type="button" role="menuitemcheckbox" aria-checked={audio.music} className="lab-btn justify-between w-full" onClick={() => audio.setMusic(!audio.music)}>
+              Музыка <span>{audio.music ? '♪ вкл' : 'выкл'}</span>
+            </button>
+            {audio.music && (
+              <label className="flex items-center gap-2 px-1 text-xs" style={{ color: 'var(--lab-dim)' }}>
+                Громкость
+                <input type="range" className="lab-range" min={0} max={1} step={0.05} value={audio.musicVolume} onChange={(e) => audio.setMusicVolume(Number(e.target.value))} aria-label="Громкость музыки" />
+              </label>
+            )}
+            <button type="button" role="menuitemcheckbox" aria-checked={audio.uiSounds} className="lab-btn justify-between w-full" onClick={() => audio.setUiSounds(!audio.uiSounds)}>
+              Звуки кнопок <span>{audio.uiSounds ? 'вкл' : 'выкл'}</span>
+            </button>
             <button type="button" role="menuitemcheckbox" aria-checked={p.retro} className="lab-btn justify-between w-full" onClick={p.onRetro}>
               Ретро-экран <span className="lab-mono text-xs">{p.retro ? 'вкл' : 'выкл'}</span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="lab-btn justify-between w-full"
+              onClick={() => {
+                setMenu(false)
+                openConsole(true)
+              }}
+            >
+              Консоль <span className="lab-kbd">~</span>
             </button>
             <div className="lab-label px-1 pt-2">Графика</div>
             <div className="grid grid-cols-3 gap-1">

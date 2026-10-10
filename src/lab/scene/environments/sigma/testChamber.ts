@@ -168,15 +168,15 @@ export const createTestChamber: EnvironmentFactory = (opts: EnvironmentOptions):
 
   const yellowMat = track(new THREE.MeshLambertMaterial({ color: 0xf2c400, flatShading: true }))
   const lineGeo = track(new THREE.BoxGeometry(hallLen, 0.006, 0.16))
-  for (const lz of [-4, 4]) addMesh(group, lineGeo, yellowMat, [hallMidX, 0.003, lz], undefined, false, false)
+  for (const lz of [-4, 4]) addMesh(group, lineGeo, yellowMat, [hallMidX, 0.012, lz], undefined, false, false)
 
   const hzMat = industrialMaterial('hazard', [8, 1])
   const hzX = track(new THREE.BoxGeometry(0.24, 0.008, 8.24))
   const hzZ = track(new THREE.BoxGeometry(13.24, 0.008, 0.24))
-  addMesh(group, hzX, hzMat, [-7, 0.004, 0], undefined, false, false)
-  addMesh(group, hzX, hzMat, [6, 0.004, 0], undefined, false, false)
-  addMesh(group, hzZ, hzMat, [-0.5, 0.004, -4], undefined, false, false)
-  addMesh(group, hzZ, hzMat, [-0.5, 0.004, 4], undefined, false, false)
+  addMesh(group, hzX, hzMat, [-7, 0.014, 0], undefined, false, false)
+  addMesh(group, hzX, hzMat, [6, 0.014, 0], undefined, false, false)
+  addMesh(group, hzZ, hzMat, [-0.5, 0.014, -4], undefined, false, false)
+  addMesh(group, hzZ, hzMat, [-0.5, 0.014, 4], undefined, false, false)
 
   const wallMat = industrialMaterial('concrete', [Math.max(1, Math.round(hallLen / 6)), 8])
   const endWallMat = industrialMaterial('concreteDark', [7, 8])

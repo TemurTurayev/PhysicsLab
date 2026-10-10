@@ -136,12 +136,12 @@ export const createLunarStation: EnvironmentFactory = (opts: EnvironmentOptions)
     addMesh(group, bowlGeo, craterBowlMat, [cx, 0.03, cz], undefined, false, true)
   }
 
-  addMesh(group, track(new THREE.BoxGeometry(13, 0.12, 8)), industrialMaterial('concreteDark', [4, 2]), [-0.5, -0.06, 0], undefined, false, true)
+  addMesh(group, track(new THREE.BoxGeometry(13, 0.12, 8)), industrialMaterial('concreteDark', [4, 2]), [-0.5, -0.03, 0], undefined, false, true)
   const hzXMat = industrialMaterial('hazard', [8, 1]), hzZMat = industrialMaterial('hazard', [5, 1])
-  for (const pz of [-4, 4]) addMesh(group, track(new THREE.BoxGeometry(13.2, 0.008, 0.24)), hzXMat, [-0.5, 0.004, pz], undefined, false, false)
-  for (const px of [-7, 6]) addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzZMat, [px, 0.004, 0], undefined, false, false)
+  for (const pz of [-4, 4]) addMesh(group, track(new THREE.BoxGeometry(13.2, 0.008, 0.24)), hzXMat, [-0.5, 0.036, pz], undefined, false, false)
+  for (const px of [-7, 6]) addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzZMat, [px, 0.036, 0], undefined, false, false)
   const trackMat = track(new THREE.MeshLambertMaterial({ color: 0x65635f, flatShading: true }))
-  for (const rz of [-2.4, 2.4]) addMesh(group, track(new THREE.PlaneGeometry(24, 0.3)), trackMat, [1, 0.003, rz], [-Math.PI / 2, 0, 0], false, false)
+  for (const rz of [-2.4, 2.4]) addMesh(group, track(new THREE.PlaneGeometry(24, 0.3)), trackMat, [1, 0.012, rz], [-Math.PI / 2, 0, 0], false, false)
 
   const whiteModuleMat = track(new THREE.MeshLambertMaterial({ color: 0xdfdfdb, flatShading: true })), orangeStripeMat = track(new THREE.MeshLambertMaterial({ color: 0xff6a13, flatShading: true }))
   const steelMat = industrialMaterial('steelPanel'), windowLitMat = track(new THREE.MeshBasicMaterial({ color: 0xffe699 }))

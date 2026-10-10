@@ -46,6 +46,8 @@ export interface MissionRun {
   stdout: string
   fire: (input: { values: SliderValues; code: string; prediction: number | null }) => Promise<ShotRecord | null>
   reset: () => void
+  /** Console `impulse 101`: all lives back. */
+  refill: () => void
 }
 
 interface Computed {
@@ -119,7 +121,8 @@ async function momentShot(params: SimParams, code: string): Promise<Compute> {
 }
 
 /** Everything that happens when the student pulls the trigger, independent of rendering. */
-export function useMissionRun(m: Mission): MissionRun {
+/** `god` (a console cheat) keeps every life whatever the shot. */
+export function useMissionRun(m: Mission, opts: { god?: boolean } = {}): MissionRun {
   const [last, setLast] = useState<ShotRecord | null>(null)
   const [shots, setShots] = useState(0)
   const [hitSoFar, setHitSoFar] = useState<ReadonlySet<number>>(new Set())
@@ -166,7 +169,7 @@ export function useMissionRun(m: Mission): MissionRun {
           expectDrag: m.base.world.drag ? { k: dragFactor(m.base.trebuchet.mp, m.base.trebuchet.r), wind: m.base.world.wind } : undefined,
         })
         const { hits, predictionError } = evaluateShot(m, shot, prediction)
-        const lifeLost = !won && costsLife(m, { hits, predictionError }, code)
+        const lifeLost = !won && !opts.god && costsLife(m, { hits, predictionError }, code)
         const record: ShotRecord = { shot, ghost, failures, hits, predictionError, lifeLost }
         const livesLeft = lifeLost ? lives - 1 : lives
         const nextShots = shots + 1
@@ -185,11 +188,12 @@ export function useMissionRun(m: Mission): MissionRun {
         setBusy(false)
       }
     },
-    [m, shots, hitSoFar, won, lives],
+    [m, shots, hitSoFar, won, lives, opts.god],
   )
 
+  const refill = useCallback(() => setLives(MAX_LIVES), [])
   return useMemo(
-    () => ({ last, shots, hitSoFar, won, stars, lives, busy, codeError, stdout, fire, reset }),
-    [last, shots, hitSoFar, won, stars, lives, busy, codeError, stdout, fire, reset],
+    () => ({ last, shots, hitSoFar, won, stars, lives, busy, codeError, stdout, fire, reset, refill }),
+    [last, shots, hitSoFar, won, stars, lives, busy, codeError, stdout, fire, reset, refill],
   )
 }

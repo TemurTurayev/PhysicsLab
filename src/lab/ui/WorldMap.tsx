@@ -8,6 +8,7 @@ import './lab.css'
 import './sigma.css'
 import { applyCopy, UNIVERSES } from '../universe'
 import { AccountButton } from '../account/AccountButton'
+import { MusicToggle } from '../audio/MusicToggle'
 import { UniversePicker } from '../universe/UniversePicker'
 import { useUniverse } from '../universe/useUniverse'
 
@@ -74,6 +75,7 @@ export function WorldMap(): JSX.Element {
               ← Главная
             </button>
             <div className="flex items-center gap-2 ml-auto">
+              <MusicToggle />
               <AccountButton />
               <div className="lab-mono text-xs px-3 py-1.5 rounded-full border border-[var(--lab-line)] bg-white/5 text-[var(--lab-dim)]">
                 {universe.terms.journal}:{' '}
@@ -89,6 +91,12 @@ export function WorldMap(): JSX.Element {
               Физика броска: от момента отпуска до параболы и собственного движка на Python.
             </p>
           </div>
+          {nextMission && (
+            <button type="button" className="map-cta lab-btn lab-btn-primary self-start !min-h-[52px] !px-6 !text-base" onClick={() => navigate(`/trebuchet/${nextMission.id}`)}>
+              {Object.keys(completed).length === 0 ? 'Начать' : 'Продолжить'}
+              <span className="font-normal opacity-80">· {applyCopy(nextMission, universe).title}</span> <span aria-hidden>→</span>
+            </button>
+          )}
           <div role="radiogroup" aria-label="Вселенная" className="flex gap-2 flex-wrap">
             {UNIVERSES.map((u) => (
               <button
@@ -148,13 +156,8 @@ export function WorldMap(): JSX.Element {
                             ? `${mission.title} — Сначала пройди предыдущую миссию`
                             : `${mission.title}, ${KIND_LABELS[mission.kind]}, ${stars} из 3 звёзд`
                         }
-                        className={`lab-panel relative z-10 flex flex-col justify-between p-4 sm:p-5 text-left rounded-[var(--lab-radius)] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--lab-accent)] focus-visible:outline-offset-2 ${
-                          !unlocked
-                            ? 'opacity-60 cursor-not-allowed border-[var(--lab-line)]'
-                            : isNext
-                              ? 'ring-2 ring-[var(--lab-accent)] shadow-[0_0_18px_rgba(240,166,64,0.35)] animate-pulse motion-reduce:animate-none border-[var(--lab-accent)]'
-                              : 'hover:border-white/20 hover:bg-white/[0.07] cursor-pointer'
-                        }`}
+                        data-state={!unlocked ? 'locked' : isNext ? 'next' : stars > 0 ? 'done' : 'open'}
+                        className="map-card lab-panel relative z-10 flex flex-col justify-between p-4 sm:p-5 text-left rounded-[var(--lab-radius)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--lab-accent)] focus-visible:outline-offset-2"
                       >
                         <div>
                           <div className="flex items-center justify-between gap-2">

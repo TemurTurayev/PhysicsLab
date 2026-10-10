@@ -17,6 +17,7 @@ import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
 import { useIsDesktop, useIsShort } from './useIsDesktop'
+import { useConsoleMission, useMissionBridge } from '../console/useConsoleMission'
 import { defaultQuality, saveQuality, type FxQuality } from '../scene/postFx'
 import { CodeDrawer } from './CodeDrawer'
 import { ControlPanel } from './ControlPanel'
@@ -88,7 +89,9 @@ function MissionView({ mission }: { mission: Mission }) {
   const [retro, setRetro] = useState(universe.retroByDefault)
   const [quality, setQuality] = useState<FxQuality>(defaultQuality)
   useEffect(() => sceneRef.current?.setRetro(retro), [retro, sceneRef, universe])
-  const run = useMissionRun(mission)
+  // The console may bend gravity (sv_gravity) or forgive misses (god); `played` is the mission as it now runs.
+  const { cvars, played, cheated } = useConsoleMission(mission)
+  const run = useMissionRun(played, { god: cvars.god })
   const progress = useLabProgress()
   const [values, setValues] = useState<SliderValues>(() => Object.fromEntries(mission.sliders.map((s) => [s.key, s.start])))
   const releaseDeg = values.releaseDeg ?? mission.base.trebuchet.releaseDeg
@@ -104,7 +107,7 @@ function MissionView({ mission }: { mission: Mission }) {
   const cues = useRef({ whoosh: false, thud: false })
   const [log, setLog] = useState<ShotLogRow[]>([])
   // The launch the current setting will produce, sketched on the machine (not where computing vx, vy is the task).
-  const sheet = useMemo(() => (mission.code?.fn === 'launch_velocity' ? null : launchSheet(withSliders(mission, values))), [mission, values])
+  const sheet = useMemo(() => (mission.code?.fn === 'launch_velocity' ? null : launchSheet(withSliders(played, values))), [mission, played, values])
   useEffect(() => sceneRef.current?.setPreview(sheet), [sheet, sceneRef, universe])
   // A launcher slider (its position) moves the tower itself.
   const launcher = useMemo(() => withSliders(mission, values).launcher, [mission, values])
@@ -191,15 +194,31 @@ function MissionView({ mission }: { mission: Mission }) {
   }, [sceneRef, run, values, code, prediction, finishShot, sigma])
 
   useEffect(() => {
-    if (run.won) progress.complete(mission.id, run.stars)
+    // A win under console cheats is not saved.
+    if (run.won && !cheated) progress.complete(mission.id, run.stars)
     // progress.complete is stable; only react to a new win
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.won, run.stars, mission.id])
+  }, [run.won, run.stars, mission.id, cheated])
 
   // A click places the flag; a drag only turns the camera.
   // Space fires, unless the student is typing a number or code.
   const fireRef = useRef(fire)
   fireRef.current = fire
+  const canFire = phase !== 'flying' && (run.lives > 0 || run.won) && (!mission.predict || prediction !== null)
+  useMissionBridge({
+    current: { id: mission.id, title: told.title, g: mission.base.world.g, lives: run.lives, shots: run.shots },
+    fire: () => {
+      if (!canFire || intro) return false
+      void fireRef.current()
+      return true
+    },
+    refillLives: () => {
+      run.refill()
+      return true
+    },
+  })
+  useEffect(() => sceneRef.current?.setTimescale(cvars.host_timescale), [cvars.host_timescale, sceneRef, universe])
+  useEffect(() => sceneRef.current?.setMarksVisible(cvars.r_drawmarks), [cvars.r_drawmarks, sceneRef, universe])
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null
@@ -230,7 +249,7 @@ function MissionView({ mission }: { mission: Mission }) {
   // On a low landscape phone the right dock has room only for the controls; the numbers scroll on the left.
   const calcInDock = desktop && !showCode && !short
   const chipsInDock = !desktop
-  const calc = <CalcPanel mission={mission} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />
+  const calc = <CalcPanel mission={played} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />
   const restart = () => {
     run.reset()
     setLog([])

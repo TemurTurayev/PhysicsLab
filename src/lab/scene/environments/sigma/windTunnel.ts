@@ -124,19 +124,19 @@ export const createWindTunnel: EnvironmentFactory = (opts: EnvironmentOptions): 
   // Concrete Hall Floor & Markings (z in [-16, 30], center z = 7)
   addMesh(group, track(new THREE.BoxGeometry(hallLen, 0.15, 46)), industrialMaterial('concrete', [Math.max(1, Math.round(hallLen / 6)), 8]), [hallMidX, -0.075, 7], undefined, false, true)
   const hzMat = industrialMaterial('hazard', [8, 1])
-  addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzMat, [-7, 0.004, 0], undefined, false, false)
-  addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzMat, [6, 0.004, 0], undefined, false, false)
-  addMesh(group, track(new THREE.BoxGeometry(13.24, 0.008, 0.24)), hzMat, [-0.5, 0.004, -4], undefined, false, false)
-  addMesh(group, track(new THREE.BoxGeometry(13.24, 0.008, 0.24)), hzMat, [-0.5, 0.004, 4], undefined, false, false)
+  addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzMat, [-7, 0.014, 0], undefined, false, false)
+  addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzMat, [6, 0.014, 0], undefined, false, false)
+  addMesh(group, track(new THREE.BoxGeometry(13.24, 0.008, 0.24)), hzMat, [-0.5, 0.014, -4], undefined, false, false)
+  addMesh(group, track(new THREE.BoxGeometry(13.24, 0.008, 0.24)), hzMat, [-0.5, 0.014, 4], undefined, false, false)
 
   const yellowMat = track(new THREE.MeshLambertMaterial({ color: 0xf2c400, flatShading: true })), laneGeo = track(new THREE.BoxGeometry(hallLen - 10, 0.006, 0.16))
-  addMesh(group, laneGeo, yellowMat, [hallMidX, 0.003, -5], undefined, false, false)
-  addMesh(group, laneGeo, yellowMat, [hallMidX, 0.003, 5], undefined, false, false)
+  addMesh(group, laneGeo, yellowMat, [hallMidX, 0.012, -5], undefined, false, false)
+  addMesh(group, laneGeo, yellowMat, [hallMidX, 0.012, 5], undefined, false, false)
 
   const distGeo = track(new THREE.PlaneGeometry(0.8, 0.5))
   for (let x = 10; x <= opts.maxX; x += 10) {
     const dMat = track(new THREE.MeshLambertMaterial({ map: track(signTexture(`${x}`, '#f2c400', '#1b1b1b', 96, 64)) }))
-    addMesh(group, distGeo, dMat, [x, 0.005, -4.2], [-Math.PI / 2, 0, 0], false, false)
+    addMesh(group, distGeo, dMat, [x, 0.014, -4.2], [-Math.PI / 2, 0, 0], false, false)
   }
 
   // Hall Walls (32 m high), Steel Ribs, and Dark Roof Truss Grid at y = 34

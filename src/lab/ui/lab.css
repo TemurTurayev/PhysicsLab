@@ -76,3 +76,26 @@
 
 /* Buttons floating over the 3D scene need a solid plate to stay readable on bright floors. */
 .lab-btn-float:not(.lab-btn-primary) { background: var(--lab-panel-solid); }
+
+/* Mission map: open steps must read at a glance — bright and outlined; locked ones fade back. */
+.map-card { transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s; }
+.map-card[data-state='open'], .map-card[data-state='done'] {
+  border-color: color-mix(in srgb, var(--lab-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--lab-accent) 7%, var(--lab-panel));
+}
+.map-card[data-state='open'] h3, .map-card[data-state='done'] h3, .map-card[data-state='next'] h3 { color: var(--lab-text); }
+.map-card[data-state='open']:hover, .map-card[data-state='done']:hover, .map-card[data-state='next']:hover {
+  transform: translateY(-2px); border-color: var(--lab-accent);
+}
+.map-card[data-state='next'] {
+  border: 2px solid var(--lab-accent);
+  background: color-mix(in srgb, var(--lab-accent) 14%, var(--lab-panel));
+  animation: map-glow 2.2s ease-in-out infinite;
+}
+.map-card[data-state='locked'] { opacity: 0.38; filter: grayscale(0.7); cursor: not-allowed; }
+@keyframes map-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--lab-accent) 0%, transparent), 0 10px 40px rgba(0, 0, 0, 0.35); }
+  50% { box-shadow: 0 0 26px 4px color-mix(in srgb, var(--lab-accent) 55%, transparent), 0 10px 40px rgba(0, 0, 0, 0.35); }
+}
+.map-cta { box-shadow: 0 0 0 0 transparent; animation: map-glow 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .map-card, .map-cta { animation: none !important; } }

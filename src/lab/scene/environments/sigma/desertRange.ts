@@ -117,7 +117,7 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
   const signPostGeo = track(new THREE.BoxGeometry(0.06, 0.7, 0.06)), signBackGeo = track(new THREE.BoxGeometry(0.82, 0.46, 0.04)), signFaceGeo = track(new THREE.PlaneGeometry(0.8, 0.44))
   for (let x = 10; x <= opts.maxX; x += 10) {
     const is50 = x % 50 === 0
-    addMesh(group, is50 ? c50Geo : c10Geo, lineMat, [x, 0.003, 0], undefined, false, false)
+    addMesh(group, is50 ? c50Geo : c10Geo, lineMat, [x, 0.012, 0], undefined, false, false)
     if (is50) {
       addMesh(group, signPostGeo, industrialMaterial('steelPanel'), [x, 0.35, -3.4])
       addMesh(group, signBackGeo, industrialMaterial('steelPanel'), [x, 0.7, -3.4])
@@ -176,10 +176,10 @@ export const createDesertRange: EnvironmentFactory = (opts: EnvironmentOptions):
   bushesMesh.instanceMatrix.needsUpdate = true; group.add(bushesMesh)
 
   // Launch pad under machine & hazard borders
-  addMesh(group, track(new THREE.BoxGeometry(13, 0.12, 8)), industrialMaterial('concrete', [4, 2]), [-0.5, -0.06, 0], undefined, false, true)
+  addMesh(group, track(new THREE.BoxGeometry(13, 0.12, 8)), industrialMaterial('concrete', [4, 2]), [-0.5, -0.03, 0], undefined, false, true)
   const hzXMat = industrialMaterial('hazard', [8, 1]), hzZMat = industrialMaterial('hazard', [5, 1])
-  for (const pz of [-4, 4]) addMesh(group, track(new THREE.BoxGeometry(13.2, 0.008, 0.24)), hzXMat, [-0.5, 0.004, pz], undefined, false, false)
-  for (const px of [-7, 6]) addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzZMat, [px, 0.004, 0], undefined, false, false)
+  for (const pz of [-4, 4]) addMesh(group, track(new THREE.BoxGeometry(13.2, 0.008, 0.24)), hzXMat, [-0.5, 0.036, pz], undefined, false, false)
+  for (const px of [-7, 6]) addMesh(group, track(new THREE.BoxGeometry(0.24, 0.008, 8.24)), hzZMat, [px, 0.036, 0], undefined, false, false)
 
   // Blast wall of concrete jersey barriers behind crew zone at x ≈ -16
   const barMat = industrialMaterial('concreteDark', [2, 1]), barBaseGeo = track(new THREE.BoxGeometry(0.65, 0.4, 1.8)), barTopGeo = track(new THREE.BoxGeometry(0.35, 0.75, 1.8))

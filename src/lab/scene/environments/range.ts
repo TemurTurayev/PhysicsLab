@@ -129,14 +129,14 @@ export const createRange: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   // Measured lane chalk lines: along x at z = ±4 from 0 to maxX
   const laneGeo = track(new THREE.BoxGeometry(opts.maxX, 0.005, 0.12))
   for (const lz of [-4, 4]) {
-    const l = new THREE.Mesh(laneGeo, chalkMat); l.position.set(opts.maxX / 2, 0.003, lz); group.add(l)
+    const l = new THREE.Mesh(laneGeo, chalkMat); l.position.set(opts.maxX / 2, 0.012, lz); group.add(l)
   }
   const cross10Geo = track(new THREE.BoxGeometry(0.1, 0.005, 8.0))
   const cross25Geo = track(new THREE.BoxGeometry(0.2, 0.005, 11.0))
   for (let x = 0; x <= opts.maxX; x += 10) {
     const is25 = x % 25 === 0
     const c = new THREE.Mesh(is25 ? cross25Geo : cross10Geo, chalkMat)
-    c.position.set(x, 0.003, 0); group.add(c)
+    c.position.set(x, 0.012, 0); group.add(c)
   }
 
   // Wooden signboards & red pennant flags every 25m

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AccountButton } from '../lab/account/AccountButton'
+import { MusicToggle } from '../lab/audio/MusicToggle'
 import { useLabProgress } from '../lab/state/labProgress'
 import type { UniverseId } from '../lab/universe/types'
 import '../lab/ui/lab.css'
@@ -46,6 +47,7 @@ export function HomePage() {
                 Карта миссий
               </button>
             </span>
+            <MusicToggle />
             <AccountButton />
           </nav>
         </div>
