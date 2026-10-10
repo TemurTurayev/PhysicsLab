@@ -1,0 +1,51 @@
+/* Home page: the lab's notebook tokens (lab.css) over a cinematic strip of real scene frames. */
+
+.home-hero { position: relative; isolation: isolate; overflow: hidden; }
+.home-hero-frames { position: absolute; inset: 0; z-index: -2; }
+.home-hero-frames > div {
+  position: absolute; inset: 0; background-size: cover; background-position: center 55%;
+  opacity: 0; animation: home-frame 30s infinite; will-change: opacity, transform;
+}
+/* Five frames, 6 s each: fade in, drift slowly, fade out while the next one fades in. */
+@keyframes home-frame {
+  0% { opacity: 0; transform: scale(1.04); }
+  4% { opacity: 1; }
+  20% { opacity: 1; }
+  24% { opacity: 0; transform: scale(1.12); }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+.home-hero-shade {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(14, 12, 10, 0.94) 0%, rgba(14, 12, 10, 0.78) 38%, rgba(14, 12, 10, 0.2) 75%, rgba(14, 12, 10, 0.05) 100%),
+    linear-gradient(0deg, var(--lab-bg) 0%, rgba(14, 12, 10, 0) 28%);
+}
+@media (max-width: 767px) {
+  .home-hero-shade {
+    background: linear-gradient(180deg, rgba(14, 12, 10, 0.25) 0%, rgba(14, 12, 10, 0.05) 18%, rgba(14, 12, 10, 0.2) 30%, var(--lab-bg) 44%);
+  }
+  .home-hero-frames { bottom: auto; height: 50%; }
+}
+
+.home-display { font-family: var(--lab-display); font-weight: 700; letter-spacing: -0.02em; line-height: 1.04; }
+.home-accent { color: var(--lab-accent); font-style: italic; }
+
+/* A dashed parabola drawn under the headline, like the logo's throw. */
+.home-arc path { stroke-dasharray: 2 9; animation: home-dash 1.6s linear infinite; }
+@keyframes home-dash { to { stroke-dashoffset: -22; } }
+
+.home-card { transition: transform 0.25s ease, border-color 0.2s ease, box-shadow 0.25s ease; }
+.home-card:hover { transform: translateY(-3px); border-color: rgba(236, 166, 75, 0.55); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45); }
+.home-card:focus-visible { outline: 2px solid var(--lab-accent); outline-offset: 3px; }
+.home-card .home-shot { transition: transform 0.6s ease; }
+.home-card:hover .home-shot { transform: scale(1.05); }
+
+.home-bar { height: 4px; border-radius: 99px; background: rgba(255, 236, 200, 0.1); overflow: hidden; }
+.home-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--lab-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-frames > div { animation: none; }
+  .home-hero-frames > div:first-child { opacity: 1; }
+  .home-arc path { animation: none; }
+  .home-card, .home-card .home-shot { transition: none; }
+}

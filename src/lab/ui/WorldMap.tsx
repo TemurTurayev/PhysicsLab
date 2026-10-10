@@ -79,7 +79,7 @@ export function WorldMap(): JSX.Element {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--lab-text)]">
-              Мир 1 · Требушет
+              Требушет · карта миссий
             </h1>
             <p className="text-sm text-[var(--lab-dim)] mt-1.5 max-w-2xl leading-relaxed">
               Физика броска: от момента отпуска до параболы и собственного движка на Python.
