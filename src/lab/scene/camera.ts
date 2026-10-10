@@ -19,17 +19,21 @@ function mix(a: CameraShot, b: CameraShot, f: number): CameraShot {
 /** Narrow screens need the camera further back to keep the same subject in frame. */
 const pullFor = (aspect: number) => (aspect < 1 ? 1.9 : aspect < 1.4 ? 1.25 : 1)
 
-/** Three-quarter view from behind the machine: the trebuchet in the foreground, the lane and targets beyond. */
-export function establishingShot(focusX: number, aspect: number): CameraShot {
+/**
+ * Three-quarter view from behind the machine: the trebuchet in the foreground, the lane and targets beyond.
+ * A taller machine (the basics tower) moves the camera up and back so its top stays in frame.
+ */
+export function establishingShot(focusX: number, aspect: number, machineHeight = 4.2): CameraShot {
   const p = pullFor(aspect)
   const reach = Math.min(focusX, 80)
+  const tall = Math.max(0, machineHeight - 5)
   if (aspect < 1) {
     // Portrait phones: a narrow horizontal view, so stand back (inside indoor halls, z < 30) and aim near the machine.
-    return { position: new THREE.Vector3(-22, 12, 27), target: new THREE.Vector3(Math.min(reach, 40) * 0.08, 4, 0) }
+    return { position: new THREE.Vector3(-22 - tall * 0.4, 12 + tall * 0.6, 27 + tall * 0.6), target: new THREE.Vector3(Math.min(reach, 40) * 0.08, 4 + tall * 0.5, 0) }
   }
   return {
-    position: new THREE.Vector3(-16 * p, 7.5 * p, 15 * p),
-    target: new THREE.Vector3(reach * 0.32, 3.2, -1),
+    position: new THREE.Vector3(-16 * p - tall * 0.6, 7.5 * p + tall * 0.55, 15 * p + tall * 1.1),
+    target: new THREE.Vector3(reach * 0.32, 3.2 + tall * 0.45, -1),
   }
 }
 
@@ -60,8 +64,8 @@ export function launchCloseup(cx: number, cy: number, aspect: number): CameraSho
  * Deterministic camera for scene time t: establishing → follow the stone → settle on the landing.
  * Same t always gives the same framing, so replays and screenshots are reproducible.
  */
-export function cameraAt(t: number, aspect: number, stone: FlightSample | null, launchT: number | null, land: FlightSample | null, focusX: number): CameraShot {
-  const wide = establishingShot(focusX, aspect)
+export function cameraAt(t: number, aspect: number, stone: FlightSample | null, launchT: number | null, land: FlightSample | null, focusX: number, machineHeight?: number): CameraShot {
+  const wide = establishingShot(focusX, aspect, machineHeight)
   if (launchT === null || stone === null) {
     return land ? mix(wide, landingShot(land.x, aspect), (t - land.t) / 1.2) : wide
   }

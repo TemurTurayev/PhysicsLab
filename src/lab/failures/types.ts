@@ -32,4 +32,6 @@ export interface DetectContext {
   expectDrag?: { k: number; wind: number }
   /** The time step the student's step() was called with (s). */
   stepDt?: number
+  /** A fixed launcher, not a sling: no release to get wrong, and the stone may land right at the tower. */
+  fixedLaunch?: boolean
 }

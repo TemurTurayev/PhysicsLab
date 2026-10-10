@@ -12,6 +12,7 @@ await page.evaluate(async (u) => { localStorage.clear(); localStorage.setItem('p
 const result = await page.evaluate(async () => {
   const D = window.__drv; const M = (id) => D.L.findMission(id)
   const steps = [
+    ['0-1', { x0: 22 }], ['0-2', { speed: 18 }], ['0-3', null, 1.56], ['0-4', null, 23.9], ['0-5', { speed: 13 }], ['0-6', null, 2.04], ['0-7', null, 15.29], ['0-8', null, undefined, 'ref'], ['0-9', null, undefined, 'ref'],
     ['1-1', { releaseDeg: 116 }], ['1-2', null, 58.5], ['1-3', null, undefined, 'ref'], ['1-4', { releaseDeg: 96 }], ['1-4', { releaseDeg: 103 }], ['1-4', { releaseDeg: 111 }],
     ['2-1', { releaseDeg: 111 }], ['2-2', null, 32], ['2-3', null, undefined, 'ref'], ['2-4', { releaseDeg: 97 }],
     ['3-1', { mc: 825 }], ['3-2', null, 150], ['3-3', null, undefined, 'ref'], ['3-4', { mc: 850, releaseDeg: 101 }], ['3-4', { mc: 1000, releaseDeg: 108 }],

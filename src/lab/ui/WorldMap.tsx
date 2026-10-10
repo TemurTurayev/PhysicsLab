@@ -1,6 +1,6 @@
 import type { JSX } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CHAPTERS, isUnlocked } from '../levels'
+import { CHAPTERS, chapterLabel, isUnlocked } from '../levels'
 import type { EnvironmentId, MissionKind } from '../levels/types'
 import { useLabProgress } from '../state/labProgress'
 import { FAILURES } from '../failures/catalog'
@@ -111,7 +111,7 @@ export function WorldMap(): JSX.Element {
                   className="rounded-xl p-5 sm:p-6 mb-6 border"
                   style={{ background: universe.bannerFor?.(chapter.id) ?? theme.gradient, borderColor: theme.border }}
                 >
-                  <div className="lab-label">Глава {chapter.id}</div>
+                  <div className="lab-label">{chapterLabel(chapter.id)}</div>
                   <h2 id={`chapter-${chapter.id}`} className="text-xl sm:text-2xl font-bold text-[var(--lab-text)] mt-1">
                     {universe.chapterTitles[chapter.id] ?? chapter.title}
                   </h2>
@@ -159,7 +159,7 @@ export function WorldMap(): JSX.Element {
                                 {mission.order}
                               </span>
                               <span className="text-[11px] font-medium px-2 py-0.5 rounded border border-white/10 bg-white/5 text-[var(--lab-dim)]">
-                                {KIND_LABELS[mission.kind]}
+                                {mission.subject ?? KIND_LABELS[mission.kind]}
                               </span>
                             </div>
 

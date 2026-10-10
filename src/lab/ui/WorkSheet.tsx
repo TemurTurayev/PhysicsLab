@@ -35,11 +35,11 @@ function slotsFor(sheet: LaunchSheet, showVelocity: boolean): Slot[] {
  * The student's own calculation for the current setting, checked step by step before any shot:
  * a green vx and a red t says exactly where the slip is. Free — it never costs a life.
  */
-export function WorkSheet({ sheet, showVelocity, vacuumNote, hidden }: { sheet: LaunchSheet; showVelocity: boolean; vacuumNote: boolean; hidden: string | null }) {
+export function WorkSheet({ sheet, showVelocity, vacuumNote, hidden, only }: { sheet: LaunchSheet; showVelocity: boolean; vacuumNote: boolean; hidden: string | null; only?: string[] }) {
   const [entries, setEntries] = useState<Record<string, string>>({})
   const formal = useUniverse().id === 'sigma'
   // The quantity a prediction mission asks for stays unchecked: the prediction itself is the test.
-  const slots = slotsFor(sheet, showVelocity).filter((s) => s.key !== hidden)
+  const slots = slotsFor(sheet, showVelocity).filter((s) => s.key !== hidden && (!only || only.includes(s.key)))
   return (
     <div className="flex flex-col gap-1">
       <div className="lab-label mt-2">

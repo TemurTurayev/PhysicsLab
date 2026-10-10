@@ -66,7 +66,9 @@ function useLabScene(mission: Mission, universe: Universe) {
     // A sector this universe has not built yet falls back to Classic rather than an empty void.
     const env = universe.envFor(mission.chapter) ?? getUniverse('classic').envFor(mission.chapter)!
     scene.setEnvironment(env, mission.targets, maxX, mission.base.world.wind)
-    scene.setTrebuchet(mission.base.trebuchet, universe.envFor(mission.chapter) ? universe.machine : 'wood')
+    const skin = universe.envFor(mission.chapter) ? universe.machine : 'wood'
+    if (mission.base.launcher) scene.setLauncher(mission.base.launcher, skin)
+    else scene.setTrebuchet(mission.base.trebuchet, skin)
     sceneRef.current = scene
     return () => {
       scene.dispose()
@@ -104,6 +106,11 @@ function MissionView({ mission }: { mission: Mission }) {
   // The launch the current setting will produce, sketched on the machine (not where computing vx, vy is the task).
   const sheet = useMemo(() => (mission.code?.fn === 'launch_velocity' ? null : launchSheet(withSliders(mission, values))), [mission, values])
   useEffect(() => sceneRef.current?.setPreview(sheet), [sheet, sceneRef, universe])
+  // A launcher slider (its position) moves the tower itself.
+  const launcher = useMemo(() => withSliders(mission, values).launcher, [mission, values])
+  useEffect(() => {
+    if (launcher) sceneRef.current?.setLauncher(launcher, universe.envFor(mission.chapter) ? universe.machine : 'wood')
+  }, [launcher, sceneRef, universe, mission.chapter])
   const [intro, setIntro] = useState(true)
   const [coach, setCoach] = useState(false)
   const [slow, setSlow] = useState(false)
@@ -257,6 +264,7 @@ function MissionView({ mission }: { mission: Mission }) {
     <Placard
       shot={run.last?.shot ?? null}
       releaseDeg={releaseDeg}
+      idleLine={mission.base.launcher ? (sigma ? 'Пусковая установка заряжена. Огонь — по готовности расчёта.' : 'Камень лежит в лотке. Посчитай — и жми «Огонь».') : undefined}
       beamLimit={mission.base.trebuchet.beamStrength}
       movingLabel={universe.terms.movingTarget}
       tell={(line) => tellLine(line, universe)}

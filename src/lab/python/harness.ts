@@ -46,6 +46,17 @@ def _run_launch(speed, angle_deg):
     if not (isinstance(v, (tuple, list)) and len(v) == 2):
         raise TypeError("launch_velocity() должна вернуть пару (vx, vy)")
     return json.dumps([float(v[0]), float(v[1])])
+
+def _run_value(name, args):
+    if name not in globals():
+        what = f"функция {name}()" if args is not None else f"переменная {name}"
+        raise NameError(f"не найдена {what}")
+    v = globals()[name](*args) if args is not None else globals()[name]
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        raise TypeError(f"{name} должна быть числом, а сейчас это {type(v).__name__}")
+    if not math.isfinite(v):
+        raise ValueError(f"{name} получилась {v} — так не бывает, проверь деление")
+    return json.dumps(float(v))
 `
 
 /** Pulls the student's line number out of a Pyodide traceback ("File \"<exec>\", line 7"). */

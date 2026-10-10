@@ -6,6 +6,7 @@ import { createWindTunnel } from '../scene/environments/sigma/windTunnel'
 import { createTestChamber } from '../scene/environments/sigma/testChamber'
 import type { EnvironmentFactory } from '../scene/environments/types'
 import { SIGMA_META } from './meta'
+import { SIGMA_BASICS_COPY } from './sigmaBasics'
 import type { Universe } from './types'
 
 /**
@@ -13,7 +14,7 @@ import type { Universe } from './types'
  * Genre homage to late-90s science-facility games; every name and line here is our own
  * (universe.test.ts guards against borrowed trademarks).
  */
-const ENVS: Record<number, EnvironmentFactory> = { 1: createTestChamber, 2: createDesertRange, 3: createDemolitionHall, 4: createWindTunnel, 5: createLunarStation }
+const ENVS: Record<number, EnvironmentFactory> = { 0: createDesertRange, 1: createTestChamber, 2: createDesertRange, 3: createDemolitionHall, 4: createWindTunnel, 5: createLunarStation }
 
 export const SIGMA: Universe = {
   ...SIGMA_META,
@@ -55,6 +56,7 @@ export const SIGMA: Universe = {
     },
   },
   copy: {
+    ...SIGMA_BASICS_COPY,
     '1-1': {
       title: 'Допуск к установке',
       brief:

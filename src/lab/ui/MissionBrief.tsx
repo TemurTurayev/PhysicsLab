@@ -27,7 +27,7 @@ export function MissionBrief({ mission, shots, hitSoFar, lives, onReread }: Miss
           {mission.goal}
         </span>
         <span className="text-xs shrink-0" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`}>
-          {'❤️'.repeat(lives)}
+          {mission.practice ? '🎓' : '❤️'.repeat(lives)}
         </span>
         <span aria-hidden className="text-xs" style={{ color: 'var(--lab-dim)' }}>
           ▾
@@ -41,13 +41,19 @@ export function MissionBrief({ mission, shots, hitSoFar, lives, onReread }: Miss
         <button type="button" className="lab-label text-left" onClick={() => setExpanded(false)} disabled={desktop || shots === 0}>
           Цель
         </button>
-        <span className="text-[15px] tracking-tight" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`} title="Жизни: каждый промах отнимает одну">
-          {Array.from({ length: MAX_LIVES }, (_, i) => (
-            <span key={i} className={i < lives ? '' : 'opacity-25 grayscale'}>
-              ❤️
-            </span>
-          ))}
-        </span>
+        {mission.practice ? (
+          <span className="text-xs" style={{ color: 'var(--lab-dim)' }} title="Здесь промахи ничего не стоят">
+            🎓 разминка
+          </span>
+        ) : (
+          <span className="text-[15px] tracking-tight" aria-label={`Жизней: ${lives} из ${MAX_LIVES}`} title="Жизни: каждый промах отнимает одну">
+            {Array.from({ length: MAX_LIVES }, (_, i) => (
+              <span key={i} className={i < lives ? '' : 'opacity-25 grayscale'}>
+                ❤️
+              </span>
+            ))}
+          </span>
+        )}
       </div>
       <div className="lab-title text-[17px] leading-snug" style={{ color: 'var(--lab-accent)' }}>
         {mission.goal}

@@ -35,6 +35,11 @@ async function handle(req: WorkerRequest): Promise<WorkerResponse> {
       const moments = JSON.parse(py.runPython(`_run_moment(${JSON.stringify(job.masses)})`, { globals }) as string)
       return { id: req.id, ok: true, kind: 'moment', moments, stdout }
     }
+    if (job.kind === 'value') {
+      const args = job.args === null ? 'None' : JSON.stringify(job.args)
+      const value = JSON.parse(py.runPython(`_run_value(${JSON.stringify(job.name)}, ${args})`, { globals }) as string)
+      return { id: req.id, ok: true, kind: 'value', value, stdout }
+    }
     const velocity = JSON.parse(py.runPython(`_run_launch(${job.speed}, ${job.angleDeg})`, { globals }) as string)
     return { id: req.id, ok: true, kind: 'launch', velocity, stdout }
   } catch (e) {

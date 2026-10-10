@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { simulateArm } from '../sim/trebuchet'
-import type { ArmSample, FlightSample, ShotResult, TrebuchetParams } from '../sim/types'
+import type { ArmSample, FlightSample, LauncherParams, ShotResult, TrebuchetParams } from '../sim/types'
 import type { Target } from '../levels/types'
 import { ShotAnnotations } from './annotations'
 import { LaunchPreview, type PreviewPart } from './launchPreview'
@@ -15,6 +15,7 @@ import { armAt, flightAt } from './sampling'
 import { skyEnvironment } from './sky'
 import { RetroPass } from './retroPass'
 import { defaultQuality, PostFx, type FxQuality } from './postFx'
+import { createLauncher } from './launcherModel'
 import { createTrebuchet, type MachineSkin, type TrebuchetModel } from './trebuchetModel'
 
 export interface ShotView {
@@ -41,6 +42,7 @@ export class LabScene {
   private envMap: THREE.WebGLRenderTarget | null = null
   private machine: TrebuchetModel | null = null
   private idle: ArmSample | null = null
+  private launcherMode = false
   private crew: Crew
   private readonly stone: THREE.Mesh
   private readonly trail = new PathLine('#ffe2a8', 0.9, false)
@@ -63,6 +65,7 @@ export class LabScene {
   private view: ShotView | null = null
   private targets: Target[] = []
   private focusX = 60
+  private noTargets = false
   private t = 0
   private playing = false
   private speed = 1
@@ -110,6 +113,7 @@ export class LabScene {
     if (this.env) this.scene.remove(this.env.group)
     this.targets = targets
     this.focusX = targets[0]?.x ?? maxX * 0.6
+    this.noTargets = targets.length === 0
     this.env = factory({ targets, maxX, wind })
     this.scene.add(this.env.group)
     this.setSkirt(this.env.skirt ?? null)
@@ -148,11 +152,33 @@ export class LabScene {
       this.machine.dispose()
     }
     this.machine = createTrebuchet(p, skin)
+    this.launcherMode = false
     this.idle = simulateArm(p, 9.81, { duration: 0 }).arm[0]
     this.pivotY = p.H
     this.scene.add(this.machine.group)
     const s = this.stone.geometry as THREE.IcosahedronGeometry
     this.stone.scale.setScalar(p.r / s.parameters.radius)
+    this.render()
+  }
+
+  /** The basics launcher replaces the trebuchet: a tower with a chute, no arm to animate. */
+  setLauncher(l: LauncherParams, skin: MachineSkin = 'wood'): void {
+    if (this.machine) {
+      this.scene.remove(this.machine.group)
+      this.machine.dispose()
+    }
+    this.machine = createLauncher(l, skin)
+    this.launcherMode = true
+    this.idle = null
+    this.pivotY = l.y0
+    // A prediction step has no target: aim the camera at where this launcher can reach.
+    if (this.noTargets) {
+      const a = (l.angleDeg * Math.PI) / 180
+      const vy = l.speed * Math.sin(a)
+      const flight = (vy + Math.sqrt(vy * vy + 2 * 9.81 * l.y0)) / 9.81
+      this.focusX = Math.max(12, l.x0 + l.speed * Math.cos(a) * flight + 4)
+    }
+    this.scene.add(this.machine.group)
     this.render()
   }
 
@@ -279,7 +305,8 @@ export class LabScene {
     const arm = shot ? armAt(shot.arm, t) : null
     const stoneNow = shot ? flightAt(shot.flight, t) : null
     const pose = arm ?? this.idle
-    if (this.machine && pose) this.machine.pose(pose.theta, pose.phi, pose.released)
+    if (this.launcherMode) this.machine?.pose(0, 0, stoneNow !== null)
+    else if (this.machine && pose) this.machine.pose(pose.theta, pose.phi, pose.released)
     const landed = shot?.landing && t >= shot.landing.t
     this.stone.visible = stoneNow !== null && !(landed && (this.view?.hitIndex ?? null) !== null)
     if (stoneNow) this.stone.position.set(stoneNow.x, Math.max(stoneNow.y, 0.15), 0)
@@ -295,7 +322,7 @@ export class LabScene {
     this.env?.update(performance.now() / 1000)
 
     const landSample = shot?.landing ? (shot.flight.at(-1) ?? null) : null
-    const cinematic = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX)
+    const cinematic = cameraAt(t, this.camera.aspect, stoneNow, shot?.releaseT ?? null, landSample, this.focusX, this.pivotY)
     const cam = this.playing ? cinematic : this.ease(this.preview.highlighted !== null && this.previewAt ? launchCloseup(this.previewAt.x, this.previewAt.y, this.camera.aspect) : cinematic)
     if (this.playing) this.calmCam = null
     this.rig.apply(cam, stoneNow && !landed ? new THREE.Vector3(stoneNow.x, Math.max(stoneNow.y, 0.15), 0) : null)

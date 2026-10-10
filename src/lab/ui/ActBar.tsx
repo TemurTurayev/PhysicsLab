@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { chapterLabel } from '../levels'
 import type { Mission } from '../levels/types'
 import type { FxQuality } from '../scene/postFx'
 
@@ -41,7 +42,7 @@ export function ActBar(p: ActBarProps) {
       </Link>
       <div className="min-w-0 flex-1 basis-0">
         <div className="lab-label">
-          Глава {p.mission.chapter} · миссия {p.mission.order}
+          {chapterLabel(p.mission.chapter)} · {p.mission.subject ? `${p.mission.subject} · шаг` : 'миссия'} {p.mission.order}
         </div>
         <div className="lab-title text-[17px] md:text-lg leading-tight truncate">{p.mission.title}</div>
       </div>

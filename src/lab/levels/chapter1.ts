@@ -39,7 +39,7 @@ export const CHAPTER_1: Chapter = {
         'Попадают два угла отпуска: один даёт крутую траекторию, другой — пологую. Почему так — разберёшь на Полигоне.',
       ],
       theory: ['\\theta_{\\text{руки}} \\downarrow \\Rightarrow \\text{отпуск позже}'],
-      requires: [],
+      requires: ['0-9'],
     },
     {
       id: '1-2',

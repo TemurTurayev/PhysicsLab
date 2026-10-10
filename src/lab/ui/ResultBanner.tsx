@@ -13,14 +13,14 @@ export interface ResultBannerProps {
   formal?: boolean
 }
 
-const fmt = (v: number) => Math.abs(v).toLocaleString('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
+const fmt = (v: number, d = 1) => Math.abs(v).toLocaleString('ru-RU', { maximumFractionDigits: d, minimumFractionDigits: d })
 
 function verdict(m: Mission, r: ShotRecord, formal: boolean): { text: string; good: boolean } {
   if (m.predict && r.predictionError !== null) {
     const ok = Math.abs(r.predictionError) <= m.predict.tolerance
-    if (Math.abs(r.predictionError) < 0.05) return { good: true, text: 'Прогноз сбылся: точно в цель.' }
+    if (Math.abs(r.predictionError) < (m.predict.unit === 'с' ? 0.01 : 0.05)) return { good: true, text: 'Прогноз сбылся: точно в цель.' }
     const dir = r.predictionError > 0 ? 'больше' : 'меньше'
-    return { good: ok, text: `${ok ? 'Прогноз сбылся' : 'Прогноз мимо'}: ${formal ? 'ваш' : 'твой'} ответ на ${fmt(r.predictionError)} ${m.predict.unit ?? 'м'} ${dir} настоящего.` }
+    return { good: ok, text: `${ok ? 'Прогноз сбылся' : 'Прогноз мимо'}: ${formal ? 'ваш' : 'твой'} ответ на ${fmt(r.predictionError, m.predict.unit === 'с' ? 2 : 1)} ${m.predict.unit ?? 'м'} ${dir} настоящего.` }
   }
   if (r.hits.length > 0) return { good: true, text: 'Попадание!' }
   return { good: false, text: formal ? 'Мимо. Скорректируйте и повторите пуск.' : 'Мимо. Поправь и стреляй ещё.' }

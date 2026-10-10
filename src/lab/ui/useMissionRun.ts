@@ -62,6 +62,7 @@ async function computeShot(m: Mission, values: SliderValues, code: string): Prom
   if (!m.code) return { ok: true, value: { shot: simulateShot(params), studentFlight: false, angleLooksLikeDegrees: false }, stdout: '' }
 
   if (m.code.fn === 'beam_moment') return momentShot(params, code)
+  if (m.code.fn === 'value') return valueShot(m, params, code)
   const reference = simulateShot(params).flight
   const arm = armForCode(params)
   if (m.code.fn === 'launch_velocity') {
@@ -89,6 +90,18 @@ async function computeShot(m: Mission, values: SliderValues, code: string): Prom
     stdout: res.stdout,
     value: { shot: shotFromSteps(params, res.samples, dt), ghost: reference, studentFlight: true, angleLooksLikeDegrees: false },
   }
+}
+
+/** Basics Python: the student's number becomes a launcher setting; the ghost is the right setting. */
+async function valueShot(m: Mission, params: SimParams, code: string): Promise<Compute> {
+  const spec = m.code!
+  if (!params.launcher || !spec.name || !spec.sets) throw new Error('value-миссии нужна пусковая установка, имя и поле')
+  const res = await runStudent(code, { kind: 'value', name: spec.name, args: spec.args ?? null })
+  if (!res.ok) return res
+  if (res.kind !== 'value') throw new Error('unexpected worker reply')
+  const shot = simulateShot({ ...params, launcher: { ...params.launcher, [spec.sets]: res.value } })
+  const shown = res.value.toLocaleString('ru-RU', { maximumFractionDigits: 3 })
+  return { ok: true, stdout: `${spec.name} = ${shown}\n${res.stdout}`, value: { shot, studentFlight: false, angleLooksLikeDegrees: false } }
 }
 
 async function momentShot(params: SimParams, code: string): Promise<Compute> {
@@ -148,6 +161,7 @@ export function useMissionRun(m: Mission): MissionRun {
           targets: targetsAt(m.targets, flightTime),
           studentFlight,
           angleLooksLikeDegrees,
+          fixedLaunch: m.base.launcher !== undefined,
           stepDt: m.code?.fn === 'step' ? (m.code.dt ?? STEP_DT) : undefined,
           expectDrag: m.base.world.drag ? { k: dragFactor(m.base.trebuchet.mp, m.base.trebuchet.r), wind: m.base.world.wind } : undefined,
         })

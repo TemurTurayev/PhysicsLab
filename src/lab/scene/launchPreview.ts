@@ -1,8 +1,9 @@
 import * as THREE from 'three'
 import type { LaunchSheet } from '../calc/launchSheet'
+import type { SheetPart } from '../levels/types'
 import { arrow, label, line } from './annotations'
 
-export type PreviewPart = 'v0' | 'alpha' | 'vx' | 'vy' | 'y0' | 'x0'
+export type PreviewPart = SheetPart
 
 const ru = (v: number) => v.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const SCALE = 0.35 // m of arrow per m/s, same as the shot annotations

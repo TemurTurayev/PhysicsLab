@@ -16,6 +16,10 @@ function fakeFlight(ay: number, n = 40): ShotResult {
 }
 
 describe('detectFailures', () => {
+  it('a dropped stone from a fixed launcher is only short, never a sling or crew failure', () => {
+    const drop = simulateShot({ trebuchet: DEFAULT_TREBUCHET, world: EARTH, launcher: { x0: 1, y0: 12, speed: 0, angleDeg: -60 } })
+    expect(ids(drop, [{ x: 20, r: 1 }], { fixedLaunch: true })).toEqual(['short'])
+  })
   it('is silent on a good shot that hits', () => {
     expect(ids(shot(110))).toEqual([])
   })

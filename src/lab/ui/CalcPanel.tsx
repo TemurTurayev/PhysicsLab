@@ -27,6 +27,7 @@ const BASE_FORMULAS = [
 ]
 
 function formulasFor(m: Mission): string[] {
+  if (m.panel) return m.panel.formulas
   const extra: string[] = []
   if (m.targets.some((t) => t.h)) extra.push('t_{\\text{стена}} = \\dfrac{x_{\\text{стена}} - x_0}{v_0\\cos\\alpha},\\quad y(t_{\\text{стена}}) > h \\Rightarrow \\text{перелетит}')
   if (m.targets.some((t) => t.moving)) extra.push('x_{\\text{цели}}(t) = x_{\\text{старт}} + u\\,t \\;\\Rightarrow\\; R = x_{\\text{старт}} + u\\,t_{\\text{пол}}')
@@ -112,11 +113,14 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
   const p = params.trebuchet
   const w = params.world
   const hideVelocity = mission.code?.fn === 'launch_velocity' // computing vx, vy is the task itself
+  // Basics steps show only the numbers this step needs; the rest is the student's to compute.
+  const shown = (part: PreviewPart) => !mission.panel || mission.panel.show.includes(part)
+  const launcher = params.launcher
   const setting = mission.sliders.map((s) => `${(values[s.key] ?? s.start).toLocaleString('ru-RU')}${s.unit === '°' ? '°' : ` ${s.unit}`}`).join(', ')
   const tabs: Array<[Tab, string]> = [
     ['launch', 'Пуск'],
     ['formulas', 'Формулы'],
-    ['check', 'Проверка'],
+    ...(mission.panel?.check.length === 0 ? [] : ([['check', 'Проверка']] as Array<[Tab, string]>)),
     ['shots', `Выстрелы${log.length ? ` · ${log.length}` : ''}`],
   ]
 
@@ -130,7 +134,7 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
       </button>
       {open && (
         <>
-          <div role="tablist" aria-label="Расчёт" className="grid grid-cols-4 gap-1 rounded-[10px] p-0.5" style={{ background: 'var(--lab-raise)' }}>
+          <div role="tablist" aria-label="Расчёт" className="grid gap-1 rounded-[10px] p-0.5" style={{ background: 'var(--lab-raise)', gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
             {tabs.map(([id, label]) => (
               <button
                 key={id}
@@ -154,17 +158,26 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
               </p>
               {sheet ? (
                 <div className="grid grid-cols-2 gap-1.5">
-                  <Tile k="скорость вылета v₀" v={n(sheet.v0)} unit="м/с" part="v0" onHighlight={onHighlight} />
-                  <Tile k="угол вылета α" v={`${n(sheet.alphaDeg)}°`} unit="" part="alpha" onHighlight={onHighlight} />
-                  <Tile k="точка вылета x₀" v={n(sheet.x0)} unit="м" part="x0" onHighlight={onHighlight} />
-                  <Tile k="высота вылета y₀" v={n(sheet.y0)} unit="м" part="y0" onHighlight={onHighlight} />
-                  {!hideVelocity && <Tile k="vx" v={n(sheet.vx)} unit="м/с" part="vx" onHighlight={onHighlight} />}
-                  {!hideVelocity && <Tile k="vy" v={n(sheet.vy)} unit="м/с" part="vy" onHighlight={onHighlight} />}
+                  {shown('v0') && <Tile k="скорость вылета v₀" v={n(sheet.v0)} unit="м/с" part="v0" onHighlight={onHighlight} />}
+                  {shown('alpha') && <Tile k="угол вылета α" v={`${n(sheet.alphaDeg)}°`} unit="" part="alpha" onHighlight={onHighlight} />}
+                  {shown('x0') && <Tile k="точка вылета x₀" v={n(sheet.x0)} unit="м" part="x0" onHighlight={onHighlight} />}
+                  {shown('y0') && <Tile k="высота вылета y₀" v={n(sheet.y0, 2)} unit="м" part="y0" onHighlight={onHighlight} />}
+                  {!hideVelocity && shown('vx') && <Tile k="vx" v={n(sheet.vx)} unit="м/с" part="vx" onHighlight={onHighlight} />}
+                  {!hideVelocity && shown('vy') && <Tile k="vy" v={n(sheet.vy)} unit="м/с" part="vy" onHighlight={onHighlight} />}
                 </div>
               ) : (
                 <p className="text-xs" style={{ color: 'var(--lab-bad)' }}>
                   При этой настройке праща не раскроется.
                 </p>
+              )}
+              {mission.panel?.known && (
+                <ul className="flex flex-col gap-1 text-[13px]">
+                  {mission.panel.known.map((k) => (
+                    <li key={k} className="rounded-lg px-2.5 py-1.5" style={{ background: 'var(--lab-accent-soft)' }}>
+                      {k}
+                    </li>
+                  ))}
+                </ul>
               )}
               {w.drag && (
                 <p className="text-xs" style={{ color: 'var(--lab-dim)' }}>
@@ -183,9 +196,9 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
                     v={`x = ${n(t.x)} ± ${n(t.r)} м${t.h ? `, h = ${n(t.h)} м` : ''}${t.moving ? `, u = ${n(t.moving.speed)} м/с` : ''}`}
                   />
                 ))}
-                <Row k="Плечи L₁ / L₂" v={`${n(p.L1)} / ${n(p.L2)} м`} />
-                <Row k="Праща Lₛ, ось H" v={`${n(p.Ls)} м, ${n(p.H)} м`} />
-                <Row k="Противовес / снаряд" v={`${p.mc.toLocaleString('ru-RU')} / ${n(p.mp)} кг`} />
+                {!launcher && <Row k="Плечи L₁ / L₂" v={`${n(p.L1)} / ${n(p.L2)} м`} />}
+                {!launcher && <Row k="Праща Lₛ, ось H" v={`${n(p.Ls)} м, ${n(p.H)} м`} />}
+                {!launcher && <Row k="Противовес / снаряд" v={`${p.mc.toLocaleString('ru-RU')} / ${n(p.mp)} кг`} />}
               </div>
             </div>
           )}
@@ -200,7 +213,7 @@ export function CalcPanel({ mission, values, log, onHighlight }: { mission: Miss
 
           {tab === 'check' &&
             (sheet ? (
-              <WorkSheet key={setting} sheet={sheet} showVelocity={!hideVelocity} vacuumNote={w.drag} hidden={PREDICTED_SLOT[mission.predict?.quantity ?? ''] ?? null} />
+              <WorkSheet key={setting} sheet={sheet} showVelocity={!hideVelocity} vacuumNote={w.drag} hidden={PREDICTED_SLOT[mission.predict?.quantity ?? ''] ?? null} only={mission.panel?.check} />
             ) : (
               <p className="text-xs" style={{ color: 'var(--lab-dim)' }}>
                 Сначала выбери настройку, при которой праща раскрывается.

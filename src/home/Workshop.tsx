@@ -1,4 +1,4 @@
-import { CHAPTERS } from '../lab/levels'
+import { CHAPTERS, chapterLabel } from '../lab/levels'
 import { UNIVERSE_META as UNIVERSES } from '../lab/universe/meta'
 import type { UniverseId } from '../lab/universe/types'
 import type { ProgressSummary } from './progress'
@@ -25,8 +25,8 @@ export function Workshop({ universe, onUniverse, summary, onOpen }: WorkshopProp
           <div className="lab-label mb-2">Мастерская</div>
           <h2 className="home-display text-4xl md:text-5xl">Требушет</h2>
           <p className="mt-3 max-w-xl leading-relaxed" style={{ color: 'var(--lab-dim)' }}>
-            Пять глав: от первого выстрела во дворе до полёта без воздуха на Луне. Задачи и прогресс общие — вселенная меняет только
-            атмосферу.
+            Шесть глав: от числовой оси и теоремы Пифагора до полёта без воздуха на Луне. Задачи и прогресс общие — вселенная меняет
+            только атмосферу.
           </p>
         </div>
         <button type="button" onClick={onOpen} className="lab-btn self-start md:self-auto">
@@ -75,7 +75,7 @@ export function Workshop({ universe, onUniverse, summary, onOpen }: WorkshopProp
               <div className="relative overflow-hidden aspect-[16/9]">
                 <img src={`/previews/${universe}-${c.id}.webp`} alt="" loading="lazy" className="home-shot absolute inset-0 w-full h-full object-cover" />
                 <span className="absolute left-3 top-3 lab-mono text-xs px-2 py-1 rounded-md" style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}>
-                  Глава {c.id}
+                  {chapterLabel(c.id)}
                 </span>
                 {p.done === p.total && (
                   <span className="absolute right-3 top-3 text-xs font-semibold px-2 py-1 rounded-md" style={{ background: 'var(--lab-accent)', color: '#1a1206' }}>
@@ -94,24 +94,24 @@ export function Workshop({ universe, onUniverse, summary, onOpen }: WorkshopProp
                   {u.chapterTaglines[c.id] ?? c.tagline}
                 </p>
                 <div className="flex items-center gap-3 mt-1">
-                  <div className="home-bar flex-1" role="progressbar" aria-valuemin={0} aria-valuemax={p.total} aria-valuenow={p.done} aria-label={`Глава ${c.id}: пройдено ${p.done} из ${p.total}`}>
+                  <div className="home-bar flex-1" role="progressbar" aria-valuemin={0} aria-valuemax={p.total} aria-valuenow={p.done} aria-label={`${chapterLabel(c.id)}: пройдено ${p.done} из ${p.total}`}>
                     <span style={{ width: `${(p.done / p.total) * 100}%` }} />
                   </div>
                   <span className="lab-mono text-xs" style={{ color: 'var(--lab-dim)' }}>
-                    {p.open ? `${p.done}/${p.total}` : `после гл. ${c.id - 1}`}
+                    {p.open ? `${p.done}/${p.total}` : c.id === 1 ? 'после Основ' : `после гл. ${c.id - 1}`}
                   </span>
                 </div>
               </div>
             </button>
           )
         })}
-        <HowItWorks />
       </div>
+      <HowItWorks />
     </section>
   )
 }
 
-/** The sixth tile closes the grid: what a mission asks of you. */
+/** Under the chapters: what a mission asks of you. */
 function HowItWorks() {
   const steps: Array<[string, string]> = [
     ['Увидь', 'Стреляй и смотри, куда летит камень.'],
@@ -119,25 +119,22 @@ function HowItWorks() {
     ['Собери', 'Напиши свой движок полёта на Python.'],
   ]
   return (
-    <div className="lab-panel !rounded-2xl p-5 flex flex-col gap-4" style={{ background: 'var(--lab-panel-solid)' }}>
-      <div className="lab-label">Как устроена миссия</div>
-      <ol className="flex flex-col gap-3">
-        {steps.map(([t, d], i) => (
-          <li key={t} className="flex gap-3">
-            <span className="lab-mono text-sm w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ background: 'var(--lab-accent-soft)', color: 'var(--lab-accent)' }}>
-              {i + 1}
+    <div className="lab-panel !rounded-2xl p-5 sm:p-6 mt-4 grid gap-5 md:grid-cols-[1fr_1fr_1fr_1.2fr]" style={{ background: 'var(--lab-panel-solid)' }}>
+      {steps.map(([t, d], i) => (
+        <div key={t} className="flex gap-3">
+          <span className="lab-mono text-sm w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ background: 'var(--lab-accent-soft)', color: 'var(--lab-accent)' }}>
+            {i + 1}
+          </span>
+          <span>
+            <span className="font-semibold">{t}</span>
+            <span className="block text-sm" style={{ color: 'var(--lab-dim)' }}>
+              {d}
             </span>
-            <span>
-              <span className="font-semibold">{t}</span>
-              <span className="block text-sm" style={{ color: 'var(--lab-dim)' }}>
-                {d}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ol>
-      <p className="text-sm mt-auto pt-3 border-t" style={{ borderColor: 'var(--lab-line)', color: 'var(--lab-dim)' }}>
-        <span aria-hidden>❤️❤️❤️</span> Три жизни на миссию: считай, а не угадывай. Каждый провал — запись в журнале.
+          </span>
+        </div>
+      ))}
+      <p className="text-sm md:border-l md:pl-5" style={{ borderColor: 'var(--lab-line)', color: 'var(--lab-dim)' }}>
+        <span aria-hidden>❤️❤️❤️</span> Три жизни на миссию: считай, а не угадывай. В разминке «Основ» жизни не тратятся.
       </p>
     </div>
   )

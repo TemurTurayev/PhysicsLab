@@ -38,7 +38,14 @@ export function withRelease(params: SimParams, releaseDeg: number | undefined): 
 }
 
 /** Apply only the parameters this mission exposes as sliders; everything else stays as authored. */
+const LAUNCHER_KEYS = new Set<string>(['x0', 'speed', 'angleDeg'])
+
 export function withSliders(m: Mission, values: SliderValues): SimParams {
+  const set = m.sliders.flatMap((s) => (values[s.key] === undefined ? [] : [[s.key, values[s.key]] as const]))
+  if (m.base.launcher) {
+    const launcher = { ...m.base.launcher, ...Object.fromEntries(set.filter(([k]) => LAUNCHER_KEYS.has(k))) }
+    return { ...m.base, launcher }
+  }
   const overrides = Object.fromEntries(m.sliders.flatMap((s) => (values[s.key] === undefined ? [] : [[s.key, values[s.key]]])))
   return { ...m.base, trebuchet: { ...m.base.trebuchet, ...overrides } }
 }

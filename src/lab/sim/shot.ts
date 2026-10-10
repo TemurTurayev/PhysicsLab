@@ -1,6 +1,6 @@
 import { simulateFlight } from './flight'
 import { simulateArm, type ArmRun } from './trebuchet'
-import type { FlightSample, ShotResult, SimParams } from './types'
+import type { FlightSample, LauncherParams, ShotResult, SimParams } from './types'
 
 const RAD = 180 / Math.PI
 
@@ -22,8 +22,20 @@ export function loadsOf(run: ArmRun): Pick<ShotResult, 'breakage' | 'peakMoment'
   return { breakage: run.breakage, peakMoment: run.peakMoment, peakTension: run.peakTension }
 }
 
+/** The stone's state the instant it leaves a fixed launcher, at t = 0. */
+export function launcherStart(l: LauncherParams): FlightSample {
+  const a = l.angleDeg / RAD
+  return { t: 0, x: l.x0, y: l.y0, vx: l.speed * Math.cos(a), vy: l.speed * Math.sin(a) }
+}
+
+function launcherShot(l: LauncherParams, params: SimParams): ShotResult {
+  const flight = simulateFlight(launcherStart(l), params.world, params.trebuchet.mp, params.trebuchet.r)
+  return { arm: [], flight, released: true, releaseT: 0, breakage: null, peakMoment: 0, peakTension: 0, ...summarizeFlight(flight) }
+}
+
 export function simulateShot(params: SimParams): ShotResult {
-  const { trebuchet, world } = params
+  const { trebuchet, world, launcher } = params
+  if (launcher) return launcherShot(launcher, params)
   const run = simulateArm(trebuchet, world.g)
   if (!run.release) {
     return { ...loadsOf(run), arm: run.arm, flight: [], released: false, releaseT: null, launch: null, landing: null, apex: null }

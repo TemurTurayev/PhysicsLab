@@ -62,7 +62,7 @@ function releaseFailures(r: ShotResult): FailureEvent[] {
 function landingFailures(r: ShotResult, ctx: DetectContext): FailureEvent[] {
   if (!r.landing) return []
   const { x, t } = r.landing
-  if (x < SELF_HIT_X) return [{ id: 'self_hit', t, numbers: { x } }]
+  if (x < SELF_HIT_X && !ctx.fixedLaunch) return [{ id: 'self_hit', t, numbers: { x } }]
   if (ctx.targets.length === 0) return []
   const nearest = ctx.targets.reduce((a, b) => (Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a))
   const miss = x - nearest.x
@@ -95,7 +95,7 @@ export function detectFailures(r: ShotResult, ctx: DetectContext): FailureEvent[
     // A stone that lands on a target was thrown and computed well enough: no faults to report.
     ...(ctx.studentFlight && !onTarget ? studentPhysics(r, ctx) : []),
   ]
-  const releaseFaults = codeFaults.length > 0 || onTarget ? [] : releaseFailures(r)
+  const releaseFaults = codeFaults.length > 0 || onTarget || ctx.fixedLaunch ? [] : releaseFailures(r)
   const landing = landingFailures(r, ctx)
   const consequences = codeFaults.length + releaseFaults.length > 0 ? landing.filter((e) => e.id === 'self_hit') : landing
   const events = [...codeFaults, ...releaseFaults, ...consequences]

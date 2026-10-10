@@ -13,6 +13,11 @@ export interface LaunchSheet {
 }
 
 export function launchSheet(params: SimParams): LaunchSheet | null {
+  const l = params.launcher
+  if (l) {
+    const a = (l.angleDeg * Math.PI) / 180
+    return { x0: l.x0, y0: l.y0, v0: l.speed, alphaDeg: l.angleDeg, vx: l.speed * Math.cos(a), vy: l.speed * Math.sin(a), g: params.world.g }
+  }
   const r = simulateArm(params.trebuchet, params.world.g).release
   if (!r) return null
   return {

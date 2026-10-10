@@ -20,9 +20,18 @@ export interface WorldParams {
   wind: number // m/s along +x
 }
 
+/** A fixed launcher (tower with a chute) for the basics: the stone leaves (x0, y0) at this speed and angle, no arm. */
+export interface LauncherParams {
+  x0: number // m, where the chute lets go
+  y0: number // m, height of the chute
+  speed: number // m/s
+  angleDeg: number // above horizontal
+}
+
 export interface SimParams {
   trebuchet: TrebuchetParams
   world: WorldParams
+  launcher?: LauncherParams
 }
 
 export interface ArmSample {

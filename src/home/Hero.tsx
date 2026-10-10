@@ -1,3 +1,4 @@
+import { CHAPTERS } from '../lab/levels'
 import type { ProgressSummary } from './progress'
 
 const FRAMES = [1, 3, 2, 4, 5].map((ch) => `/previews/classic-${ch}.webp`)
@@ -33,8 +34,8 @@ export function Hero({ summary, onContinue }: HeroProps) {
             <path d="M4 30 Q 110 -20 216 30" fill="none" stroke="var(--lab-accent)" strokeWidth="3" strokeLinecap="round" />
           </svg>
           <p className="text-[17px] md:text-lg leading-relaxed max-w-[540px]" style={{ color: 'var(--lab-text)', opacity: 0.88 }}>
-            Настраиваешь требушет, считаешь траекторию по формулам и проверяешь расчёт выстрелом. Промах не страшен: он попадает в журнал
-            и объясняет, что пошло не так.
+            Начинаешь со школьной базы — числовая ось, Пифагор, парабола, первые строки на Python — и шаг за шагом доходишь до
+            настоящего требушета. Каждый расчёт проверяешь выстрелом, а промах объясняет, что пошло не так.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mt-8">
@@ -53,7 +54,7 @@ export function Hero({ summary, onContinue }: HeroProps) {
 
           <dl className="flex flex-wrap gap-x-8 gap-y-3 mt-10 lab-mono text-sm">
             <Stat value={String(summary.total)} label="миссий" />
-            <Stat value="5" label="глав" />
+            <Stat value={String(CHAPTERS.length)} label="глав" />
             <Stat value="2" label="вселенные" />
             {summary.started && <Stat value={`${summary.stars}/${summary.maxStars}`} label="звёзд" accent />}
           </dl>

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { chapterLabel } from '../levels'
 import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
 
@@ -22,7 +23,7 @@ export function MissionIntro({ mission, formal, onStart }: { mission: Mission; f
       <div className="lab-panel lab-rise w-[min(560px,100%)] p-5 md:p-7 flex flex-col gap-4 max-h-[92vh] overflow-y-auto">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="lab-label">
-            Глава {mission.chapter} · миссия {mission.order}
+            {chapterLabel(mission.chapter)} · {mission.subject ? `${mission.subject} · шаг` : 'миссия'} {mission.order}
           </span>
           <span className="lab-mono text-[11px] px-2 py-0.5 rounded-full" style={{ background: 'var(--lab-accent-soft)', color: 'var(--lab-accent)' }}>
             {KIND[mission.kind]}
@@ -42,7 +43,7 @@ export function MissionIntro({ mission, formal, onStart }: { mission: Mission; f
         </div>
         <ul className="text-sm flex flex-col gap-1.5" style={{ color: 'var(--lab-dim)' }}>
           <li>
-            {'❤️'.repeat(MAX_LIVES)} — {formal ? 'три допуска: неудачный пуск списывает один.' : 'три жизни: промах отнимает одну.'}
+            {mission.practice ? (formal ? '🎓 Учебное испытание: допуски не расходуются.' : '🎓 Разминка: жизни не тратятся, пробуй сколько нужно.') : `${'❤️'.repeat(MAX_LIVES)} — ${formal ? 'три допуска: неудачный пуск списывает один.' : 'три жизни: промах отнимает одну.'}`}
           </li>
           <li>📐 {formal ? 'Все числа для расчёта — в панели справа. Проверка расчёта допусков не тратит.' : 'Все числа для расчёта — в панели справа. Проверка расчёта жизни не тратит.'}</li>
           <li>💡 {formal ? 'Подсказки открываются по одной после каждого пуска.' : 'Подсказки открываются по одной после каждого выстрела.'}</li>
