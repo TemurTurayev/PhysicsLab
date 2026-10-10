@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addBoulders, addDomeHills, addFlowers, addGrass, addPines, addRoundTrees, applyHeight, rollingHeight } from './natureDressing'
 import { addGroundDetail } from '../textures/groundDetail'
 import type { Target } from '../../levels/types'
 import { createSky } from '../sky'
@@ -79,6 +80,9 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
   const groundW = opts.maxX + 180 // x from -100: broken beams throw the stone ~70 m backwards
   const groundGeo = track(new THREE.PlaneGeometry(groundW, 240, 160, 90))
   groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
+  // Flat battlefield from camp to moat; the land rolls away on the flanks and behind the castle.
+  const height = (x: number, z: number) => rollingHeight(x, z, opts.maxX, { flatZ: 46, flatXMin: -32, flatXMax: castleX + 14, rise: 5 })
+  applyHeight(groundGeo, height)
   const gColors = new Float32Array(groundGeo.attributes.position.count * 3)
   const [cMud, cGrass, cDry, cMoatMud] = [new THREE.Color('#58442e'), new THREE.Color('#7b7a48'), new THREE.Color('#8c7a4e'), new THREE.Color('#383127')]
   for (let i = 0; i < groundGeo.attributes.position.count; i++) {
@@ -320,33 +324,20 @@ export const createSiege: EnvironmentFactory = (opts: EnvironmentOptions): Envir
     crows.push({ pivot, wingL, wingR, radius: 12 + i * 3.5, speed: 0.6 + i * 0.08, y: 16 + i * 1.5, phase: i * 1.25 })
   }
 
-  // Grass tufts & Field stones
-  const tuftGeo = track(new THREE.ConeGeometry(0.16, 0.38, 4)); tuftGeo.translate(0, 0.19, 0)
-  const grassMat = track(new THREE.MeshLambertMaterial({ color: 0x6e7838, flatShading: true }))
-  const tufts = track(new THREE.InstancedMesh(tuftGeo, grassMat, 75))
-  let placedTufts = 0
-  while (placedTufts < 75) {
-    const gx = -20 + rand() * (opts.maxX + 30), gz = -24 + rand() * 48
-    if (!isReserved(gx, gz, 0.8)) {
-      dummy.position.set(gx, 0, gz); const s = 0.7 + rand() * 0.5
-      dummy.scale.set(s, s, s); dummy.rotation.set(0, rand() * Math.PI * 2, 0); dummy.updateMatrix()
-      tufts.setMatrixAt(placedTufts++, dummy.matrix)
-    }
-  }
-  tufts.instanceMatrix.needsUpdate = true; group.add(tufts)
-
-  const fieldStones = track(new THREE.InstancedMesh(stoneGeo, stoneMatShared, 25))
-  fieldStones.castShadow = true
-  let placedStones = 0
-  while (placedStones < 25) {
-    const sx = -18 + rand() * (opts.maxX + 20), sz = -22 + rand() * 44
-    if (!isReserved(sx, sz, 0.8)) {
-      dummy.position.set(sx, 0.1, sz); const s = 0.7 + rand() * 0.6
-      dummy.scale.set(s, s * 0.5, s); dummy.rotation.set(rand() * 2, rand() * 2, rand() * 2); dummy.updateMatrix()
-      fieldStones.setMatrixAt(placedStones++, dummy.matrix)
-    }
-  }
-  fieldStones.instanceMatrix.needsUpdate = true; group.add(fieldStones)
+  // Battlefield: dry grass and field flowers, stones, woods on the flanks, hills behind the castle
+  const avoid = (x: number, z: number) => isReserved(x, z, 0.8) || (Math.abs(x - castleX) < 16 && Math.abs(z) < 44)
+  const field = { xMin: -28, xMax: opts.maxX + 30, zMax: 46, avoid, height, rand }
+  addGrass(group, track, field, 1500, ['#7b7a48', '#8c7a4e', '#6e7038', '#94884f', '#6a6a3a'])
+  addFlowers(group, track, field, 140, ['#e8c84a', '#f2ead8', '#c96a4a'])
+  addBoulders(group, track, { ...field, zMax: 60 }, 30, ['#7c766c', '#8a8378', '#6b655c'], 1.8)
+  const flanks = (zMin: number) => (x: number, z: number) => Math.abs(z) < zMin || avoid(x, z)
+  addPines(group, track, { xMin: -60, xMax: opts.maxX + 60, zMax: 95, avoid: flanks(50), height, rand }, 70, ['#2f4a2a', '#36502c', '#283f26'])
+  addRoundTrees(group, track, { xMin: -50, xMax: castleX - 20, zMax: 80, avoid: flanks(48), height, rand }, 18, ['#5d6e33', '#6b7a3a', '#4f5f2c'])
+  addDomeHills(group, track, [
+    { z: -40, xFrom: castleX + 75, xTo: castleX + 85, h: [16, 22], r: [40, 50], color: 0x5f6a3a },
+    { z: 30, xFrom: castleX + 80, xTo: castleX + 90, h: [12, 18], r: [40, 50], color: 0x56603a },
+    { z: -120, xFrom: -120, xTo: opts.maxX + 140, h: [14, 26], r: [45, 70], color: 0x6a5a48 },
+  ], rand)
 
   return {
     group, fog, background,

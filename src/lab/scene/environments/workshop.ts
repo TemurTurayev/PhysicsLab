@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addBoulders, addDomeHills, addFlowers, addGrass, addPines, addRoundTrees, applyHeight, rollingHeight } from './natureDressing'
 import { addGroundDetail } from '../textures/groundDetail'
 import { createSky } from '../sky'
 import { woodMaterial } from '../wood'
@@ -52,6 +53,36 @@ interface TargetItem {
   group: THREE.Group
   pivot: THREE.Group
   discMat: THREE.MeshLambertMaterial
+}
+
+/** A farmhouse and a barn on the rise behind the yard: the place the trebuchet was built for. */
+function addFarmstead(group: THREE.Group, track: <T extends { dispose: () => void }>(item: T) => T, height: (x: number, z: number) => number): void {
+  const wall = track(new THREE.MeshLambertMaterial({ color: 0xe9dcc0, flatShading: true }))
+  const timber = track(new THREE.MeshLambertMaterial({ color: 0x6e4a2c, flatShading: true }))
+  const roof = track(new THREE.MeshLambertMaterial({ color: 0x9c4a32, flatShading: true }))
+  const prism = (w: number, h: number, d: number) => {
+    const g = new THREE.CylinderGeometry(0.0001, w / Math.SQRT2, h, 4, 1)
+    g.rotateY(Math.PI / 4)
+    g.scale(1, 1, d / w)
+    return track(g)
+  }
+  const build = (x: number, z: number, w: number, d: number, h: number, mat: THREE.Material, rot: number) => {
+    const b = new THREE.Group()
+    b.position.set(x, height(x, z) - 0.2, z)
+    b.rotation.y = rot
+    const body = new THREE.Mesh(track(new THREE.BoxGeometry(w, h, d)), mat)
+    body.position.y = h / 2
+    const top = new THREE.Mesh(prism(w * 1.15, h * 0.75, d * 1.1), roof)
+    top.position.y = h + (h * 0.75) / 2
+    for (const m of [body, top]) {
+      m.castShadow = true
+      m.receiveShadow = true
+    }
+    b.add(body, top)
+    group.add(b)
+  }
+  build(-48, -46, 9, 6, 4.2, wall, 0.25)
+  build(-30, -55, 12, 8, 5.5, timber, -0.15)
 }
 
 export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): Environment => {
@@ -108,6 +139,8 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   // Ground plane
   const groundGeo = track(new THREE.PlaneGeometry(opts.maxX + 180, 240, 160, 90))
   groundGeo.rotateX(-Math.PI / 2); groundGeo.translate((opts.maxX - 20) / 2, 0, 0)
+  const height = (x: number, z: number) => rollingHeight(x, z, opts.maxX, { flatZ: 20, flatXMin: -30, flatXMax: opts.maxX + 12, rise: 6 })
+  applyHeight(groundGeo, height)
   const gColors = new Float32Array(groundGeo.attributes.position.count * 3)
   const cDirt = new THREE.Color(0xa08866); const cGrass = new THREE.Color('#86a052'); const cDry = new THREE.Color(0xa3a35c)
   for (let i = 0; i < groundGeo.attributes.position.count; i++) {
@@ -199,7 +232,7 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   const treeCoords = [[-16, -15], [16, -22], [33, -24], [44, -19], [-38, 24], [30, 18]]
   for (const [tx, tz] of treeCoords) {
     const tree = new THREE.Group()
-    tree.position.set(tx, 0, tz)
+    tree.position.set(tx, height(tx, tz), tz)
     addMesh(tree, trunkGeo, darkWoodMat, [0, 1.6, 0])
     addMesh(tree, coneGeo1, foliageMat, [0, 3.6, 0])
     addMesh(tree, coneGeo2, foliageMat, [0, 5.0, 0])
@@ -218,40 +251,20 @@ export const createWorkshop: EnvironmentFactory = (opts: EnvironmentOptions): En
   addMesh(cart, track(new THREE.BoxGeometry(1.5, 0.25, 0.85)), woodMat, [0.1, 0.5, 0], [0, 0, -0.15])
   group.add(cart)
 
-  // Repeated instanced grass tufts & stones
-  const tuftGeo = track(new THREE.ConeGeometry(0.18, 0.4, 4))
-  tuftGeo.translate(0, 0.2, 0)
-  const grassMat = track(new THREE.MeshLambertMaterial({ color: 0x6e8838, flatShading: true }))
-  const grassTufts = track(new THREE.InstancedMesh(tuftGeo, grassMat, 70))
-  let placedTufts = 0
-  while (placedTufts < 70) {
-    const gx = -22 + rand() * (opts.maxX + 40); const gz = -18 + rand() * 34
-    if (!isReserved(gx, gz, 0.8)) {
-      dummy.position.set(gx, 0, gz)
-      const s = 0.7 + rand() * 0.6
-      dummy.scale.set(s, s, s); dummy.rotation.set(0, rand() * Math.PI * 2, 0); dummy.updateMatrix()
-      grassTufts.setMatrixAt(placedTufts++, dummy.matrix)
-    }
-  }
-  grassTufts.instanceMatrix.needsUpdate = true
-  group.add(grassTufts)
-
-  const stoneGeo = track(new THREE.DodecahedronGeometry(0.2, 0))
-  const stoneMat = track(new THREE.MeshLambertMaterial({ color: 0x76736c, flatShading: true }))
-  const stones = track(new THREE.InstancedMesh(stoneGeo, stoneMat, 25))
-  stones.castShadow = true
-  let placedStones = 0
-  while (placedStones < 25) {
-    const sx = -18 + rand() * 38; const sz = -15 + rand() * 28
-    if (!isReserved(sx, sz, 0.6)) {
-      dummy.position.set(sx, 0.08, sz)
-      dummy.scale.set(0.7 + rand() * 0.5, 0.4 + rand() * 0.3, 0.7 + rand() * 0.5)
-      dummy.rotation.set(rand() * 2, rand() * 2, rand() * 2); dummy.updateMatrix()
-      stones.setMatrixAt(placedStones++, dummy.matrix)
-    }
-  }
-  stones.instanceMatrix.needsUpdate = true
-  group.add(stones)
+  // Countryside: grass and flowers, an orchard and a pine copse, field stones, a farmstead, hills
+  const avoidYard = (x: number, z: number) => isReserved(x, z, 0.8) || (x > -16 && x < 14 && z < -9 && z > -19)
+  const near = { xMin: -30, xMax: opts.maxX + 30, zMax: 42, avoid: avoidYard, height, rand }
+  addGrass(group, track, near, 1600, ['#6f9a3d', '#7fa846', '#5f8a33', '#8bb052', '#9aa84e'])
+  addFlowers(group, track, near, 260, ['#f5f1e6', '#f2d24b', '#b78be0', '#f08a8a'])
+  addBoulders(group, track, { ...near, zMax: 60 }, 26, ['#7c786f', '#8a867b', '#6b6860'], 1.6)
+  const outside = (zMin: number) => (x: number, z: number) => Math.abs(z) < zMin || avoidYard(x, z)
+  addRoundTrees(group, track, { xMin: -60, xMax: 40, zMax: 70, avoid: outside(26), height, rand }, 26, ['#5e8a35', '#6f9a3d', '#4f7a2e', '#7a9a3a'])
+  addPines(group, track, { xMin: 20, xMax: opts.maxX + 60, zMax: 85, avoid: outside(30), height, rand }, 40, ['#2f5a2c', '#36652f', '#28502a'])
+  addFarmstead(group, track, height)
+  addDomeHills(group, track, [
+    { z: -110, xFrom: -110, xTo: opts.maxX + 120, h: [10, 18], r: [35, 55], color: 0x5f8a3a },
+    { z: -180, xFrom: -140, xTo: opts.maxX + 160, h: [24, 40], r: [60, 90], color: 0x6a8a74 },
+  ], rand)
 
   // Distance cue stakes every 10m along z = -3
   const stakeGeo = track(new THREE.BoxGeometry(0.08, 0.9, 0.08))

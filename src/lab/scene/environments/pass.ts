@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { addBoulders, addPines } from './natureDressing'
 import { addGroundDetail } from '../textures/groundDetail'
 import type { Target } from '../../levels/types'
 import { createSky } from '../sky'
@@ -9,6 +10,19 @@ let seed = 777
 function rand(): number {
   seed = (seed * 16807) % 2147483647
   return (seed - 1) / 2147483646
+}
+
+/** The saddle: flat lane |z| ≤ 6, slopes rising on both sides, capped so the mesh edge never shows a cliff. */
+function passHeight(gx: number, gz: number): number {
+  let y = 0
+  if (gz < -6) {
+    const d = -gz - 6
+    y = d > 4 ? Math.pow((d - 4) / 10, 1.8) * 7.5 + Math.sin(gx * 0.06 + gz * 0.05) * 2.5 : (d / 4) * 0.4
+  } else if (gz > 6) {
+    const d = gz - 6
+    y = d > 8 ? Math.pow((d - 8) / 10, 1.8) * 7.5 + Math.cos(gx * 0.06 + gz * 0.05) * 2.5 : (d / 8) * 0.4
+  }
+  return Math.min(40, Math.max(0, y))
 }
 
 function isReserved(x: number, z: number, m = 0.5): boolean {
@@ -91,15 +105,8 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
 
   for (let i = 0; i < posCount; i++) {
     const gx = groundGeo.attributes.position.getX(i); const gz = groundGeo.attributes.position.getZ(i); const absZ = Math.abs(gz)
-    let y = 0
-    if (gz < -6) {
-      const d = -gz - 6; y = d > 4 ? Math.pow((d - 4) / 10, 1.8) * 7.5 + Math.sin(gx * 0.06 + gz * 0.05) * 2.5 : (d / 4) * 0.4
-    } else if (gz > 6) {
-      const d = gz - 6; y = d > 8 ? Math.pow((d - 8) / 10, 1.8) * 7.5 + Math.cos(gx * 0.06 + gz * 0.05) * 2.5 : (d / 8) * 0.4
-    }
-    if (absZ <= 6) y = 0
-    // Cap the slopes: unbounded they reach hundreds of metres at the mesh edge and show a cut-off cliff in the sky.
-    groundGeo.attributes.position.setY(i, Math.min(40, Math.max(0, y)))
+    const y = passHeight(gx, gz)
+    groundGeo.attributes.position.setY(i, y)
 
     const n = Math.sin(gx * 0.12) * Math.cos(gz * 0.15) * 0.1
     const col = cGrass.clone()
@@ -119,7 +126,7 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   groundMesh.receiveShadow = true; group.add(groundMesh)
 
   // Distant snow-capped mountain peaks
-  const peakGeo = track(new THREE.ConeGeometry(24, 28, 5)); const snowCapGeo = track(new THREE.ConeGeometry(12, 14, 5))
+  const peakGeo = track(new THREE.ConeGeometry(24, 28, 5)); const snowCapGeo = track(new THREE.ConeGeometry(12.7, 14.2, 5)) // proud of the peak's faces: equal cones z-fight into a pixel mess
   const peakMat = track(new THREE.MeshLambertMaterial({ color: 0x5a6066, flatShading: true }))
   const snowMat = track(new THREE.MeshLambertMaterial({ color: 0xe8eff4, flatShading: true }))
   const peaks: Array<[number, number, number, number]> = [
@@ -200,7 +207,7 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
   const treeCoords = [[-18, -12], [8, -11], [30, -12], [opts.maxX * 0.65, -13], [-15, 15], [22, 16], [opts.maxX * 0.8, 15]]
   const pineLeanZ = -windDir * (0.12 + Math.min(0.25, absWind * 0.02))
   for (const [tx, tz] of treeCoords) {
-    const tree = new THREE.Group(); tree.position.set(tx, 0, tz); tree.rotation.z = pineLeanZ
+    const tree = new THREE.Group(); tree.position.set(tx, passHeight(tx, tz), tz); tree.rotation.z = pineLeanZ
     addMesh(tree, trunkGeo, darkWoodMat, [0, 1.4, 0]); addMesh(tree, fGeo1, foliageMat, [0, 2.5, 0])
     addMesh(tree, fGeo2, foliageMat, [0, 3.7, 0]); addMesh(tree, fGeo3, foliageMat, [0, 4.7, 0]); group.add(tree)
   }
@@ -290,6 +297,16 @@ export const createPass: EnvironmentFactory = (opts: EnvironmentOptions): Enviro
     }
   }
   stones.instanceMatrix.needsUpdate = true; group.add(stones)
+
+  // Conifer forest on the lower slopes (thinning out where the snow starts) and scree boulders
+  // Nothing tall between the camera (behind the machine, on the +z side) and the lane.
+  const inCameraView = (x: number, z: number) => z > 0 && z < 40 && x < 45
+  const onSlope = (lo: number, hi: number) => (x: number, z: number) => {
+    const h = passHeight(x, z)
+    return Math.abs(z) < 9 || h < lo || h > hi || isReserved(x, z, 1) || inCameraView(x, z)
+  }
+  addPines(group, track, { xMin: -60, xMax: opts.maxX + 60, zMax: 70, avoid: onSlope(0.5, 9), height: passHeight, rand }, 150, ['#2b4527', '#324d2c', '#263e23', '#3a5530'], 0.15)
+  addBoulders(group, track, { xMin: -50, xMax: opts.maxX + 50, zMax: 60, avoid: onSlope(0.3, 12), height: passHeight, rand }, 50, ['#6c7075', '#5f6368', '#7a7d80'], 2.6)
 
   // Targets: straw archery butts on wooden stands
   const targetTex = track(createTargetTexture()); const hayMat = track(new THREE.MeshLambertMaterial({ color: 0xd4b055, flatShading: true }))
