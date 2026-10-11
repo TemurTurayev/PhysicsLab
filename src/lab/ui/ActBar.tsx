@@ -114,6 +114,9 @@ export function ActBar(p: ActBarProps) {
               
               {tr("Звуки кнопок") + ' '}<span>{audio.uiSounds ? tr('вкл') : tr('выкл')}</span>
             </button>
+            <button type="button" role="menuitemcheckbox" aria-checked={audio.voice} className="lab-btn justify-between w-full" onClick={() => audio.setVoice(!audio.voice)}>
+              {tr('Озвучка') + ' '}<span>{audio.voice ? tr('вкл') : tr('выкл')}</span>
+            </button>
             <button type="button" role="menuitemcheckbox" aria-checked={p.retro} className="lab-btn justify-between w-full" onClick={p.onRetro}>
               
               {tr("Ретро-экран") + ' '}<span className="lab-mono text-xs">{p.retro ? tr('вкл') : tr('выкл')}</span>

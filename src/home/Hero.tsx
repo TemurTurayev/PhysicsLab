@@ -23,7 +23,7 @@ export function Hero({ summary, onContinue }: HeroProps) {
       </div>
       <div className="home-hero-shade" aria-hidden="true" />
       <div className="home-hero-guide hidden lg:flex" aria-hidden="true">
-        <div className="home-hero-bubble">{tr('Привет! Я Нодир. Помоги мне рассчитать бросок — и вся деревня увидит, на что способна физика!')}</div>
+        <div className="home-hero-bubble">{tr('Привет! Я Джон Доу. Помоги мне рассчитать бросок — и вся деревня увидит, на что способна физика!')}</div>
         <Portrait world="classic" className="home-hero-portrait" />
       </div>
 

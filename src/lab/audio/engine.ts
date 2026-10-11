@@ -6,9 +6,11 @@ interface AudioSettings {
   music: boolean
   musicVolume: number // 0..1
   uiSounds: boolean
+  voice: boolean // narration of briefings and announcements
   setMusic: (on: boolean) => void
   setMusicVolume: (v: number) => void
   setUiSounds: (on: boolean) => void
+  setVoice: (on: boolean) => void
 }
 
 export const useAudioSettings = create<AudioSettings>()(
@@ -17,9 +19,11 @@ export const useAudioSettings = create<AudioSettings>()(
       music: true,
       musicVolume: 0.45,
       uiSounds: true,
+      voice: true,
       setMusic: (music) => set({ music }),
       setMusicVolume: (musicVolume) => set({ musicVolume: Math.max(0, Math.min(1, musicVolume)) }),
       setUiSounds: (uiSounds) => set({ uiSounds }),
+      setVoice: (voice) => set({ voice }),
     }),
     { name: 'physicslab-audio' },
   ),
@@ -27,8 +31,10 @@ export const useAudioSettings = create<AudioSettings>()(
 
 export interface Bus {
   ctx: AudioContext
-  music: GainNode // music → reverb send + dry
+  music: GainNode // music → duck → reverb send + dry
+  duck: GainNode // lowered while a voice line plays
   ui: GainNode
+  voice: GainNode
   reverb: ConvolverNode
 }
 
@@ -68,12 +74,17 @@ export function getBus(): Bus | null {
     const music = ctx.createGain()
     const { music: on, musicVolume } = useAudioSettings.getState()
     music.gain.value = on ? musicVolume * 0.5 : 0
-    music.connect(limiter)
-    music.connect(reverb)
+    const duck = ctx.createGain()
+    music.connect(duck)
+    duck.connect(limiter)
+    duck.connect(reverb)
     const ui = ctx.createGain()
     ui.gain.value = 0.5
     ui.connect(limiter)
-    bus = { ctx, music, ui, reverb }
+    const voice = ctx.createGain()
+    voice.gain.value = 1
+    voice.connect(limiter)
+    bus = { ctx, music, duck, ui, voice, reverb }
     useAudioSettings.subscribe((s) => {
       if (!bus) return
       bus.music.gain.setTargetAtTime(s.music ? s.musicVolume * 0.5 : 0, bus.ctx.currentTime, 0.3)

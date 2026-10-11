@@ -7,8 +7,8 @@ import type { UniverseId } from '../lab/universe/types'
 import { Portrait } from './Portrait'
 
 const LOOK: Record<UniverseId, { hero: string; mood: string }> = {
-  classic: { hero: tr('Нодир, сын мельника и изобретатель-самоучка'), mood: tr('Дерево · верёвка · камень · приключение') },
-  sigma: { hero: tr('Стажёр Даниил Орлов, отдел прикладной механики'), mood: tr('Бетон · сталь · протоколы · 1998 год') },
+  classic: { hero: tr('Джон Доу, сын мельника и изобретатель-самоучка'), mood: tr('Дерево · верёвка · камень · приключение') },
+  sigma: { hero: tr('Стажёр Джон Доу, отдел прикладной механики'), mood: tr('Бетон · сталь · протоколы · 1998 год') },
 }
 
 /** First visit: choose the world. The same physics, two stories; it can be changed any time at the top. */

@@ -5,6 +5,7 @@ import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
 import { Portrait } from '../../home/Portrait'
 import type { UniverseId } from '../universe/types'
+import { VoiceButton } from '../audio/VoiceButton'
 
 const KIND: Record<Mission['kind'], string> = {
   tune: tr('Настрой и попади'),
@@ -23,7 +24,7 @@ export function MissionIntro({ mission, formal, onStart, world, story }: { missi
   useEffect(() => start.current?.focus(), [])
   return (
     <div className="absolute inset-0 z-40 flex items-center justify-center p-3" style={{ background: 'rgba(5, 6, 8, 0.55)' }} role="dialog" aria-modal="true" aria-labelledby="intro-title">
-      <div className="lab-panel lab-rise w-[min(560px,100%)] p-5 md:p-7 flex flex-col gap-4 max-h-[92vh] overflow-y-auto">
+      <div className="lab-panel lab-rise w-[min(560px,100%)] p-5 md:p-7 flex flex-col gap-4 max-h-[92vh] overflow-y-auto" data-vg-title={world === 'sigma' ? tr('Брифинг · испытание {0}', [mission.id]) : undefined}>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="lab-label">
             {chapterLabel(mission.chapter)} · {mission.subject ? tr(`{0} · шаг`, [mission.subject]) : tr('миссия')} {mission.order}
@@ -57,9 +58,12 @@ export function MissionIntro({ mission, formal, onStart, world, story }: { missi
           <li>📐 {formal ? tr('Данные, формулы и проверка расчёта — на столе решений. Проверка допусков не тратит.') : tr('Данные, формулы и проверка расчёта — на столе решений. Проверка жизни не тратит.')}</li>
           <li>💡 {formal ? tr('Подсказки открываются по одной после каждого пуска.') : tr('Подсказки открываются по одной после каждого выстрела.')}</li>
         </ul>
-        <button ref={start} type="button" className="lab-btn lab-btn-primary self-start !min-h-[46px] !px-6 text-base" onClick={onStart}>
-          {formal ? tr('К расчёту') : tr('К столу решений')} <span className="lab-kbd">Enter</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button ref={start} type="button" className="lab-btn lab-btn-primary !min-h-[46px] !px-6 text-base" onClick={onStart}>
+            {formal ? tr('К расчёту') : tr('К столу решений')} <span className="lab-kbd">Enter</span>
+          </button>
+          <VoiceButton clip={`${world}/${mission.id}`} />
+        </div>
       </div>
     </div>
   )

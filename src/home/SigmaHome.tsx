@@ -6,6 +6,7 @@ import { useAccount } from '../lab/account/account'
 import { AuthDialog } from '../lab/account/AuthDialog'
 import { useAudioSettings } from '../lab/audio/engine'
 import { SOUNDFONT_CREDIT } from '../lab/audio/samples'
+import { VOICE_CREDIT } from '../lab/audio/voice'
 import { useConsole } from '../lab/console/store'
 import { useLabProgress } from '../lab/state/labProgress'
 import { applyCopy, getUniverse } from '../lab/universe'
@@ -75,6 +76,7 @@ export function SigmaHome({ summary }: { summary: ProgressSummary }) {
       <div className="cs-footer">
         {tr('Протокол {0} · допуск {1}/{2} ★', ['2026.10', summary.stars, summary.maxStars])}
         <div className="cs-credit">{SOUNDFONT_CREDIT}</div>
+        <div className="cs-credit">{VOICE_CREDIT}</div>
       </div>
 
       {dialog === 'options' && <OptionsDialog onClose={() => setDialog(null)} />}
@@ -116,6 +118,9 @@ function OptionsDialog({ onClose }: { onClose: () => void }) {
             </label>
             <label className="cs-radio">
               <input type="checkbox" checked={audio.uiSounds} onChange={(e) => audio.setUiSounds(e.target.checked)} /> {tr('Звуки кнопок')}
+            </label>
+            <label className="cs-radio">
+              <input type="checkbox" checked={audio.voice} onChange={(e) => audio.setVoice(e.target.checked)} /> {tr('Озвучка')}
             </label>
           </fieldset>
         </div>

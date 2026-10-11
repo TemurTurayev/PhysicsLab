@@ -4,8 +4,8 @@ export type Mood = 'smile' | 'think' | 'wow'
 
 /**
  * The two heroes as flat vector busts:
- * - Classic: Nodir, a village boy-inventor — embroidered skullcap, brass goggles, pencil behind the ear;
- * - Complex: intern Daniil — glasses, white lab coat over a blue shirt and tie, a Σ-7 pass on the pocket.
+ * - Classic: John Doe, a village boy-inventor — embroidered skullcap, brass goggles, pencil behind the ear;
+ * - Complex: intern John Doe — glasses, white lab coat over a blue shirt and tie, a Σ-7 pass on the pocket.
  */
 export function Portrait({ world, mood = 'smile', className = '' }: { world: UniverseId; mood?: Mood; className?: string }) {
   return world === 'sigma' ? <Intern mood={mood} className={className} /> : <Nodir mood={mood} className={className} />
@@ -30,7 +30,7 @@ function Brows({ mood, lx, rx, y, color }: { mood: Mood; lx: number; rx: number;
 
 function Nodir({ mood, className }: { mood: Mood; className: string }) {
   return (
-    <svg viewBox="0 0 200 240" className={className} role="img" aria-label="Nodir">
+    <svg viewBox="0 0 200 240" className={className} role="img" aria-label="John Doe">
       {/* shoulders: linen shirt, leather vest */}
       <path d="M22 240 q8 -58 78 -66 q70 8 78 66z" fill="#e9dcc2" />
       <path d="M34 240 q6 -46 44 -58 l22 30 l22 -30 q38 12 44 58z" fill="#7a4b2a" />
@@ -79,7 +79,7 @@ function Intern({ mood, className }: { mood: Mood; className: string }) {
   // Serious by default: the complex does not smile at its interns. Hard top light, muted palette.
   const look = mood === 'smile' ? 'serious' : mood
   return (
-    <svg viewBox="0 0 200 240" className={className} role="img" aria-label="Daniil Orlov">
+    <svg viewBox="0 0 200 240" className={className} role="img" aria-label="John Doe">
       <defs>
         <linearGradient id="int-coat" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#d9ddd9" />

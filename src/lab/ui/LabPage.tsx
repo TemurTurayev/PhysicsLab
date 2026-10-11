@@ -17,6 +17,7 @@ import { withSliders } from '../levels/evaluate'
 import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
+import { playVoice, stopVoice } from '../audio/voice'
 import { useIsDesktop, useIsShort, useIsWide } from './useIsDesktop'
 import { useConsoleMission, useMissionBridge } from '../console/useConsoleMission'
 import { defaultQuality, saveQuality, type FxQuality } from '../scene/postFx'
@@ -121,6 +122,12 @@ function MissionView({ mission }: { mission: Mission }) {
     if (launcher) sceneRef.current?.setLauncher(launcher, universe.envFor(mission.chapter) ? universe.machine : 'wood')
   }, [launcher, sceneRef, universe, mission.chapter])
   const [intro, setIntro] = useState(true)
+  // The briefing is read aloud on arrival; leaving the mission cuts the line.
+  const clip = `${universe.id}/${mission.id}`
+  useEffect(() => {
+    void playVoice(clip)
+    return stopVoice
+  }, [clip])
   const [coach, setCoach] = useState(false)
   const [slow, setSlow] = useState(false)
   useEffect(() => sceneRef.current?.setSlowMotion(slow), [slow, sceneRef, universe])

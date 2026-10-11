@@ -4,6 +4,7 @@ import { Portrait } from '../../home/Portrait'
 import { MAX_LIVES } from '../levels/lives'
 import type { Mission } from '../levels/types'
 import type { UniverseId } from '../universe/types'
+import { VoiceButton } from '../audio/VoiceButton'
 import { HintLadder } from './HintLadder'
 
 export interface SolutionDeskProps {
@@ -52,9 +53,12 @@ export function SolutionDesk(p: SolutionDeskProps) {
                 {m.goal}
               </span>
             </div>
-            <button type="button" className="lab-btn self-start !min-h-[32px] !px-3 text-xs" onClick={p.onReread}>
-              {tr('Полное условие')}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="lab-btn !min-h-[32px] !px-3 text-xs" onClick={p.onReread}>
+                {tr('Полное условие')}
+              </button>
+              <VoiceButton clip={`${p.world}/${m.id}`} />
+            </div>
           </div>
         </div>
 

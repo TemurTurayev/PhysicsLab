@@ -4,6 +4,7 @@ import { AccountButton } from '../lab/account/AccountButton'
 import { LanguageSwitch } from '../i18n/LanguageSwitch'
 import { MusicToggle } from '../lab/audio/MusicToggle'
 import { SOUNDFONT_CREDIT } from '../lab/audio/samples'
+import { VOICE_CREDIT } from '../lab/audio/voice'
 import { useLabProgress } from '../lab/state/labProgress'
 import '../lab/ui/lab.css'
 import './home.css'
@@ -71,7 +72,7 @@ export function HomePage() {
           </span>
           <span className="sm:ml-auto">{tr("Работает в браузере на компьютере, планшете и телефоне. Python запускается прямо на странице — ничего устанавливать не нужно.")}</span>
         </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 pb-6 text-[11px]" style={{ color: 'var(--lab-dim)', opacity: 0.7 }}>{tr('Музыка')}: {SOUNDFONT_CREDIT}</div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 pb-6 text-[11px]" style={{ color: 'var(--lab-dim)', opacity: 0.7 }}>{tr('Музыка')}: {SOUNDFONT_CREDIT} · {VOICE_CREDIT}</div>
       </footer>
       {universe === null && <WorldGate />}
     </div>

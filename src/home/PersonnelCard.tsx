@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { tr } from '../i18n'
+import { playVoice, stopVoice } from '../lab/audio/voice'
+import { NOTICES } from './notices'
 import { Portrait } from './Portrait'
 
 /** The intern's clearance pass: the complex sees people as records. Clearance grows with finished sectors. */
@@ -16,7 +18,7 @@ export function PersonnelCard({ clearance }: { clearance: number }) {
         </div>
         <dl className="pass-fields">
           <dt>{tr('Фамилия, имя')}</dt>
-          <dd>{tr('Орлов Даниил')}</dd>
+          <dd>{tr('Доу Джон')}</dd>
           <dt>{tr('Должность')}</dt>
           <dd>{tr('Стажёр, отдел прикладной механики')}</dd>
           <dt>{tr('Допуск')}</dt>
@@ -31,22 +33,24 @@ export function PersonnelCard({ clearance }: { clearance: number }) {
   )
 }
 
-const NOTICES = [
-  tr('Объявление: пуск без расчёта приравнивается к нарушению техники безопасности.'),
-  tr('Напоминаем: каждая ошибка заносится в архив протоколов. Архив хранится бессрочно.'),
-  tr('Отдел кадров: стажёры без вводного курса к установке ЭМУ-3 не допускаются.'),
-  tr('Служба вентиляции: шум в секторе В является штатным. Повода для беспокойства нет.'),
-  tr('Охрана труда: находиться на линии огня во время пуска запрещено.'),
-  tr('Администрация благодарит сотрудников за пунктуальность. Опоздания учитываются.'),
-]
-
-/** Public-address notices, one at a time, in the dry voice of the institute. */
+/**
+ * Public-address notices, one at a time, in the dry voice of the institute — read aloud by the announcer.
+ * The next notice waits for the current line to finish.
+ */
 export function Notices() {
   const [i, setI] = useState(0)
   useEffect(() => {
-    const id = setInterval(() => setI((x) => (x + 1) % NOTICES.length), 9000)
-    return () => clearInterval(id)
-  }, [])
+    let alive = true
+    let timer = 0
+    void playVoice(`sigma/notice-${i}`).then((sec) => {
+      if (alive) timer = window.setTimeout(() => setI((x) => (x + 1) % NOTICES.length), Math.max(9000, (sec ?? 0) * 1000 + 5000))
+    })
+    return () => {
+      alive = false
+      window.clearTimeout(timer)
+    }
+  }, [i])
+  useEffect(() => stopVoice, [])
   return (
     <div className="cs-notice" role="status" aria-live="off">
       <span className="cs-notice-tag">{tr('ОПОВЕЩЕНИЕ')}</span>

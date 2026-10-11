@@ -1,76 +1,109 @@
-/* НИИ «Сигма-7» — terminal skin over the same panels. Only tokens and a few overlays change. */
+/* НИИ «Сигма-7» — the panels as an early-2000s PC game's interface: olive windows with one-pixel bevels,
+   Tahoma text, square corners, inset fields, a yellowish highlight. Only tokens and a few overrides change. */
 @import '@fontsource/share-tech-mono/400.css';
-@import '@fontsource/barlow-condensed/500.css';
-@import '@fontsource/barlow-condensed/700.css';
 
 .lab-root[data-universe='sigma'] {
-  --lab-bg: #0f1112;
-  --lab-panel: rgba(8, 14, 11, 0.86);
-  --lab-panel-solid: #0b120e;
-  --lab-line: rgba(125, 255, 138, 0.18);
-  --lab-text: #c9f5cf;
-  --lab-dim: #7fa889;
-  --lab-accent: #ff6a13;
-  --lab-accent-soft: rgba(255, 106, 19, 0.16);
-  --lab-good: #7dff8a;
-  --lab-bad: #ff4d3d;
-  --lab-info: #6fd3ff;
-  --lab-radius: 4px;
-  --lab-mono: 'Share Tech Mono', ui-monospace, Menlo, monospace;
-  --lab-sans: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
-  --lab-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  --lab-raise: rgba(125, 255, 138, 0.05);
-  letter-spacing: 0.01em;
+  --vg-hi: #8c9686; /* bevel light edge */
+  --vg-lo: #292c21; /* bevel dark edge */
+  --vg-inset: #3e4637; /* sunken fields */
+  --lab-bg: #1a1e17;
+  --lab-panel: rgba(76, 88, 68, 0.97);
+  --lab-panel-solid: #4c5844;
+  --lab-raise: var(--vg-inset);
+  --lab-line: #353b2d;
+  --lab-text: #d8ded3;
+  --lab-dim: #a0aa95;
+  --lab-accent: #c4b550;
+  --lab-accent-soft: rgba(196, 181, 80, 0.12);
+  --lab-good: #a8d46f;
+  --lab-bad: #e0563f;
+  --lab-info: #8fc3d8;
+  --lab-radius: 0px;
+  --lab-mono: 'Share Tech Mono', 'Lucida Console', ui-monospace, monospace;
+  --lab-sans: Tahoma, Verdana, 'DejaVu Sans', 'Segoe UI', sans-serif;
+  --lab-display: Verdana, Tahoma, 'DejaVu Sans', sans-serif;
+  -webkit-font-smoothing: auto;
 }
 
-/* Phosphor glow on text and faint scanlines on every panel. */
+/* Square everything: the era had no rounded corners. */
+.lab-root[data-universe='sigma'] [class*='rounded'],
+.lab-root[data-universe='sigma'] .desk-bubble,
+.lab-root[data-universe='sigma'] .desk-task,
+.lab-root[data-universe='sigma'] .desk-portrait { border-radius: 0 !important; }
+
+/* Raised window: light top-left, dark bottom-right. */
 .lab-root[data-universe='sigma'] .lab-panel {
-  position: relative;
-  text-shadow: 0 0 6px rgba(125, 255, 138, 0.25);
-  box-shadow: 0 0 0 1px rgba(125, 255, 138, 0.08), 0 12px 40px rgba(0, 0, 0, 0.55);
+  background: var(--lab-panel);
+  border: 1px solid;
+  border-color: var(--vg-hi) var(--vg-lo) var(--vg-lo) var(--vg-hi);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55);
 }
-.lab-root[data-universe='sigma'] .lab-panel::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.18) 2px 3px);
-}
-.lab-root[data-universe='sigma'] .lab-label {
-  font-family: var(--lab-mono);
-  letter-spacing: 0.14em;
-}
+.lab-root[data-universe='sigma'] .lab-title { font-family: var(--lab-display); font-weight: 700; letter-spacing: 0; }
+.lab-root[data-universe='sigma'] .lab-label { font-family: var(--lab-sans); letter-spacing: 0.05em; color: var(--lab-dim); }
+
+/* Bevelled push buttons; pressed ones sink. The default button gets the black outline of the era. */
 .lab-root[data-universe='sigma'] .lab-btn {
-  border-radius: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-family: var(--lab-sans);
-  font-size: 15px;
-}
-.lab-root[data-universe='sigma'] .lab-btn-primary {
-  color: #160800;
+  border-radius: 0;
+  min-height: 30px;
+  background: var(--lab-panel-solid);
+  color: var(--lab-text);
+  border: 1px solid;
+  border-color: var(--vg-hi) var(--vg-lo) var(--vg-lo) var(--vg-hi);
+  font: 600 13px/1.2 var(--lab-sans);
+  letter-spacing: 0;
+  text-transform: none;
   text-shadow: none;
-  background: repeating-linear-gradient(-45deg, #ff6a13 0 14px, #ff7d2e 14px 28px);
 }
-.lab-root[data-universe='sigma'] .lab-btn-primary:hover {
-  background: #ff8a3d;
+.lab-root[data-universe='sigma'] .lab-btn:hover { background: #56634d; color: #fff; }
+.lab-root[data-universe='sigma'] .lab-btn:active,
+.lab-root[data-universe='sigma'] .lab-btn[aria-pressed='true'] { border-color: var(--vg-lo) var(--vg-hi) var(--vg-hi) var(--vg-lo); background: var(--vg-inset); transform: none; }
+.lab-root[data-universe='sigma'] .lab-btn-primary {
+  color: #f0eccb;
+  background: #5d6b52;
+  outline: 1px solid #000;
+  outline-offset: 0;
 }
-/* Hazard tape along the top of incident protocols. */
-.lab-root[data-universe='sigma'] [role='dialog'] {
-  border-top: 6px solid transparent;
-  border-image: repeating-linear-gradient(-45deg, #f2c400 0 10px, #1b1b1b 10px 20px) 6;
+.lab-root[data-universe='sigma'] .lab-btn-primary:hover { background: #6a7a5d; color: #fff; }
+.lab-root[data-universe='sigma'] .lab-btn:focus-visible { outline: 1px dotted var(--lab-accent); outline-offset: -4px; }
+.lab-root[data-universe='sigma'] .lab-kbd { border-radius: 0; font-family: var(--lab-sans); opacity: 0.75; }
+
+/* Sunken fields: inputs, the story bubble, the task line. */
+.lab-root[data-universe='sigma'] input[type='number'],
+.lab-root[data-universe='sigma'] input[type='text'],
+.lab-root[data-universe='sigma'] input[type='email'],
+.lab-root[data-universe='sigma'] input[type='password'],
+.lab-root[data-universe='sigma'] textarea,
+.lab-root[data-universe='sigma'] .desk-bubble,
+.lab-root[data-universe='sigma'] .desk-task {
+  background: var(--vg-inset);
+  border: 1px solid;
+  border-color: var(--vg-lo) var(--vg-hi) var(--vg-hi) var(--vg-lo);
+  border-radius: 0;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .lab-root[data-universe='sigma'] .lab-panel::after {
-    animation: sigma-flicker 7s steps(1) infinite;
-  }
-}
-@keyframes sigma-flicker {
-  0%, 96%, 100% { opacity: 1; }
-  97% { opacity: 0.6; }
-  98% { opacity: 1; }
-  99% { opacity: 0.75; }
+.lab-root[data-universe='sigma'] .desk-task { border-left-width: 1px; }
+.lab-root[data-universe='sigma'] .lab-range { accent-color: var(--lab-accent); }
+
+/* The solution desk as a dialog window: a title strip on top, groups divided by etched lines. */
+.lab-root[data-universe='sigma'] .desk { background: var(--lab-panel-solid); }
+.lab-root[data-universe='sigma'] .desk-top { background: #434e3c; border-bottom: 1px solid var(--vg-lo); box-shadow: 0 1px 0 var(--vg-hi); }
+.lab-root[data-universe='sigma'] .desk-h { color: var(--lab-accent); border-top: 1px solid var(--vg-lo); box-shadow: inset 0 1px 0 var(--vg-hi); letter-spacing: 0.06em; }
+.lab-root[data-universe='sigma'] .desk-answer { background: var(--lab-panel-solid); border-top: 1px solid var(--vg-lo); box-shadow: inset 0 1px 0 var(--vg-hi); }
+.lab-root[data-universe='sigma'] .desk-portrait { background: #b9bfba; border: 1px solid; border-color: var(--vg-lo) var(--vg-hi) var(--vg-hi) var(--vg-lo); filter: grayscale(0.45) contrast(1.05); }
+
+/* Dialog windows (briefing, protocols) get a title bar from data-vg-title. */
+.lab-root[data-universe='sigma'] [data-vg-title] { position: relative; padding-top: 44px !important; }
+.lab-root[data-universe='sigma'] [data-vg-title]::before {
+  content: attr(data-vg-title);
+  position: absolute; left: 0; right: 0; top: 0; height: 30px;
+  display: flex; align-items: center; padding: 0 10px;
+  font: 700 13px/1 var(--lab-sans); letter-spacing: 0.04em; color: var(--lab-accent);
+  background: #434e3c; border-bottom: 1px solid var(--vg-lo); box-shadow: 0 1px 0 var(--vg-hi);
 }
 
-.lab-root[data-universe='sigma'] .lab-title { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+/* Scrollbars of the era: bevelled thumb in a sunken track. */
+.lab-root[data-universe='sigma'] ::-webkit-scrollbar { width: 14px; height: 14px; }
+.lab-root[data-universe='sigma'] ::-webkit-scrollbar-track { background: var(--vg-inset); }
+.lab-root[data-universe='sigma'] ::-webkit-scrollbar-thumb { background: var(--lab-panel-solid); border: 1px solid; border-color: var(--vg-hi) var(--vg-lo) var(--vg-lo) var(--vg-hi); }
+.lab-root[data-universe='sigma'] * { scrollbar-color: var(--lab-panel-solid) var(--vg-inset); }
