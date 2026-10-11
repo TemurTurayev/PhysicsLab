@@ -36,7 +36,7 @@
  "classic/5-4": "Oy tiri: chang bo'ylab nishon-vezdexod harakatlanmoqda. Tushning so'nggi sinovi! Nishon: Harakatlanuvchi nishonga ur.",
  "sigma/0-1": "1-sonli farmoyish: stajyor Doe kirish kursini o'tasin. Birinchi mashq — o'quv minorasini snaryad nishon belgisiga tushadigan qilib o'rnatish. Vazifa: 52 m belgisidagi nishonga uring.",
  "sigma/0-2": "Laborant Kim parvoz vaqtini 2 s qilib belgiladi va stajyordan uchish tezligini kutyapti. Hisob-kitobdagi xato — jurnalda tanbeh uchun asos. Vazifa: 36 m belgisidagi nishonga uring.",
- "sigma/0-3": "Sekundomerlarni kalibrlash uchun 12 m minoradan erkin tushish vaqti kerak. Bo'lim raqamni uchirishdan oldin kutyapti, keyin emas. Vazifa: Qulash vaqtini ±0,08 s aniqlik bilan prognoz qiling.",
+ "sigma/0-3": "Sekundomerlarni kalibrlash uchun o'quv minorasidan erkin tushish vaqti kerak. Bo'lim raqamni uchirishdan oldin kutyapti, keyin emas. Vazifa: Qulash vaqtini ±0,08 s aniqlik bilan prognoz qiling.",
  "sigma/0-4": "Minoradan gorizontal uchirish: snaryadlarni yig'ish jamoasi tushish nuqtasini oldindan egallashi kerak. Uni ko'rsating. Vazifa: Tushish nuqtasini ±1 m aniqlik bilan prognoz qiling.",
  "sigma/0-5": "Texnik topshiriq: snaryad 12 va 5 m/s tashkil etuvchilar bilan uchishi kerak. Pifagor teoremasi bo'yicha to'liq uchib chiqish tezligini aniqlang. Vazifa: Uchib chiqish tezligini hisoblash orqali aniqlang va nishonga uring.",
  "sigma/0-6": "Novning tezligi va burchagi ma'lum. Poligon jadvali uchun parvoz vaqti kerak — tarkibiy qismlarni sinus va kosinus orqali toping. Vazifa: Parvoz vaqtini ±0,08 s aniqlik bilan prognoz qiling.",

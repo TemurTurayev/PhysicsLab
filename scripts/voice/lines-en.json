@@ -36,7 +36,7 @@
  "classic/5-4": "Lunar shooting gallery: a target rover drives through the dust. The last test of the dream! Target: Hit the moving target.",
  "sigma/0-1": "Directive No. 1: intern Doe is to complete the introductory course. The first exercise is to position the training tower so the projectile lands on the target mark. Task: Hit the target at the 52 m mark.",
  "sigma/0-2": "Lab assistant Kim set the flight time to 2 s and expects the initial velocity from the intern. A calculation error is grounds for a remark in the journal. Task: Hit the target at the 36 m mark.",
- "sigma/0-3": "To calibrate the stopwatches, the free fall time from the 12 m tower is needed. The department awaits the number before the launch, not after. Task: Predict the fall time with an accuracy of ±0.08 s.",
+ "sigma/0-3": "To calibrate the stopwatches, the free fall time from the training tower is needed. The department awaits the number before the launch, not after. Task: Predict the fall time with an accuracy of ±0.08 s.",
  "sigma/0-4": "Horizontal launch from the tower: the projectile recovery team must occupy the impact point in advance. Specify it. Task: Predict the impact point with an accuracy of ±1 m.",
  "sigma/0-5": "Technical task: the projectile must launch with components of 12 and 5 m/s. Determine the total initial velocity using the Pythagorean theorem. Task: Determine the launch speed by calculation and hit the target.",
  "sigma/0-6": "The velocity and angle of the tray are known. The flight time is needed for the test range schedule — find the components using sine and cosine. Task: Predict the flight time with an accuracy of ±0.08 s.",

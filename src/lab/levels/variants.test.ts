@@ -32,9 +32,24 @@ describe('prediction variants', () => {
     for (let i = 1; i < order.length; i++) expect(Math.abs(order[i] - order[i - 1]), `${m.id} v${i}`).toBeGreaterThan(2 * p.tolerance)
   })
 
+  it.each(predicts.map((m) => [m.id, m] as const))('%s: texts quote the current numbers, no placeholder left', (_, m) => {
+    for (let n = 0; n <= m.predict!.variants!.length; n++) {
+      const told = withVariant(m, n)
+      const texts = [told.brief, told.goal, ...told.hints, ...(told.panel?.known ?? [])]
+      for (const t of texts) expect(t, `${m.id} v${n}`).not.toMatch(/\{(y0|v0|alpha|sinAlpha|release|mc|earthR|earthT)\}/)
+    }
+  })
+
+  it('a changed tower shows up in the brief', () => {
+    const m = predicts.find((x) => x.id === '0-4')!
+    expect(withVariant(m, 0).brief).toContain('12 м')
+    expect(withVariant(m, 1).brief).toContain('16 м')
+    expect(withVariant(m, 1).brief).toContain('10 м/с')
+  })
+
   it('variant 0 is the mission as written; later ones cycle', () => {
     const m = predicts.find((x) => x.id === '0-4')!
-    expect(withVariant(m, 0)).toBe(m)
+    expect(withVariant(m, 0).base).toEqual(m.base)
     const n = m.predict!.variants!.length
     expect(withVariant(m, n + 1).base).toEqual(withVariant(m, 1).base)
     expect(variantChanges(m, 0)).toEqual([])

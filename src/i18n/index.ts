@@ -35,7 +35,7 @@ export function setDictionary(l: Locale, d: Dict): void {
   dicts[l] = d
 }
 
-function fill(s: string, vars?: ReadonlyArray<unknown> | Record<string, unknown>): string {
+export function fill(s: string, vars?: ReadonlyArray<unknown> | Record<string, unknown>): string {
   if (!vars) return s
   return s.replace(/\{(\w+)\}/g, (m, k: string) => {
     const v = Array.isArray(vars) ? vars[Number(k)] : (vars as Record<string, unknown>)[k]

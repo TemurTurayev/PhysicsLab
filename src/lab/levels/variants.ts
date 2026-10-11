@@ -1,4 +1,5 @@
-import { tr } from '../../i18n'
+import { fill, fmt, tr } from '../../i18n'
+import { simulateShot } from '../sim/shot'
 import type { LauncherParams, TrebuchetParams } from '../sim/types'
 import type { Mission } from './types'
 
@@ -14,14 +15,49 @@ export interface Variant {
 
 export function withVariant(m: Mission, n: number): Mission {
   const list = m.predict?.variants
-  if (!list?.length || n <= 0) return m
+  if (!list?.length || n <= 0) return tellNumbers(m)
   const v = list[(n - 1) % list.length]
   const base = {
     ...m.base,
     trebuchet: { ...m.base.trebuchet, ...v.trebuchet },
     ...(m.base.launcher ? { launcher: { ...m.base.launcher, ...v.launcher } } : {}),
   }
-  return { ...m, base }
+  return tellNumbers({ ...m, base })
+}
+
+const EARTH_G = 9.81
+
+/** The given numbers a text may quote: {y0}, {v0}, {alpha}, {sinAlpha}, {release}, {mc}, and for other worlds {earthR}, {earthT}. */
+export function textVars(m: Mission): Record<string, string> {
+  const l = m.base.launcher
+  const t = m.base.trebuchet
+  const vars: Record<string, string> = {
+    release: fmt(t.releaseDeg, 0),
+    mc: fmt(t.mc, 0),
+    ...(l ? { y0: fmt(l.y0, 1, 0), v0: fmt(l.speed, 1, 0), alpha: fmt(l.angleDeg, 0), sinAlpha: fmt(Math.sin((l.angleDeg * Math.PI) / 180), 3, 1) } : {}),
+  }
+  if (m.base.world.g === EARTH_G) return vars
+  // «On Earth this setting gave …»: the same machine and angle under Earth gravity.
+  const earth = simulateShot({ ...m.base, world: { ...m.base.world, g: EARTH_G } })
+  return {
+    ...vars,
+    earthR: earth.landing ? fmt(earth.landing.x, 0) : '—',
+    earthT: earth.landing && earth.releaseT !== null ? fmt(earth.landing.t - earth.releaseT, 1) : '—',
+  }
+}
+
+/** Put the mission's current numbers into its texts (the brief, hints and facts are written with placeholders). */
+export function tellNumbers(m: Mission): Mission {
+  if (!m.predict) return m
+  const vars = textVars(m)
+  const say = (s: string) => fill(s, vars)
+  return {
+    ...m,
+    brief: say(m.brief),
+    goal: say(m.goal),
+    hints: m.hints.map(say),
+    ...(m.panel ? { panel: { ...m.panel, known: m.panel.known?.map(say) } } : {}),
+  }
 }
 
 export interface Change {

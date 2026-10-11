@@ -17,7 +17,7 @@ import { withSliders } from '../levels/evaluate'
 import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
-import { withVariant } from '../levels/variants'
+import { tellNumbers, withVariant } from '../levels/variants'
 import { VariantNote } from './VariantNote'
 import { playVoice, stopVoice } from '../audio/voice'
 import { useIsDesktop, useIsShort, useIsWide } from './useIsDesktop'
@@ -93,7 +93,7 @@ function MissionView({ mission: written }: { mission: Mission }) {
   const variant = useLabProgress((s) => s.variants[written.id] ?? 0)
   const mission = useMemo(() => withVariant(written, variant), [written, variant])
   const universe = useUniverse()
-  const told = applyCopy(mission, universe)
+  const told = tellNumbers(applyCopy(mission, universe))
   const sigma = universe.id === 'sigma'
   const { canvasRef, sceneRef, freeCamera } = useLabScene(written, universe)
   const pressAt = useRef<{ x: number; y: number } | null>(null)
