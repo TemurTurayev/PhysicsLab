@@ -1,4 +1,5 @@
 import type { SimParams } from '../sim/types'
+import type { Variant } from './variants'
 
 export type MissionKind = 'tune' | 'predict' | 'write' | 'fix' | 'challenge'
 export type EnvironmentId = 'workshop' | 'range' | 'siege' | 'pass' | 'moon'
@@ -44,6 +45,8 @@ export interface Prediction {
   tolerance: number // in the quantity's own unit
   min: number
   max: number
+  /** New conditions after each miss, so the last landing spot is never the answer. See variants.ts. */
+  variants?: Variant[]
 }
 
 /** A number in the data panel that can light up its piece of the launch on the scene. */

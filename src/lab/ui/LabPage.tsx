@@ -17,6 +17,8 @@ import { withSliders } from '../levels/evaluate'
 import { CoachMarks, type CoachStep } from './CoachMarks'
 import { coachDone } from './coachStore'
 import { MissionIntro } from './MissionIntro'
+import { withVariant } from '../levels/variants'
+import { VariantNote } from './VariantNote'
 import { playVoice, stopVoice } from '../audio/voice'
 import { useIsDesktop, useIsShort, useIsWide } from './useIsDesktop'
 import { useConsoleMission, useMissionBridge } from '../console/useConsoleMission'
@@ -85,12 +87,15 @@ function useLabScene(mission: Mission, universe: Universe) {
   return { canvasRef, sceneRef, freeCamera }
 }
 
-function MissionView({ mission }: { mission: Mission }) {
+function MissionView({ mission: written }: { mission: Mission }) {
   const navigate = useNavigate()
+  // A missed prediction brings new conditions: the page works on the current variant of the mission.
+  const variant = useLabProgress((s) => s.variants[written.id] ?? 0)
+  const mission = useMemo(() => withVariant(written, variant), [written, variant])
   const universe = useUniverse()
   const told = applyCopy(mission, universe)
   const sigma = universe.id === 'sigma'
-  const { canvasRef, sceneRef, freeCamera } = useLabScene(mission, universe)
+  const { canvasRef, sceneRef, freeCamera } = useLabScene(written, universe)
   const pressAt = useRef<{ x: number; y: number } | null>(null)
   const [retro, setRetro] = useState(universe.retroByDefault)
   const [quality, setQuality] = useState<FxQuality>(defaultQuality)
@@ -148,9 +153,24 @@ function MissionView({ mission }: { mission: Mission }) {
     else scene.setPrediction(null, prediction === null ? null : { x: 22, y: prediction })
   }, [prediction, mission.predict, sceneRef])
 
+  const variantTimer = useRef(0)
+  useEffect(() => () => window.clearTimeout(variantTimer.current), [])
   const finishShot = useCallback(
-    (record: ShotRecord) => {
+    (record: ShotRecord, livesAfter: number) => {
       setPhase('landed')
+      const missed = mission.predict && record.predictionError !== null && Math.abs(record.predictionError) > mission.predict.tolerance
+      if (missed && mission.predict?.variants?.length) {
+        // Let the miss sink in, then clear the field and bring new conditions. With no lives left the
+        // out-of-lives card stays; the restart already gets the new conditions.
+        if (livesAfter > 0) {
+          variantTimer.current = window.setTimeout(() => {
+            progress.nextVariant(mission.id)
+            sceneRef.current?.setShot(null)
+            setPhase('idle')
+            setPrediction(null)
+          }, 2600)
+        } else progress.nextVariant(mission.id)
+      }
       if (record.failures.length > 0) {
         setIncidents(record.failures.map((event) => ({ event, isNew: progress.recordIncident(event.id) })))
         if (sigma) {
@@ -162,7 +182,7 @@ function MissionView({ mission }: { mission: Mission }) {
         playSfx('success')
       }
     },
-    [progress, mission.predict, sigma, sceneRef],
+    [progress, mission.predict, mission.id, sigma, sceneRef],
   )
 
   const fire = useCallback(async () => {
@@ -171,8 +191,10 @@ function MissionView({ mission }: { mission: Mission }) {
     setIncidents([])
     // On a phone the desk covers the scene: switch to the field to watch the shot.
     if (!window.matchMedia('(min-width: 1024px) and (min-height: 521px)').matches) setView('field')
+    const livesBefore = run.lives
     const record = await run.fire({ values, code, prediction })
     if (!record) return
+    const livesAfter = livesBefore - (record.lifeLost ? 1 : 0)
     const { shot } = record
     setLog((rows) => [
       ...rows,
@@ -206,7 +228,7 @@ function MissionView({ mission }: { mission: Mission }) {
       }
       if (done) {
         scene.onTimeUpdate(null)
-        finishShot(record)
+        finishShot(record, livesAfter)
       }
     })
   }, [sceneRef, run, values, code, prediction, finishShot, sigma, mission.predict])
@@ -356,7 +378,12 @@ function MissionView({ mission }: { mission: Mission }) {
       story={storyFor(mission.id, universe.id)}
       lives={run.lives}
       shots={run.shots}
-      feedback={feedback}
+      feedback={
+        <>
+          {!run.won && phase !== 'flying' && <VariantNote written={written} variant={variant} formal={sigma} />}
+          {feedback}
+        </>
+      }
       calc={<CalcPanel stacked theory={mission.theory} secret={secret} mission={played} values={values} log={log} onHighlight={(p) => sceneRef.current?.highlightPreview(p)} />}
       answer={answer}
       answerInline={showCode}
@@ -403,6 +430,7 @@ function MissionView({ mission }: { mission: Mission }) {
             feedback ? 'max-h-[62vh]' : showCode ? 'max-h-[20vh]' : 'max-h-[38vh]'
           } md:max-h-[calc(100vh-72px-150px)] ${phase === 'flying' ? 'opacity-35 hover:opacity-100' : ''}`}
         >
+          {!run.won && phase !== 'flying' && <VariantNote written={written} variant={variant} formal={sigma} />}
           {feedback}
           <MissionBrief mission={told} shots={run.shots} hitSoFar={run.hitSoFar} lives={run.lives} onReread={() => setIntro(true)} />
           {!calcInDock && calc}

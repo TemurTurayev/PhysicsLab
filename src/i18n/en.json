@@ -1010,5 +1010,14 @@
  "Брифинг · испытание {0}": "Briefing · test {0}",
  "Прослушать": "Listen",
  "Остановить озвучку": "Stop narration",
- "Озвучка": "Narration"
+ "Озвучка": "Narration",
+ "скорость вылета": "launch speed",
+ "высота вышки": "tower height",
+ "угол лотка": "chute angle",
+ "угол отпуска": "release angle",
+ "противовес": "counterweight",
+ "Условия испытания изменены": "Test conditions changed",
+ "Условия изменились": "The conditions have changed",
+ "Прошлый пуск больше не подсказка: пересчитайте по новым данным.": "The last launch is no longer a hint: recalculate with the new data.",
+ "Прошлый бросок больше не подсказка: пересчитай по новым данным.": "Your last throw is no hint anymore: recalculate with the new data."
 }

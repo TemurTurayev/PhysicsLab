@@ -1010,5 +1010,14 @@
  "Брифинг · испытание {0}": "Brifing · sinov {0}",
  "Прослушать": "Tinglash",
  "Остановить озвучку": "Ovozni to'xtatish",
- "Озвучка": "Ovozli hikoya"
+ "Озвучка": "Ovozli hikoya",
+ "скорость вылета": "uchish tezligi",
+ "высота вышки": "minora balandligi",
+ "угол лотка": "tarnov burchagi",
+ "угол отпуска": "qo'yib yuborish burchagi",
+ "противовес": "qarshi yuk",
+ "Условия испытания изменены": "Sinov shartlari o'zgartirildi",
+ "Условия изменились": "Shartlar o'zgardi",
+ "Прошлый пуск больше не подсказка: пересчитайте по новым данным.": "Oldingi uchirish endi maslahat emas: yangi ma'lumotlar bo'yicha qayta hisoblang.",
+ "Прошлый бросок больше не подсказка: пересчитай по новым данным.": "Oldingi otish endi maslahat emas: yangi ma'lumotlar bo'yicha qayta hisobla."
 }

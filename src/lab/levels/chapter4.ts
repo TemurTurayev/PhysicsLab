@@ -57,7 +57,7 @@ export const CHAPTER_4: Chapter = {
       sliders: [],
       base: { trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: 104, mp: 2, r: 0.3 }, world: STILL_AIR },
       targets: [],
-      predict: { quantity: 'landingX', label: tr('Шар упадёт на'), tolerance: 5, min: 0, max: 100 },
+      predict: { quantity: 'landingX', label: tr('Шар упадёт на'), tolerance: 5, min: 0, max: 100, variants: [{ trebuchet: { releaseDeg: 115 } }, { trebuchet: { releaseDeg: 95 } }, { trebuchet: { releaseDeg: 120 } }, { trebuchet: { releaseDeg: 105 } }] },
       hints: [
         tr('Сравни коэффициент сопротивления k в панели: k = ρ·Cd·π·r²/(2m). У шара площадь больше в 4 раза, масса меньше в 6 раз.'),
         tr('Значит, k шара в 4·6 = 24 раза больше, чем у камня. Формула без воздуха даст для шара R больше, чем у камня, — но это сильное завышение.'),

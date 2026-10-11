@@ -87,7 +87,7 @@ export const CHAPTER_0: Chapter = {
       sliders: [],
       base: at({ x0: 2, y0: TOWER, speed: 0, angleDeg: 0 }),
       targets: [],
-      predict: { quantity: 'flightTime', label: tr('Камень будет падать'), unit: tr('с'), tolerance: 0.08, min: 0, max: 5 },
+      predict: { quantity: 'flightTime', label: tr('Камень будет падать'), unit: tr('с'), tolerance: 0.08, min: 0, max: 5, variants: [{ launcher: { y0: 18 } }, { launcher: { y0: 8 } }, { launcher: { y0: 15 } }, { launcher: { y0: 5 } }] },
       panel: {
         show: ['y0'],
         check: [],
@@ -113,7 +113,7 @@ export const CHAPTER_0: Chapter = {
       sliders: [],
       base: at({ x0: 2, y0: TOWER, speed: 14, angleDeg: 0 }),
       targets: [],
-      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 1, min: 0, max: 60 },
+      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 1, min: 0, max: 60, variants: [{ launcher: { speed: 10, y0: 16 } }, { launcher: { speed: 17, y0: 9 } }, { launcher: { speed: 8, y0: 18 } }, { launcher: { speed: 18, y0: 14 } }] },
       panel: {
         show: ['v0', 'y0', 'x0'],
         check: ['t'],
@@ -164,7 +164,7 @@ export const CHAPTER_0: Chapter = {
       sliders: [],
       base: at({ x0: 0, y0: 0, speed: 20, angleDeg: 30 }),
       targets: [],
-      predict: { quantity: 'flightTime', label: tr('Камень пролетит'), unit: tr('с'), tolerance: 0.08, min: 0, max: 6 },
+      predict: { quantity: 'flightTime', label: tr('Камень пролетит'), unit: tr('с'), tolerance: 0.08, min: 0, max: 6, variants: [{ launcher: { speed: 16, angleDeg: 50 } }, { launcher: { speed: 24, angleDeg: 20 } }, { launcher: { speed: 18, angleDeg: 60 } }, { launcher: { speed: 12, angleDeg: 35 } }] },
       panel: {
         show: ['v0', 'alpha'],
         check: ['vx', 'vy'],
@@ -190,7 +190,7 @@ export const CHAPTER_0: Chapter = {
       sliders: [],
       base: at({ x0: 0, y0: 0, speed: 20, angleDeg: 60 }),
       targets: [],
-      predict: { quantity: 'apexY', label: tr('Вершина на высоте'), tolerance: 0.8, min: 0, max: 30 },
+      predict: { quantity: 'apexY', label: tr('Вершина на высоте'), tolerance: 0.8, min: 0, max: 30, variants: [{ launcher: { speed: 16, angleDeg: 45 } }, { launcher: { speed: 24, angleDeg: 70 } }, { launcher: { speed: 14, angleDeg: 35 } }, { launcher: { speed: 22, angleDeg: 55 } }] },
       panel: {
         show: ['v0', 'alpha'],
         check: ['vy', 't'],

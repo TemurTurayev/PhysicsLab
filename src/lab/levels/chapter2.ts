@@ -54,7 +54,7 @@ export const CHAPTER_2: Chapter = {
       sliders: [],
       base: { ...base, trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: 120 } },
       targets: [],
-      predict: { quantity: 'apexY', label: tr('Высота вершины'), tolerance: 3, min: 0, max: 60 },
+      predict: { quantity: 'apexY', label: tr('Высота вершины'), tolerance: 3, min: 0, max: 60, variants: [{ trebuchet: { releaseDeg: 100 } }, { trebuchet: { releaseDeg: 135 } }, { trebuchet: { releaseDeg: 110 } }] },
       hints: [
         tr('В вершине вертикальная скорость равна нулю. Возьми vy из блока «Пуск при …» в панели «Данные для расчёта».'),
         tr('Подъём над точкой вылета: Δh = vy² / (2g). Высота вершины h = y₀ + vy² / (2g).'),

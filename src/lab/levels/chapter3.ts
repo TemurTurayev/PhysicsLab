@@ -66,7 +66,7 @@ export const CHAPTER_3: Chapter = {
       sliders: [],
       base: { ...base, trebuchet: { ...SIEGE_TREBUCHET, mc: 1100, releaseDeg: 110 } },
       targets: [],
-      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 12, min: 0, max: 250 },
+      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 12, min: 0, max: 250, variants: [{ trebuchet: { mc: 800 } }, { trebuchet: { mc: 1200 } }, { trebuchet: { mc: 700 } }, { trebuchet: { mc: 1000 } }] },
       hints: [
         tr('Противовес уже 1100 кг. Числа для расчёта — в панели «Данные для расчёта», блок «Пуск при …».'),
         tr('Посчитай время t = (v₀·sin α + √((v₀·sin α)² + 2·g·y₀)) / g, затем R = x₀ + v₀·cos α · t.'),

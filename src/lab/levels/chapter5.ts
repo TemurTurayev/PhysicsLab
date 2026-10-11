@@ -35,7 +35,7 @@ export const CHAPTER_5: Chapter = {
       sliders: [],
       base: { trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: 110 }, world: MOON },
       targets: [],
-      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 8, min: 0, max: 500 },
+      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 8, min: 0, max: 500, variants: [{ trebuchet: { releaseDeg: 95 } }, { trebuchet: { releaseDeg: 115 } }, { trebuchet: { releaseDeg: 125 } }, { trebuchet: { releaseDeg: 105 } }] },
       hints: [
         tr('g = 1,62 м/с². Блок «Пуск при …» в панели «Данные для расчёта» уже посчитан для Луны: v₀ там меньше, чем на Земле.'),
         tr('Подставь в формулы с g = 1,62: t = (v₀·sin α + √((v₀·sin α)² + 2·g·y₀)) / g, затем R = x₀ + v₀·cos α · t.'),
@@ -57,7 +57,7 @@ export const CHAPTER_5: Chapter = {
       sliders: [],
       base: { trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: 110 }, world: MOON },
       targets: [],
-      predict: { quantity: 'flightTime', label: tr('Полёт продлится'), unit: tr('с'), tolerance: 1, min: 0, max: 20 },
+      predict: { quantity: 'flightTime', label: tr('Полёт продлится'), unit: tr('с'), tolerance: 1, min: 0, max: 20, variants: [{ trebuchet: { releaseDeg: 95 } }, { trebuchet: { releaseDeg: 120 } }, { trebuchet: { releaseDeg: 100 } }, { trebuchet: { releaseDeg: 125 } }] },
       hints: [
         tr('Время полёта: t = (v₀·sin α + √((v₀·sin α)² + 2·g·y₀)) / g. Числа — в панели «Данные для расчёта», g = 1,62 м/с².'),
         tr('Посчитай v₀·sin α, его квадрат и 2·g·y₀, извлеки корень, сложи и раздели на g.'),

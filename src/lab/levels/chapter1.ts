@@ -55,7 +55,7 @@ export const CHAPTER_1: Chapter = {
       sliders: [],
       base: { ...base, trebuchet: { ...DEFAULT_TREBUCHET, releaseDeg: 120 } },
       targets: [],
-      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 6, min: 0, max: 100 },
+      predict: { quantity: 'landingX', label: tr('Камень упадёт на'), tolerance: 6, min: 0, max: 100, variants: [{ trebuchet: { releaseDeg: 95 } }, { trebuchet: { releaseDeg: 110 } }, { trebuchet: { releaseDeg: 130 } }, { trebuchet: { releaseDeg: 105 } }] },
       hints: [
         tr('Угол уже выставлен — 120°. Все числа для расчёта лежат в панели «Данные для расчёта», в блоке «Пуск при 120°».'),
         tr('Посчитай по порядку: v₀·sin α и v₀·cos α, затем время t = (v₀·sin α + √((v₀·sin α)² + 2·g·y₀)) / g, затем R = x₀ + v₀·cos α · t.'),
