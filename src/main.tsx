@@ -1,14 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/react'
 import './index.css'
-import App from './App.tsx'
+import { loadLocale, useLocale } from './i18n'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-    <Analytics />
-    <SpeedInsights />
-  </StrictMode>,
-)
+// Texts are translated when modules load, so the language's dictionary comes first, then the app.
+// Switching the language reloads the page: every text is rebuilt in the new language.
+const { locale } = useLocale.getState()
+document.documentElement.lang = locale
+useLocale.subscribe((s, prev) => {
+  if (s.locale !== prev.locale) window.location.reload()
+})
+loadLocale(locale)
+  .catch(() => useLocale.setState({ locale: 'ru' }))
+  .then(() => import('./boot.tsx'))

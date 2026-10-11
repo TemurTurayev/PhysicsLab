@@ -1,0 +1,104 @@
+@import '@fontsource/share-tech-mono/400.css';
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/700.css';
+/* The complex's main menu: an early-2000s shooter menu — cinematic backdrop, game title, text items, bevelled windows. */
+.cs-home {
+  position: relative; min-height: 100vh; overflow: hidden; isolation: isolate;
+  font-family: Tahoma, Verdana, 'Segoe UI', sans-serif; color: #e6e6e1; background: #0b0d0a;
+}
+.cs-backdrop { position: absolute; inset: 0; z-index: -2; }
+.cs-backdrop > div {
+  position: absolute; inset: 0; background-image: var(--lg); background-size: cover; background-position: center 55%;
+  opacity: 0; animation: cs-frame 35s infinite; filter: saturate(0.45) brightness(0.72) contrast(1.15);
+}
+@media (max-width: 767px) { .cs-backdrop > div { background-image: var(--sm); } }
+@keyframes cs-frame {
+  0% { opacity: 0; transform: scale(1.03); } 4% { opacity: 1; } 18% { opacity: 1; } 22% { opacity: 0; transform: scale(1.1); } 100% { opacity: 0; }
+}
+.cs-shade {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(5, 6, 5, 0.92) 0%, rgba(5, 6, 5, 0.55) 45%, rgba(5, 6, 5, 0.15) 100%),
+    linear-gradient(0deg, rgba(5, 6, 5, 0.85) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px);
+}
+.cs-logo { position: absolute; left: clamp(20px, 6vw, 90px); top: clamp(28px, 9vh, 110px); }
+.cs-logo-title {
+  font-family: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif; font-weight: 700;
+  font-size: clamp(44px, 8vw, 104px); letter-spacing: 0.06em; line-height: 0.9; color: #f0efe6;
+  text-shadow: 0 2px 0 #000, 0 0 24px rgba(255, 150, 60, 0.15);
+}
+.cs-logo-sub { margin-top: 10px; font-size: 12px; letter-spacing: 0.24em; color: #c4b550; }
+.cs-hero { position: absolute; right: clamp(0px, 4vw, 80px); bottom: 0; width: clamp(160px, 26vw, 360px); opacity: 0.95; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.7)); }
+.cs-menu {
+  position: absolute; left: clamp(20px, 6vw, 90px); bottom: clamp(70px, 14vh, 150px);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; max-width: calc(100vw - 40px);
+}
+.cs-next { font-size: 12px; color: #a0aa95; margin-bottom: 10px; }
+.cs-next b { color: #c4b550; font-weight: 700; }
+.cs-item {
+  padding: 5px 2px; min-height: 34px; font: 18px/1.2 Tahoma, Verdana, sans-serif; color: #d8d8d0; background: none; border: 0;
+  text-align: left; text-shadow: 0 1px 0 #000; transition: color 0.08s;
+}
+.cs-item:hover, .cs-item:focus-visible { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35), 0 1px 0 #000; outline: none; }
+.cs-item:focus-visible { text-decoration: underline dotted #c4b550; }
+.cs-item-hot { color: #ffd86b; font-weight: 700; animation: cs-pulse 1.8s ease-in-out infinite; }
+@keyframes cs-pulse { 50% { text-shadow: 0 0 14px rgba(255, 200, 90, 0.7), 0 1px 0 #000; } }
+.cs-footer { position: absolute; left: clamp(20px, 6vw, 90px); bottom: 14px; font-size: 11px; color: #8d9483; }
+
+.cs-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, 0.45); font-family: Tahoma, Verdana, sans-serif; }
+.cs-window {
+  width: min(420px, 100%); background: #4c5844; color: #d8ded3; font-size: 13px;
+  border: 1px solid; border-color: #8c9686 #292c21 #292c21 #8c9686; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.cs-window-title { display: flex; align-items: center; padding: 6px 6px 6px 10px; color: #c4b550; font-weight: 700; letter-spacing: 0.04em; }
+.cs-window-body { margin: 0 8px; padding: 10px; background: #3e4637; border: 1px solid; border-color: #292c21 #8c9686 #8c9686 #292c21; display: flex; flex-direction: column; gap: 10px; }
+.cs-group { border: 1px solid; border-color: #292c21 #8c9686 #8c9686 #292c21; padding: 6px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+.cs-group legend { padding: 0 4px; color: #c4b550; }
+.cs-radio { display: flex; align-items: center; gap: 8px; min-height: 28px; }
+.cs-radio input { accent-color: #c4b550; width: 16px; height: 16px; }
+.cs-slider input { flex: 1; }
+.cs-window-buttons { display: flex; justify-content: flex-end; padding: 8px; }
+.cs-btn {
+  min-width: 80px; min-height: 30px; color: #d8ded3; background: #4c5844; font: 12px Tahoma, Verdana, sans-serif;
+  border: 1px solid; border-color: #8c9686 #292c21 #292c21 #8c9686;
+}
+.cs-btn:active { border-color: #292c21 #8c9686 #8c9686 #292c21; }
+.cs-x { margin-left: auto; min-width: 28px; min-height: 24px; }
+
+@media (max-width: 640px) {
+  .cs-hero { width: 120px; opacity: 0.6; }
+  .cs-item { font-size: 17px; }
+}
+@media (max-height: 520px) {
+  .cs-logo { top: 14px; } .cs-logo-title { font-size: 40px; } .cs-hero { display: none; }
+  .cs-menu { bottom: 30px; } .cs-item { min-height: 28px; padding: 2px; font-size: 15px; }
+  .cs-footer { left: auto; right: 16px; text-align: right; }
+}
+@media (prefers-reduced-motion: reduce) { .cs-backdrop > div { animation: none; } .cs-backdrop > div:first-child { opacity: 1; } .cs-item-hot { animation: none; } }
+.cs-credit { margin-top: 2px; font-size: 10px; opacity: 0.7; }
+
+/* Clearance pass: a laminated corporate ID. */
+.cs-hero { width: clamp(240px, 24vw, 330px); bottom: clamp(70px, 14vh, 150px); filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.75)); transform: rotate(-2deg); }
+.pass { background: #e9ebe6; color: #1b1e1c; border-radius: 6px; overflow: hidden; font-family: Tahoma, Verdana, sans-serif; border: 1px solid #b8bdb6; }
+.pass-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #8f1d16; color: #f4efe6; font-weight: 700; font-size: 12px; letter-spacing: 0.12em; }
+.pass-no { font-family: 'Share Tech Mono', ui-monospace, monospace; letter-spacing: 0.05em; opacity: 0.85; }
+.pass-body { display: grid; grid-template-columns: 38% 1fr; gap: 10px; padding: 10px; }
+.pass-photo { background: #b9bfba; border: 1px solid #8a908a; filter: grayscale(0.55) contrast(1.1); }
+.pass-photo svg { display: block; width: 100%; }
+.pass-fields { margin: 0; font-size: 11px; line-height: 1.25; }
+.pass-fields dt { color: #6a706b; text-transform: uppercase; letter-spacing: 0.08em; font-size: 9px; margin-top: 4px; }
+.pass-fields dd { margin: 0; font-weight: 700; }
+.pass-level { color: #8f1d16; }
+.pass-foot { display: flex; align-items: center; gap: 10px; padding: 6px 10px 8px; font-size: 9px; color: #6a706b; border-top: 1px dashed #b8bdb6; }
+.pass-bars { width: 70px; height: 18px; background: repeating-linear-gradient(90deg, #111 0 2px, transparent 2px 3px, #111 3px 4px, transparent 4px 7px, #111 7px 10px, transparent 10px 11px); }
+
+/* Public-address notices, top right. */
+.cs-notice { position: absolute; top: 18px; right: 18px; max-width: min(520px, 50vw); display: flex; gap: 10px; align-items: baseline; font-family: 'Share Tech Mono', ui-monospace, monospace; font-size: 12px; color: #c9c2a4; }
+.cs-notice-tag { color: #b3261e; font-weight: 700; letter-spacing: 0.15em; flex-shrink: 0; animation: cs-blink 2s steps(2) infinite; }
+.cs-notice-text { animation: cs-type 0.6s ease-out both; }
+@keyframes cs-blink { 50% { opacity: 0.35; } }
+@keyframes cs-type { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (max-width: 760px) { .cs-notice { left: 16px; right: 16px; max-width: none; top: auto; bottom: 46px; font-size: 11px; } .cs-hero { display: none; } }
+@media (max-height: 520px) { .cs-notice { display: none; } }
+@media (prefers-reduced-motion: reduce) { .cs-notice-tag, .cs-notice-text { animation: none; } }

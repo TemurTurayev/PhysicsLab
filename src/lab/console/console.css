@@ -1,0 +1,32 @@
+/* Developer console: an old-school windowed console — bevelled olive frame, small monospace log. */
+.game-console {
+  position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 70;
+  width: min(760px, calc(100vw - 24px)); height: min(46vh, 420px);
+  display: flex; flex-direction: column;
+  background: rgba(62, 70, 55, 0.96); color: #d8ded3;
+  border: 1px solid; border-color: #8c9686 #292c21 #292c21 #8c9686;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  font: 13px/1.45 'Share Tech Mono', 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+.game-console-title {
+  display: flex; align-items: center; gap: 10px; padding: 5px 8px;
+  background: #4c5844; color: #c4b550; font-weight: 600; letter-spacing: 0.04em;
+  font-family: Tahoma, Verdana, 'Segoe UI', sans-serif; font-size: 12px;
+}
+.game-console-cheats { color: #ff9a6b; font-family: inherit; }
+.game-console-x { margin-left: auto; min-width: 28px; min-height: 24px; color: #d8ded3; border: 1px solid; border-color: #8c9686 #292c21 #292c21 #8c9686; background: #4c5844; }
+.game-console-log {
+  flex: 1; overflow-y: auto; margin: 6px; padding: 6px 8px; white-space: pre-wrap;
+  background: rgba(30, 34, 26, 0.92); border: 1px solid; border-color: #292c21 #8c9686 #8c9686 #292c21;
+}
+.game-console-input { display: flex; gap: 6px; padding: 0 6px 6px; }
+.game-console-input input {
+  flex: 1; min-height: 32px; padding: 0 8px; color: #d8ded3; background: rgba(30, 34, 26, 0.92); outline: none;
+  border: 1px solid; border-color: #292c21 #8c9686 #8c9686 #292c21; font: inherit;
+}
+.game-console-input input:focus { border-color: #c4b550; }
+.game-console-input button {
+  min-width: 72px; min-height: 32px; color: #d8ded3; background: #4c5844; font-family: Tahoma, Verdana, sans-serif; font-size: 12px;
+  border: 1px solid; border-color: #8c9686 #292c21 #292c21 #8c9686;
+}
+.game-console-input button:active, .game-console-x:active { border-color: #292c21 #8c9686 #8c9686 #292c21; }
